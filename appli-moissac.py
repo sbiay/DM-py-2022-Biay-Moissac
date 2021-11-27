@@ -4,6 +4,7 @@ app = Flask("Application")
 
 
 @app.route("/")
+@app.route("/templates/css/moissac1.css")
 def accueil():
     return render_template("accueil.html", nom="Scriptorium de Moissac")
 
