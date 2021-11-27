@@ -1,23 +1,14 @@
 import requests
 import csv
-from flask import Flask, render_template
-
-app = Flask("Application")
-
-
-@app.route("/")
-def accueil():
-    return render_template("accueil.html", nom="Scriptorium de Moissac")
 
 
 def iiif(ark):
     """A partir d'un identifiant ark, cette fonction imprime les métadonnées
     d'un objet hébergé sur Gallica :
-
+    
     :param ark: identifiant ark
     :type ark: str
-    :returns: objet Json contenant les métadonnées du manuscrit
-    :type return: dict
+    :returns: None
     """
     
     # Requête HTML sur Gallica
@@ -30,7 +21,6 @@ def iiif(ark):
     return jsonf
 
 
-@app.route("/codices/<int:cod_id>")
 def notice_codex(cod_id):
     with open("csv/dufour_ark.csv") as f:
         cont_csv = csv.DictReader(f)
@@ -44,10 +34,8 @@ def notice_codex(cod_id):
         
         for enreg in concord_duf_ark:
             if str(cod_id) == enreg["iduf"]:
-                json_codex = iiif(enreg["ark"])  # json_codex est le dictionnaire contenant les métadonnées du
-                # manuscrit cherché par son identifiant
+                json_codex = iiif(enreg["ark"])
     return "Notice " + str(cod_id) + " du catalogue de Jean Dufour"
 
 
-if __name__ == "__main__":
-    app.run()
+notice_codex(56)
