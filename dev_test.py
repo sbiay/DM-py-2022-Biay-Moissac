@@ -1,14 +1,6 @@
 import requests
+import json
 import csv
-from flask import Flask, render_template
-
-app = Flask("Application")
-
-
-@app.route("/")
-def accueil():
-    return render_template("accueil.html", nom="Scriptorium de Moissac")
-
 
 def iiif(ark):
     """A partir d'un identifiant ark, cette fonction donne comme valeur de retour un objet Json
@@ -26,11 +18,12 @@ def iiif(ark):
     # Affichage des métadonnées de l'objet
     for meta in jsonf["metadata"]:
         print("{label} : {value}".format(label=meta["label"], value=meta["value"]))
-    
+    with open("json/notice_gallica.json", mode="w") as f:
+        json.dump(jsonf, f)
     return jsonf
 
 
-def concordance(cod_id):
+def concordance(id):
     """A partir d'un identifiant numérique, cette fonction interroge la concordance entre le catalogue
     de Dufour et une liste d'identifiants ark de la BNF et retourne l'objet Json correspondant
     via la fonction iiif"""
@@ -45,16 +38,17 @@ def concordance(cod_id):
             concord_duf_ark.append(row)
         
         for enreg in concord_duf_ark:
-            if str(cod_id) == enreg["iduf"]:
+            if str(id) == enreg["iduf"]:
                 json_codex = iiif(enreg["ark"])  # json_codex est le dictionnaire contenant les métadonnées du
                 # manuscrit cherché par son identifiant
+                
+        print(json_codex.keys())
     return json_codex
 
 
-@app.route("/codices/<int:cod_id>")
 def notice_codex(cod_id):
-    return render_template("notice.html", jsonf=concordance(cod_id))
+    print("yez")
+    return "Notice " + str(cod_id) + " du catalogue de Jean Dufour"
 
 
-if __name__ == "__main__":
-    app.run()
+concordance(56)
