@@ -53,7 +53,9 @@ def concordance(cod_id):
 
 @app.route("/codices/<int:cod_id>")
 def notice_codex(cod_id):
-    return render_template("notice.html", jsonf=concordance(cod_id))
+    jsonf = concordance(cod_id)
+    titre = jsonf["metadata"][4]["value"][62:]
+    return render_template("notice.html", titre=titre)
 
 
 if __name__ == "__main__":

@@ -47,8 +47,9 @@ def concordance(id):
 
 
 def notice_codex(cod_id):
-    print("yez")
+    jsonf = concordance(cod_id)
+    print(jsonf["metadata"][4]["value"][62:])
     return "Notice " + str(cod_id) + " du catalogue de Jean Dufour"
 
 
-concordance(56)
+notice_codex(56)
