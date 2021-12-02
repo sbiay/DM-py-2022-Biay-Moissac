@@ -7,5 +7,11 @@ Devoir python Moissac
 # Choix des données et particularités à gérer
 - Origine :
     - Ms. fait en dehors de Moissac
-        - Solesmes G31-34 : inaccessible en ligne (duf102, ancienne page de garde de duf103)
-
+        * BNF Latin 2388, duf67
+        - 
+- Oeuvre :
+    - Une oeuvre répartie en plusieurs codices (tomes) :
+        * Latin 1983-1986 duf? :
+            1. Lat 1983 ark:/12148/btv1b10543776j
+            2. 
+            3. 
