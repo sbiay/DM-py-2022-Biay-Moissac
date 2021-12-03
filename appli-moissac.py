@@ -122,7 +122,11 @@ def notice_codex(cod_id):
     # Test d'existence d'un index dans la liste des prem_codices :
     if cod_id <= len(prem_codices) - 1:
         codex = prem_codices[cod_id]
-        return render_template("pages/codices.html", titre=codex['cote'])
+        return render_template("pages/codices.html",
+                               titre=codex['cote'],
+                               codicologie=codex['format'],
+                               date=codex['date'],
+                               contenu=codex['contenu'])
     else:
         return render_template("pages/codices.html", message_erreur="Cette adresse ne correspond à aucune notice !")
 

@@ -2,8 +2,28 @@
 
 {% block corps %}
 {% if titre %}
-<header><h2>{{titre}}</h2></header>
-<div></div>
+<header>
+    <h2>{{titre}}</h2>
+</header>
+<div>
+    <h3>Description codicologique</h3>
+    <p>{{codicologie}}</p>
+    <h3>Date</h3>
+    <p>{{date}}</p>
+    <h3>Contenu</h3>
+    <ul>
+        {% for items in contenu %}
+            {% if items.auteur and items.titre %}
+                <li>{{items.auteur}} : {{items.titre}}</li>
+            {% elif items.auteur and not items.titre %}
+                <li>{{items.auteur}}.</li>
+            {% elif not items.auteur and items.titre %}
+                <li>{{items.titre}}.</li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+</div>
+
 
 {% else %}
 <h2>{{message_erreur}}</h2>
