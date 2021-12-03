@@ -6,8 +6,13 @@ app = Flask("Application")
 
 
 @app.route("/")
+def conteneur():
+    return render_template("conteneur.html", nom="Bibliothèque de Moissac")
+
+
+@app.route("/pages/")
 def accueil():
-    return render_template("accueil.html", nom="Scriptorium de Moissac")
+    return render_template("accueil.html", nom="Bibliothèque de Moissac")
 
 
 def iiif(ark):
@@ -51,11 +56,11 @@ def concordance(cod_id):
     return json_codex
 
 
-@app.route("/codices/<int:cod_id>")
+@app.route("/pages/<int:cod_id>")
 def notice_codex(cod_id):
     jsonf = concordance(cod_id)
     titre = jsonf["metadata"][4]["value"][62:]
-    return render_template("notice.html", titre=titre)
+    return render_template("pages/codices.html", titre=titre)
 
 
 if __name__ == "__main__":
