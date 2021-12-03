@@ -5,16 +5,6 @@ from flask import Flask, render_template
 app = Flask("Application")
 
 
-@app.route("/")
-def conteneur():
-    return render_template("conteneur.html", nom="Bibliothèque de Moissac")
-
-
-@app.route("/pages/")
-def accueil():
-    return render_template("accueil.html", nom="Bibliothèque de Moissac")
-
-
 def iiif(ark):
     """A partir d'un identifiant ark, cette fonction donne comme valeur de retour un objet Json
     contenant les métadonnées d'un objet hébergé sur Gallica :
@@ -56,7 +46,17 @@ def concordance(cod_id):
     return json_codex
 
 
-@app.route("/pages/<int:cod_id>")
+@app.route("/")
+def conteneur():
+    return render_template("conteneur.html", nom="Bibliothèque de Moissac")
+
+
+@app.route("/pages/")
+def accueil():
+    return render_template("pages/accueil.html", nom="Bibliothèque de Moissac")
+
+
+@app.route("/pages/codices/<int:cod_id>")
 def notice_codex(cod_id):
     jsonf = concordance(cod_id)
     titre = jsonf["metadata"][4]["value"][62:]

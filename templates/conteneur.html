@@ -15,7 +15,7 @@
 <div class="div_conteneur"> <!--Ceci est la div de mon corps de document-->
     <img class="menu" src="{{ url_for('static', filename='img/tests_accueil/btv1b105254751_f336.jpg')}}"
              alt="Latin 2077 : Humilité">
-    <div>Voici mon conteneur : et je peux le modifier en temps réel</div>
+    <div>{% block corps %}Voici mon conteneur{% endblock %}</div>
 </div>
 </body>
 </html>
