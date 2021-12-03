@@ -15,3 +15,5 @@ Devoir python Moissac
             1. Lat 1983 ark:/12148/btv1b10543776j
             2. 
             3. 
+- Plusieurs unités codicologiques pertinentes dans un codex :
+    * BNF Latin 4212, duf83
