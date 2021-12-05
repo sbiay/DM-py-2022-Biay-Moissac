@@ -1,8 +1,14 @@
 import requests
 import csv
 from flask import Flask, render_template
+from flask_sqlalchemy import SQLAlchemy
 
-app = Flask("Application")
+app = Flask("lib-moissac")
+app.config['SQLALCHEMY_DATABASE_URI'] = \
+    'sqlite:////Moissac/db/libMoissac.sql'
+db = SQLAlchemy(app)
+query = db.engine.execute("SELECT * FROM codices")
+print(query)
 
 prem_codices = [
     {
