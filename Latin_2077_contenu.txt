@@ -1,0 +1,66 @@
+Contient (unites_codico.id, oeuvres.id)
+(2, 2)
+(2, 3)
+(2, 4)
+(2, 5)
+(2, 6)
+
+AUGUSTINUS (s.)
+De diversis quaestionibus
+
+AUGUSTINUS (s.)
+De fide et symbolo
+
+AUGUSTINUS (s.)
+De Genesi contra Manichaeos
+
+AUGUSTINUS (s.)
+Sermones
+
+AUGUSTINUS (s.)
+Extraits divers
+
+AUGUSTINUS (s.)
+Adversus quinque haereses
+
+AUGUSTINUS (s.)
+Altercatio cum Pascentio ariano
+
+AUGUSTINUS (s.)
+De fide contra Manichaeos
+
+CAESARIUS ARELATENSIS (s.)
+Sermones
+
+FULGENTIUS RUSPENSIS (s.)
+Ad Trasimundum
+
+GREGORIUS MAGNUS I (s.), papa
+Decreta
+
+GREGORIUS MAGNUS I (s.), papa
+Moralia in Job. Fragments
+
+HALITGARIUS, ep. Cameracensis
+De vitiis et virtutibus
+
+LEODEGARIUS (s.)
+Epistola consolatoria
+
+MARIA MAGDALENA (s.)
+Sermo
+
+PASCHALIS II, papa
+Epistola spuria
+
+PASCHASIUS RADBERTUS
+De corpore et sanguine Domini
+
+PASCHASIUS RADBERTUS
+Versus ad Placidium de corpore et sanguine Domini
+
+NULL
+Revelatio quae ostensa est venerabili viro Hispaniensi Eldefonso episcopo
+
+VIGILIUS TAPSENSIS
+Collatio cum Pascentio
