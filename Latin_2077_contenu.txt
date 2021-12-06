@@ -1,9 +1,4 @@
 Contient (unites_codico.id, oeuvres.id)
-(2, 2)
-(2, 3)
-(2, 4)
-(2, 5)
-(2, 6)
 
 AUGUSTINUS (s.)
 De diversis quaestionibus
