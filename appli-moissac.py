@@ -107,14 +107,15 @@ def concordance(cod_id):
     return json_codex
 
 
-
 # Définition de mon application
 app = Flask("lib-moissac")
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db/libMoissac.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
+
 # Définition de mes classes d'objets
+# ATTENTION, il faudra veiller à bien appliquer le modèle logique
 class Codices(db.Model):
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
     cote = db.Column(db.String)
@@ -136,11 +137,11 @@ class Unites_codico(db.Model):
 
 
 # Test de requête sur les unités codico
+# ATTENTION : Il faut ajouter à ma table unites_codico la clé étrangère des codices
 id_cod = 1
 codices = Codices.query.all()
 unites_codico = Unites_codico.query.all()
 print(unites_codico)
-
 
 
 class Oeuvres(db.Model):
@@ -149,7 +150,7 @@ class Oeuvres(db.Model):
     data_bnf = db.Column(db.Integer)
     partie_de = db.Column(db.Boolean)
     auteur = db.Column(db.Integer)
-    
+
 
 @app.route("/")
 def conteneur():
@@ -167,7 +168,7 @@ def notice_codex(cod_id):
     codex = Codices.query.get(cod_id)
     
     # Test d'existence d'un index dans la liste des prem_codices :
-    if cod_id <= len(codices):  
+    if cod_id <= len(codices):
         # Si l'id passé dans l'URL n'est pas plus grand que la liste 
         # de tous les codices, alors :
         return render_template("pages/codices.html",
@@ -177,7 +178,5 @@ def notice_codex(cod_id):
     else:
         return render_template("pages/codices.html", message_erreur="Cette adresse ne correspond à aucune notice !")
 
-    
-if __name__ == "__main__":
-    app.run()
-
+# if __name__ == "__main__":
+#    app.run()
