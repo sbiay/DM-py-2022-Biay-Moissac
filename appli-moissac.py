@@ -134,14 +134,12 @@ class Unites_codico(db.Model):
     date_pas_apres = db.Column(db.Integer, nullable=False)
     # La date porte-t-elle la mention circa ?
     date_circa = db.Column(db.Boolean, nullable=False)
+    code_id = db.Column(db.Integer, nullable=False)
 
 
 # Test de requête sur les unités codico
-# ATTENTION : Il faut ajouter à ma table unites_codico la clé étrangère des codices
-id_cod = 1
-codices = Codices.query.all()
-unites_codico = Unites_codico.query.all()
-print(unites_codico)
+num = 2
+listUC_enfants = Unites_codico.query.filter(Unites_codico.code_id == num).all()
 
 
 class Oeuvres(db.Model):
@@ -162,13 +160,13 @@ def accueil():
     return render_template("pages/accueil.html", nom="Bibliothèque de Moissac")
 
 
-@app.route("/pages/codices/<int:cod_id>")
-def notice_codex(cod_id):
+@app.route("/pages/codices/<int:num>")
+def notice_codex(num):
     codices = Codices.query.all()
-    codex = Codices.query.get(cod_id)
+    codex = Codices.query.get(num)
     
     # Test d'existence d'un index dans la liste des prem_codices :
-    if cod_id <= len(codices):
+    if num <= len(codices):
         # Si l'id passé dans l'URL n'est pas plus grand que la liste 
         # de tous les codices, alors :
         return render_template("pages/codices.html",
