@@ -3,17 +3,28 @@ import csv
 from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 
+# Définition de mon application
 app = Flask("lib-moissac")
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db/libMoissac.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-query = db.engine.execute('SELECT * FROM codices')
-print(query)
-for x in query.fetchall():
-    for donnes in x:
-        print(donnes)
+# Définition de mes classes d'objets
+class Codices(db.Model):
+    id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
+    cote = db.Column(db.String)
+    id_technique = db.Column(db.String(19))
+    reliure_descript = db.Column(db.Text)
+    histoire = db.Column(db.Text)
 
+class Oeuvres(db.Model):
+    id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
+    titre = db.Column(db.Text)
+    data_bnf = db.Column(db.Integer)
+    partie_de = db.Column(db.Boolean)
+    auteur = db.Column(db.Integer)
+
+# Dictionnaire de travail
 prem_codices = [
     {
         'cote': "Paris, BNF, Latin 2077",
