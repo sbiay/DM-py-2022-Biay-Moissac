@@ -3,27 +3,6 @@ import csv
 from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 
-# Définition de mon application
-app = Flask("lib-moissac")
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db/libMoissac.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
-
-# Définition de mes classes d'objets
-class Codices(db.Model):
-    id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
-    cote = db.Column(db.String)
-    id_technique = db.Column(db.String(19))
-    reliure_descript = db.Column(db.Text)
-    histoire = db.Column(db.Text)
-
-class Oeuvres(db.Model):
-    id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
-    titre = db.Column(db.Text)
-    data_bnf = db.Column(db.Integer)
-    partie_de = db.Column(db.Boolean)
-    auteur = db.Column(db.Integer)
-
 # Dictionnaire de travail
 prem_codices = [
     {
@@ -128,6 +107,31 @@ def concordance(cod_id):
     return json_codex
 
 
+
+
+
+
+# Définition de mon application
+app = Flask("lib-moissac")
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db/libMoissac.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
+
+# Définition de mes classes d'objets
+class Codices(db.Model):
+    id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
+    cote = db.Column(db.String)
+    id_technique = db.Column(db.String(19))
+    reliure_descript = db.Column(db.Text)
+    histoire = db.Column(db.Text)
+
+class Oeuvres(db.Model):
+    id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
+    titre = db.Column(db.Text)
+    data_bnf = db.Column(db.Integer)
+    partie_de = db.Column(db.Boolean)
+    auteur = db.Column(db.Integer)
+    
 @app.route("/")
 def conteneur():
     return render_template("conteneur.html", nom="Bibliothèque de Moissac")
@@ -140,16 +144,16 @@ def accueil():
 
 @app.route("/pages/codices/<int:cod_id>")
 def notice_codex(cod_id):
+    codex = Codices.query.get(cod_id)
+    
+    return render_template("pages/codices.html",
+                               titre=codex.cote,
+                               reliure=codex.reliure_descript,
+                               histoire=codex.histoire)
+
     # Test d'existence d'un index dans la liste des prem_codices :
-    if cod_id <= len(prem_codices) - 1:
-        codex = prem_codices[cod_id]
-        return render_template("pages/codices.html",
-                               titre=codex['cote'],
-                               codicologie=codex['format'],
-                               date=codex['date'],
-                               contenu=codex['contenu'])
-    else:
-        return render_template("pages/codices.html", message_erreur="Cette adresse ne correspond à aucune notice !")
+    #return render_template("pages/codices.html", message_erreur="Cette adresse ne correspond à aucune notice !")    
+    
 
 
 if __name__ == "__main__":
