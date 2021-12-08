@@ -122,6 +122,27 @@ class Codices(db.Model):
     reliure_descript = db.Column(db.Text)
     histoire = db.Column(db.Text)
 
+
+class Unites_codico(db.Model):
+    id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
+    # Description physique
+    descript = db.Column(db.Text)
+    # Localisation d'une unité dans un codex (f. n-f. m)
+    loc = db.Column(db.String(30))
+    date_pas_avant = db.Column(db.Integer, nullable=False)
+    date_pas_apres = db.Column(db.Integer, nullable=False)
+    # La date porte-t-elle la mention circa ?
+    date_circa = db.Column(db.Boolean, nullable=False)
+
+
+# Test de requête sur les unités codico
+id_cod = 1
+codices = Codices.query.all()
+unites_codico = Unites_codico.query.all()
+print(unites_codico)
+
+
+
 class Oeuvres(db.Model):
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
     titre = db.Column(db.Text)
@@ -129,6 +150,7 @@ class Oeuvres(db.Model):
     partie_de = db.Column(db.Boolean)
     auteur = db.Column(db.Integer)
     
+
 @app.route("/")
 def conteneur():
     return render_template("conteneur.html", nom="Bibliothèque de Moissac")
