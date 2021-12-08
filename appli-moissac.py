@@ -108,9 +108,6 @@ def concordance(cod_id):
 
 
 
-
-
-
 # Définition de mon application
 app = Flask("lib-moissac")
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db/libMoissac.db'
@@ -144,17 +141,21 @@ def accueil():
 
 @app.route("/pages/codices/<int:cod_id>")
 def notice_codex(cod_id):
+    codices = Codices.query.all()
     codex = Codices.query.get(cod_id)
     
-    return render_template("pages/codices.html",
+    # Test d'existence d'un index dans la liste des prem_codices :
+    if cod_id <= len(codices):  
+        # Si l'id passé dans l'URL n'est pas plus grand que la liste 
+        # de tous les codices, alors :
+        return render_template("pages/codices.html",
                                titre=codex.cote,
                                reliure=codex.reliure_descript,
                                histoire=codex.histoire)
+    else:
+        return render_template("pages/codices.html", message_erreur="Cette adresse ne correspond à aucune notice !")
 
-    # Test d'existence d'un index dans la liste des prem_codices :
-    #return render_template("pages/codices.html", message_erreur="Cette adresse ne correspond à aucune notice !")    
     
-
-
 if __name__ == "__main__":
     app.run()
+
