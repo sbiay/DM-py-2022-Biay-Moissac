@@ -17,3 +17,5 @@ Devoir python Moissac
             3. 
 - Plusieurs unités codicologiques pertinentes dans un codex :
     * BNF Latin 4212, duf83
+    * BNF Latin 1961, duf51
+    * BNF Latin 2077 : 4 époques différentes
