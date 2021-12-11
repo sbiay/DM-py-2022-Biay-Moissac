@@ -1,21 +1,6 @@
 Contient (unites_codico.id, oeuvres.id)
 
 AUGUSTINUS (s.)
-De diversis quaestionibus
-
-AUGUSTINUS (s.)
-De fide et symbolo
-
-AUGUSTINUS (s.)
-De Genesi contra Manichaeos
-
-AUGUSTINUS (s.)
-Sermones
-
-AUGUSTINUS (s.)
-Extraits divers
-
-AUGUSTINUS (s.)
 Adversus quinque haereses
 
 AUGUSTINUS (s.)
