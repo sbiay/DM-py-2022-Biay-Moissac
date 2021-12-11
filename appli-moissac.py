@@ -138,7 +138,6 @@ class Unites_codico(db.Model):
     code_id = db.Column(db.Integer, nullable=False)
 
 
-
 class Oeuvres(db.Model):
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
     titre = db.Column(db.Text)
@@ -160,11 +159,14 @@ def accueil():
 @app.route("/pages/codices/<int:num>")
 def notice_codex(num):
     codex = Codices.query.get(num)
-
+    
     # Requête portant sur les unités codicologiques enfants d'un codex désigné par son identifiant
     listUC_enfants = Unites_codico.query.filter(Unites_codico.code_id == num).all()
+    paramsUCs = []
     for UC in listUC_enfants:
-        description = UC.descript
+        paramsUC = {}
+        paramsUC["description"] = UC.descript
+        
         # Conditions portant sur le booléen relatif aux recto/verso au début et à la fin de l'UC
         if UC.loc_init_v:
             rvdebut = "v"
@@ -174,9 +176,9 @@ def notice_codex(num):
             rvfin = "v"
         else:
             rvfin = ""
-        localisation = f"f. {str(UC.loc_init)}{rvdebut}-{str(UC.loc_fin)}{rvfin}"
-    
-    # REPRENDRE ICI : assigner les paramètres de date
+        paramsUC["localisation"] = f"f. {str(UC.loc_init)}{rvdebut}-{str(UC.loc_fin)}{rvfin}"
+        
+        paramsUC["date"] = f"entre {UC.date_pas_avant} et {UC.date_pas_apres}"
     
     # Test d'existence d'un index dans la liste des prem_codices :
     codices = Codices.query.all()
@@ -186,9 +188,11 @@ def notice_codex(num):
         return render_template("pages/codices.html",
                                titre=codex.cote,
                                reliure=codex.reliure_descript,
-                               histoire=codex.histoire)
+                               histoire=codex.histoire,
+                               paramsUCs=paramsUCs)
     else:
         return render_template("pages/codices.html", message_erreur="Cette adresse ne correspond à aucune notice !")
+
 
 if __name__ == "__main__":
     app.run()
