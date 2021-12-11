@@ -7,4 +7,4 @@ La librairie de Moissac : feuille de route
     - `db-fusion-codices-UC` : reconstruction de la db
 
 # Modèle logique
-- Alors que je développe l'intégration de la db à l'application, je comprends que les entités codices et unites_codico ne doivent en former qu'une, avec une association unaire.
+- Les entités codices et unites_codico ne peuvent pas en former une en raison de la variété de leurs attributs respectifs.
