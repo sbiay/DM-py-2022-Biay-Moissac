@@ -76,4 +76,5 @@ def notice_codex(num):
         print("Cette adresse ne correspond à aucune notice !")
 
 
-notice_codex(3)
+from app import test.bot
+bot()
