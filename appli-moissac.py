@@ -129,17 +129,14 @@ class Unites_codico(db.Model):
     # Description physique
     descript = db.Column(db.Text)
     # Localisation d'une unité dans un codex (f. n-f. m)
-    loc = db.Column(db.String(30))
+    loc_init = db.Column(db.Integer, default=None)
+    loc_init_v = db.Column(db.Boolean, default=None)
+    loc_fin = db.Column(db.Integer, default=None)
+    loc_fin_v = db.Column(db.Boolean, default=None)
     date_pas_avant = db.Column(db.Integer, nullable=False)
     date_pas_apres = db.Column(db.Integer, nullable=False)
-    # La date porte-t-elle la mention circa ?
-    date_circa = db.Column(db.Boolean, nullable=False)
     code_id = db.Column(db.Integer, nullable=False)
 
-
-# Test de requête sur les unités codico
-num = 2
-listUC_enfants = Unites_codico.query.filter(Unites_codico.code_id == num).all()
 
 
 class Oeuvres(db.Model):
@@ -162,10 +159,27 @@ def accueil():
 
 @app.route("/pages/codices/<int:num>")
 def notice_codex(num):
-    codices = Codices.query.all()
     codex = Codices.query.get(num)
+
+    # Requête portant sur les unités codicologiques enfants d'un codex désigné par son identifiant
+    listUC_enfants = Unites_codico.query.filter(Unites_codico.code_id == num).all()
+    for UC in listUC_enfants:
+        description = UC.descript
+        # Conditions portant sur le booléen relatif aux recto/verso au début et à la fin de l'UC
+        if UC.loc_init_v:
+            rvdebut = "v"
+        else:
+            rvdebut = ""
+        if UC.loc_fin_v:
+            rvfin = "v"
+        else:
+            rvfin = ""
+        localisation = f"f. {str(UC.loc_init)}{rvdebut}-{str(UC.loc_fin)}{rvfin}"
+    
+    # REPRENDRE ICI : assigner les paramètres de date
     
     # Test d'existence d'un index dans la liste des prem_codices :
+    codices = Codices.query.all()
     if num <= len(codices):
         # Si l'id passé dans l'URL n'est pas plus grand que la liste 
         # de tous les codices, alors :
@@ -176,5 +190,5 @@ def notice_codex(num):
     else:
         return render_template("pages/codices.html", message_erreur="Cette adresse ne correspond à aucune notice !")
 
-# if __name__ == "__main__":
-#    app.run()
+if __name__ == "__main__":
+    app.run()
