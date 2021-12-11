@@ -1,2 +1,2 @@
-def bot():
+def Bot():
     print("Ca marche !")
