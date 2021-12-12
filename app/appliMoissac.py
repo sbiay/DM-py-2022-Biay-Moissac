@@ -2,6 +2,13 @@ import requests
 import csv
 from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
+import os
+
+# Gestion des chemins
+chemin_actuel = os.path.dirname(os.path.abspath(__file__))
+templates = os.path.join(chemin_actuel, "templates")
+statics = os.path.join(chemin_actuel, "static")
+
 
 # Dictionnaire de travail
 prem_codices = [
@@ -108,7 +115,8 @@ def concordance(cod_id):
 
 
 # Définition de mon application
-app = Flask("lib-moissac")
+app = Flask("lib-moissac", template_folder=templates,
+    static_folder=statics)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db/libMoissac.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
@@ -192,7 +200,3 @@ def notice_codex(num):
                                paramsUCs=paramsUCs)
     else:
         return render_template("pages/codices.html", message_erreur="Cette adresse ne correspond à aucune notice !")
-
-
-if __name__ == "__main__":
-    app.run()
