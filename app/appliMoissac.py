@@ -117,10 +117,9 @@ def concordance(cod_id):
 # Définition de mon application
 app = Flask("lib-moissac", template_folder=templates,
     static_folder=statics)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db/libMoissac.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{chemin_actuel}/db/libMoissac.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
-
 
 # Définition de mes classes d'objets
 # ATTENTION, il faudra veiller à bien appliquer le modèle logique
