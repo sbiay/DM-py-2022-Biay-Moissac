@@ -16,36 +16,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{chemin_actuel}/db/libMoissa
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-
-# Définition de mes classes d'objets (ATTENTION, il faudra veiller à bien appliquer le modèle logique)
-class Codices(db.Model):
-    id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
-    cote = db.Column(db.String)
-    id_technique = db.Column(db.String(19))
-    reliure_descript = db.Column(db.Text)
-    histoire = db.Column(db.Text)
-
-
-class Unites_codico(db.Model):
-    id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
-    # Description physique
-    descript = db.Column(db.Text)
-    # Localisation d'une unité dans un codex (f. n-f. m)
-    loc_init = db.Column(db.Integer, default=None)
-    loc_init_v = db.Column(db.Boolean, default=None)
-    loc_fin = db.Column(db.Integer, default=None)
-    loc_fin_v = db.Column(db.Boolean, default=None)
-    date_pas_avant = db.Column(db.Integer, nullable=False)
-    date_pas_apres = db.Column(db.Integer, nullable=False)
-    code_id = db.Column(db.Integer, nullable=False)
-
-
-class Oeuvres(db.Model):
-    id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
-    titre = db.Column(db.Text)
-    data_bnf = db.Column(db.Integer)
-    partie_de = db.Column(db.Boolean)
-    auteur = db.Column(db.Integer)
+from app.modeles.classes import Codices, Unites_codico, Oeuvres
 
 
 @app.route("/")
@@ -84,7 +55,7 @@ def notice_codex(num):
         paramsUC["date"] = f"entre {UC.date_pas_avant} et {UC.date_pas_apres}"
         
         # Il faut à présent boucler sur les contenus de chaque UC, et requêter leurs auteurs
-        
+    
     # Test d'existence d'un index dans la liste des prem_codices :
     codices = Codices.query.all()
     if num <= len(codices):
