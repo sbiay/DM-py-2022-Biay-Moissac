@@ -1,2 +1,2 @@
 from app.routes.routes import notice_codex
-notice_codex(2)
+notice_codex(1)
