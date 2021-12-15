@@ -16,5 +16,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{chemin_actuel}/db/libMoissa
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
+# Import des classes
 from app.modeles.classes import Codices, Unites_codico, Oeuvres
+# Import des routes
 from app.routes import routes

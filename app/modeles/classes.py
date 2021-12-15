@@ -29,3 +29,8 @@ class Oeuvres(db.Model):
     data_bnf = db.Column(db.Integer)
     partie_de = db.Column(db.Boolean)
     auteur = db.Column(db.Integer)
+    
+class Contient(db.Model):
+    rowid = db.Column(db.Integer, primary_key=True)
+    oeuvre = db.Column(db.Integer, nullable=False)
+    unites_codico = db.Column(db.Integer, nullable=False)

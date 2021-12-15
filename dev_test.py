@@ -1,2 +1,2 @@
-from app.routes.routes import test
-print(test)
+from app.routes.routes import notice_codex
+notice_codex(2)
