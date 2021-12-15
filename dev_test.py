@@ -1,2 +1,2 @@
-from app.deuxiemepack import Cot
-Cot()
+from app.routes.routes import test
+print(test)
