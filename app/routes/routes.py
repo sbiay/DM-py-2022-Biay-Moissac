@@ -13,7 +13,7 @@ def notice_codex(num):
     codex = Codices.query.get(num)
     
     # Requête portant sur les unités codicologiques enfants d'un codex désigné par son identifiant
-    listUC_enfants = Unites_codico.query.filter(Unites_codico.code_id == num).all()
+    listUC_enfants = Unites_codico.query.filter(Unites_codico.code_id == num).order_by(Unites_codico.loc_init).all()
     
     descUCs = []
     for UC in listUC_enfants:

@@ -1,4 +1,6 @@
 .grand_titre {
+    position: fixed;
+    width: 100%;
     padding: 30px;
     background-color: #d96e49;
 }
@@ -8,10 +10,14 @@
 }
 
 .menu {
+    position: fixed;
+    top: 115px;
     width: 20%;
 }
 
 .div_conteneur > div {
+    margin-top: 115px;
+    margin-left: 20%;
     padding: 50px;
     width: 80%;
 }

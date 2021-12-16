@@ -6,19 +6,17 @@
     <h2>{{titre}}</h2>
 </header>
 <div>
-    <h3>Description de la reliure</h3>
-    <p>{{reliure}}</p>
     <h3>Histoire</h3>
     <p>{{histoire}}</p>
+    <h3>Description de la reliure</h3>
+    <p>{{reliure}}</p>
     {% if descUCs|length > 1 %}
         <h3>Contenu</h3>
         {% for UC in descUCs %}
             <h4>{{UC["localisation"]}} ({{UC["date"]}})</h4>
             {% if UC["description"] %}
-                <h5>Description physique du contenu</h5>
                 <p>{{UC["description"]}}</p>
             {% endif %}
-            <h5>Textes</h5>
             {% for oeuvres in UC["contenu"] %}
                 <ul>
                     <li>{{oeuvres[0]}}, {{oeuvres[1]}}</li>
