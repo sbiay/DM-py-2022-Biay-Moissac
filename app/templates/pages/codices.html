@@ -10,18 +10,35 @@
     <p>{{reliure}}</p>
     <h3>Histoire</h3>
     <p>{{histoire}}</p>
-    <h3>Contenu</h3>
-    <ul>
-        {% for items in contenu %}
-            {% if items.auteur and items.titre %}
-                <li>{{items.auteur}} : {{items.titre}}</li>
-            {% elif items.auteur and not items.titre %}
-                <li>{{items.auteur}}.</li>
-            {% elif not items.auteur and items.titre %}
-                <li>{{items.titre}}.</li>
+    {% if descUCs|length > 1 %}
+        <h3>Contenu</h3>
+        {% for UC in descUCs %}
+            <h4>{{UC["localisation"]}} ({{UC["date"]}})</h4>
+            {% if UC["description"] %}
+                <h5>Description physique du contenu</h5>
+                <p>{{UC["description"]}}</p>
             {% endif %}
+            <h5>Textes</h5>
+            {% for oeuvres in UC["contenu"] %}
+                <ul>
+                    <li>{{oeuvres[0]}}, {{oeuvres[1]}}</li>
+                </ul>
+            {% endfor %}
         {% endfor %}
-    </ul>
+    {% else %}
+        {% if descUCs[0]["description"] %}
+            <h3>Description physique du contenu</h3>
+            <p>{{descUCs[0]["description"]}}</p>
+        {% endif %}
+        <h3>Date</h3>
+        <p>{{descUCs[0]["date"]}}</p>
+        <h3>Textes</h3>
+        {% for oeuvres in descUCs[0]["contenu"] %}
+            <ul>
+                <li>{{oeuvres[0]}}, {{oeuvres[1]}}</li>
+            </ul>
+        {% endfor %}
+    {% endif %}
 </div>
 
 
