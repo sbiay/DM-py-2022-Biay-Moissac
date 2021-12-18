@@ -1,2 +1,2 @@
-from app.routes.routes import notice_codex
-notice_codex(1)
+from app.modeles.requetesDataBNF import requeteOeuvres
+requeteOeuvres("Institutes of the cenobia and the remedies")
