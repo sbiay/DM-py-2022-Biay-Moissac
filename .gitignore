@@ -4,3 +4,8 @@ dev_test.py
 db/libMoissac.db-journal
 db/libMoissac.sqbpro
 *__pycache__*
+csv/
+json/
+dev_test.py
+exo-flask_alchemy.py
+fdr.md
