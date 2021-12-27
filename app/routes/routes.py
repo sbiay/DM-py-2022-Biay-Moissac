@@ -1,6 +1,6 @@
 from flask import Flask, render_template
 from ..appliMoissac import app
-from ..modeles.classes import Codices, Unites_codico, Oeuvres, Contient, Personne
+from ..modeles.classes import Codices, Lieux, Unites_codico, Oeuvres, Contient, Personne
 
 
 @app.route("/")
@@ -12,9 +12,18 @@ def accueil():
 def notice_codex(num):
     codex = Codices.query.get(num)
     
-    # Requête portant sur les unités codicologiques enfants d'un codex désigné par son identifiant
+    # Pour le lieu de conservation du codex
+    id_lieu_cons = Codices.query.get(num).lieu_conservation
+    lieu_conservation = Lieux.query.get(id_lieu_cons)
+    if lieu_conservation.label == "Bibliothèque nationale de France":
+        lieu_conservation = lieu_conservation.localite + ", BnF"
+    else:
+        lieu_conservation = lieu_conservation.localite + ", " + lieu_conservation.label
+    
+    # Liste des unités codicologiques enfants du codex
     listUC_enfants = Unites_codico.query.filter(Unites_codico.code_id == num).order_by(Unites_codico.loc_init).all()
     
+    # Eléments descriptifs de chaque unité codicologique
     descUCs = []
     for UC in listUC_enfants:
         descUC = {}
@@ -32,7 +41,7 @@ def notice_codex(num):
         descUC["localisation"] = f"f. {str(UC.loc_init)}{rvdebut}-{str(UC.loc_fin)}{rvfin}"
         
         descUC["date"] = f"entre {UC.date_pas_avant} et {UC.date_pas_apres}"
-
+        
         # Il faut à présent boucler sur les contenus de chaque UC
         requ_contenu = Contient.query.filter(Contient.unites_codico == UC.id).all()
         # requ_contenu est une liste de mapping possédant comme propriétés .oeuvre et .unites_codico
@@ -64,7 +73,7 @@ def notice_codex(num):
             else:
                 nom = "Anonyme"
             contenu.append((nom, titre))
-
+        
         descUC["contenu"] = contenu
         
         # Après avoir bouclé sur les items du contenu, on ajoute le dictionnaire à la liste descUCs
@@ -80,7 +89,7 @@ def notice_codex(num):
         # Si l'id passé dans l'URL n'est pas plus grand que la liste
         # de tous les codices, alors :
         return render_template("pages/codices.html",
-                               titre=codex.cote,
+                               titre= f"{lieu_conservation}, {codex.cote}",
                                reliure=codex.reliure_descript,
                                histoire=codex.histoire,
                                descUCs=descUCs)

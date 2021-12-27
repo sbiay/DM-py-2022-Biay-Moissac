@@ -7,8 +7,30 @@ class Codices(db.Model):
     id_technique = db.Column(db.String(19))
     reliure_descript = db.Column(db.Text)
     histoire = db.Column(db.Text)
+    lieu_conservation = db.Column(db.Integer, nullable=False)
 
+class Contient(db.Model):
+    rowid = db.Column(db.Integer, primary_key=True)
+    oeuvre = db.Column(db.Integer, nullable=False)
+    unites_codico = db.Column(db.Integer, nullable=False)
 
+class Oeuvres(db.Model):
+    id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
+    titre = db.Column(db.Text, nullable=False)
+    data_bnf = db.Column(db.Integer, nullable=True)
+    partie_de = db.Column(db.Boolean, nullable=True)
+    auteur = db.Column(db.Integer, nullable=True)
+
+class Lieux(db.Model):
+    id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
+    localite = db.Column(db.String(20))
+    label = db.Column(db.String(30))
+    
+class Personne(db.Model):
+    rowid = db.Column(db.Integer, primary_key=True)
+    nom = db.Column(db.Text, nullable=False)
+    data_bnf = db.Column(db.Integer, nullable=True)
+    
 class Unites_codico(db.Model):
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
     # Description physique
@@ -22,20 +44,3 @@ class Unites_codico(db.Model):
     date_pas_apres = db.Column(db.Integer, nullable=False)
     code_id = db.Column(db.Integer, nullable=False)
 
-
-class Oeuvres(db.Model):
-    id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
-    titre = db.Column(db.Text, nullable=False)
-    data_bnf = db.Column(db.Integer, nullable=True)
-    partie_de = db.Column(db.Boolean, nullable=True)
-    auteur = db.Column(db.Integer, nullable=True)
-    
-class Contient(db.Model):
-    rowid = db.Column(db.Integer, primary_key=True)
-    oeuvre = db.Column(db.Integer, nullable=False)
-    unites_codico = db.Column(db.Integer, nullable=False)
-    
-class Personne(db.Model):
-    rowid = db.Column(db.Integer, primary_key=True)
-    nom = db.Column(db.Text, nullable=False)
-    data_bnf = db.Column(db.Integer, nullable=True)
