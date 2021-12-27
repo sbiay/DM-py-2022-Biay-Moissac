@@ -25,12 +25,17 @@ class Unites_codico(db.Model):
 
 class Oeuvres(db.Model):
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
-    titre = db.Column(db.Text)
-    data_bnf = db.Column(db.Integer)
-    partie_de = db.Column(db.Boolean)
-    auteur = db.Column(db.Integer)
+    titre = db.Column(db.Text, nullable=False)
+    data_bnf = db.Column(db.Integer, nullable=True)
+    partie_de = db.Column(db.Boolean, nullable=True)
+    auteur = db.Column(db.Integer, nullable=True)
     
 class Contient(db.Model):
     rowid = db.Column(db.Integer, primary_key=True)
     oeuvre = db.Column(db.Integer, nullable=False)
     unites_codico = db.Column(db.Integer, nullable=False)
+    
+class Personne(db.Model):
+    rowid = db.Column(db.Integer, primary_key=True)
+    nom = db.Column(db.Text, nullable=False)
+    data_bnf = db.Column(db.Integer, nullable=True)

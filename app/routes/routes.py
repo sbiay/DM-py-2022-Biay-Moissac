@@ -1,6 +1,6 @@
 from flask import Flask, render_template
 from ..appliMoissac import app
-from ..modeles.classes import Codices, Unites_codico, Oeuvres, Contient
+from ..modeles.classes import Codices, Unites_codico, Oeuvres, Contient, Personne
 
 
 @app.route("/")
@@ -46,7 +46,24 @@ def notice_codex(num):
         for items in requ_contenu:
             auteur = Oeuvres.query.get(items.oeuvre).auteur
             titre = Oeuvres.query.get(items.oeuvre).titre
-            contenu.append((auteur, titre))
+            if auteur:
+                # Le nom sous la forme d'autorité (avec fonction et dates entre parenthèses)
+                nom = Personne.query.get(auteur).nom
+                
+                # On retient pour la page le nom sans les parenthèses, sauf si elles contiennent un titre (pape,
+                # saint, etc)
+                # Si le premier caractère après la parenthèse n'est pas un chiffre, c'est un titre (on dira "role"
+                # pour éviter les confusions avec les titres d'oeuvre)
+                # retenir :
+                if nom.split("(")[1][0] not in "0123456789":
+                    role = nom.split("(")[1].split(",")[0]
+                    # Le nom sans les dates, suivi du role
+                    nom = f"{nom.split('(')[0][:-1]} ({role})"
+                else:
+                    nom = f"{nom.split('(')[0][:-1]}"
+            else:
+                nom = "Anonyme"
+            contenu.append((nom, titre))
 
         descUC["contenu"] = contenu
         
