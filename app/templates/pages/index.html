@@ -2,24 +2,30 @@
 
 {% block corps %}
     {% if auteurs %}
-        <h2>Les auteurs</h2>
+        <h2>Table analytique des auteurs</h2>
+        <br>
 
-        {% for auteur in auteurs %}
-            <h3>{{ auteur[1] }}</h3>
-            {% for tuple_oeuvre in auteurs[(auteur[0], auteur[1])] %}
-                {% for items in tuple_oeuvre %}
-                    <p>{{ items[1] }}</p>
-                    <ul>
-                    {% for codex in tuple_oeuvre[items] %}
-                        <li>{{ codex[1] }}</li><!-- Pour l'id, ce sera l'index 0 -->
+        {% for id_auteur in auteurs %}
+            <h3>{{ auteurs[id_auteur]["label"] }}</h3>
+
+            {% for oeuvre in auteurs[id_auteur]["oeuvres"] %}
+
+                {% for id_oeuvre in oeuvre %}
+                    <p>{{ oeuvre[id_oeuvre]["label"] }}</p>
+
+                    {% for item in oeuvre[id_oeuvre]["codices"] %}
+                        <ul>
+                        {% for id_codex in item %}
+                            <li><a href="{{ urlcodex }}{{ id_codex }}">{{item[id_codex]}}</a></li>
+                        {% endfor %}
+                        </ul>
                     {% endfor %}
-                    </ul>
 
                 {% endfor %}
 
 
-
             {% endfor %}
+
 
         {% endfor %}
 

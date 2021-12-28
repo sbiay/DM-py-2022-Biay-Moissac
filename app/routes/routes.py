@@ -14,21 +14,37 @@ def index(quel_index):
     indexes = ["auteurs", "codices", "oeuvres"]
 
     auteurs = {}
-    # auteurs est un dictionnaire destiné à accueillir, pour chaque auteur de la classe Oeuvres
-    # - clés : tuple composé de deux éléments :
-    #   1. int : l'id de l'auteur
-    #   2. str : le nom de l'auteur selon la classe Personne
-    # - valeurs : liste de tuples, composés de deux éléments :
-    #   1. int : l'id de l'oeuvre
-    #   2. str : le titre de l'oeuvre selon la classe Oeuvres
+    """
+    auteurs est un dictionnaire destiné à accueillir, pour chaque auteur de la classe Oeuvres
+    les informations relatives aux oeuvres qu'il a écrites et aux codices qui les conservent
+    Il se structure de la façon suivante :
+    auteurs = {
+        "ID AUTEUR": {
+            "label": "NOM AUTEUR",
+            "oeuvres": [
+                {
+                "ID OEUVRE": {
+                    "label": "TITRE OEUVRE",
+                    "codices": [
+                        {
+                            "ID LIEU": "LIEU CONSERVATION"}]}}]}
+        }
+    """
     classOeuvres = Oeuvres.query.all()
     for item in classOeuvres:
         if item.auteur:
             auteur = Personne.query.get(item.auteur)
             
-            # Si l'auteur n'existe pas dans le dictionnaire auteurs,
-            # l'ajoute comme clé (sous la forme d'un tuple)
-            # avec comme valeur une liste d'un seul tuple contenant son id et son titre)
+            """
+            Si l'auteur n'existe pas dans le dictionnaire auteurs,
+            on ajoute comme clé son id et comme valeur un dictionnaire comprenant
+            - label : (son nom)
+            - oeuvres : une liste de dictionnaires, avec :
+                - clé : id des oeuvres
+                - valeurs :
+                    - label : titre de l'oeuvre
+                    - codices : une liste vide qui acceuillera les codices qui le contiennent
+            """
             if not auteurs.get(auteur.rowid):
                 auteurs[auteur.rowid] = {
                     "label": auteur.nom,
@@ -40,7 +56,7 @@ def index(quel_index):
                         }
                     ]
                 }
-            # Si l'auteur existe, ajoute l'oeuvre à la liste des valeurs
+            # Si l'auteur existe, ajoute l'oeuvre (item) à la liste des valeurs
             else:
                 auteurs[auteur.rowid]["oeuvres"].append(
                     {item.id: {
@@ -77,12 +93,7 @@ def index(quel_index):
                     }
                 )
            
-    auteurs_liste_avec_codex = {}
-    # auteurs_liste_avec_codex est un dictionnaire construit à partir du dictionnaire auteurs
-    # pour lequel chaque tuple contenant l'id d'une oeuvre et son titre est la clé d'un dictionnaire
-    # dont les valeurs sont des listes de tuples composés de deux valeurs :
-    #   1. int : l'id du codex
-    #   2. str : le label du codex composé de son lieu de conservation et de sa cote
+    # On ajoute ici le contenu de la liste qui est la valeur de la clé codices dans le dictionnaire auteurs
     for id_auteur in auteurs:
         for dict_oeuvre in auteurs[id_auteur]["oeuvres"]:
             for id_oeuvre in dict_oeuvre:
@@ -99,10 +110,17 @@ def index(quel_index):
     with open("json/auteurs.json", mode="w") as jsonf:
         json.dump(auteurs, jsonf)
     
-    auteurs = auteurs_liste_avec_codex
     codices = "Voici la liste des codices"
     oeuvres = "Voici la liste des oeuvres"
-    
+
+    if quel_index == indexes[0]:
+        return render_template(
+            "pages/index.html", auteurs=auteurs, urlcodex="http://127.0.0.1:5000/pages/codices/"
+        )
+    elif quel_index == indexes[1]:
+        return render_template("pages/index.html", codices=codices)
+    elif quel_index == indexes[2]:
+        return render_template("pages/index.html", oeuvres=oeuvres)
     
 
 @app.route("/pages/codices/<int:num>")
