@@ -5,8 +5,81 @@ from ..modeles.classes import Codices, Lieux, Unites_codico, Oeuvres, Contient, 
 
 @app.route("/")
 def accueil():
-    return render_template("pages/accueil.html", nom="Bibliothèque de Moissac")
+    return render_template("pages/accueil.html")
 
+@app.route("/pages/<quel_index>")
+def index(quel_index):
+    indexes = ["auteurs", "codices", "oeuvres"]
+    
+    # auteurs est un dictionnaire de dictionnaire
+    # Les clés de premier niveau sont des noms d'auteurs
+    # Les valeurs sont des dictionnaires, dont les clés sont des oeuvres et les valeurs sont
+    classOeuvres = Oeuvres.query.all()
+    auteurs = {}
+    
+    for item in classOeuvres:
+        if item.auteur:
+            auteur = Personne.query.get(item.auteur)
+            # auteur.nom est le nom de l'auteur
+            # item.titre est le titre de l'oeuvre en question
+            
+            # Si l'auteur n'existe pas, l'ajoute comme clé (sous la forme d'un tuple contenant son id et son nom)
+            # avec comme valeur une liste d'une seule oeuvre (sous la forme d'un tuple contenant son id et son titre)
+            if not auteurs.get((auteur.rowid, auteur.nom)):
+                auteurs[(auteur.rowid, auteur.nom)] = [(item.id, item.titre)]
+            # Si l'auteur existe, ajoute l'oeuvre à la liste des valeurs
+            else:
+                auteurs[(auteur.rowid, auteur.nom)].append((item.id, item.titre))
+        # Même traitement si l'oeuvre est simplement attribuée (on ajoute une simple mention en fin de titre)
+        elif item.attr:
+            auteur = Personne.query.get(item.attr)
+            # auteur.nom est le nom de l'auteur
+            # item.titre est le titre de l'oeuvre en question
+    
+            # Si l'auteur n'existe pas, l'ajoute comme clé avec comme valeur une liste d'une seule oeuvre
+            if not auteurs.get((auteur.rowid, auteur.nom)):
+                auteurs[(auteur.rowid, auteur.nom)] = [(item.id, item.titre + " (attribution douteuse")]
+            # Si l'auteur existe, ajoute l'oeuvre à la liste des valeurs
+            else:
+                auteurs[(auteur.rowid, auteur.nom)].append((item.id, item.titre + " (attribution douteuse"))
+                
+    # Ajoute au dictionnaire auteurs les codices qui contiennent chaque oeuvre :
+    auteurs_liste_avec_codex = {}
+    for auteur in auteurs:
+        auteurs_liste_avec_codex[auteur] = []
+        for oeuvre in auteurs[auteur]:
+            oeuvre_id = oeuvre[0]
+            UCs = Contient.query.filter(Contient.oeuvre == oeuvre_id).all()
+            oeuvre_avec_codex = {oeuvre: []}
+            for UC in UCs:
+                req = Unites_codico.query.filter(Unites_codico.id == UC.unites_codico).one()
+                code_id = req.code_id
+                cote = Codices.query.get(code_id).cote
+                if cote[:5] == "Latin":
+                    lieu_conserv = "Paris, BnF"
+                else:
+                    lieu_conserv = "Attention ! règle à créer"
+                codex_label = (code_id, f"{lieu_conserv}, {cote}")
+                
+                # Ajout du codex au dictionnaire des auteurs, pour chaque oeuvre
+                # d'une liste de tuples contenant l'id du codex et son label
+                
+                # Pour ne pas ajouter deux fois le codex d'une oeuvre qui y serait conservée en plusieurs fragments
+                if codex_label not in oeuvre_avec_codex[oeuvre]:
+                    oeuvre_avec_codex[oeuvre].append(codex_label)
+            auteurs_liste_avec_codex[auteur].append(oeuvre_avec_codex)
+    
+    auteurs = auteurs_liste_avec_codex
+    codices = "Voici la liste des codices"
+    oeuvres = "Voici la liste des oeuvres"
+    
+    if quel_index == indexes[0]:
+        return render_template("pages/index.html", auteurs=auteurs)
+    elif quel_index == indexes[1]:
+        return render_template("pages/index.html", codices=codices)
+    elif quel_index == indexes[2]:
+        return render_template("pages/index.html", oeuvres=oeuvres)
+    
 
 @app.route("/pages/codices/<int:num>")
 def notice_codex(num):

@@ -20,6 +20,7 @@ class Oeuvres(db.Model):
     data_bnf = db.Column(db.Integer, nullable=True)
     partie_de = db.Column(db.Boolean, nullable=True)
     auteur = db.Column(db.Integer, nullable=True)
+    attr = db.Column(db.Integer, nullable=True)
 
 class Lieux(db.Model):
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)

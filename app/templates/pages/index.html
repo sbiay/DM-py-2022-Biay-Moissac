@@ -1,10 +1,35 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends "conteneur.html" %}
+
+{% block corps %}
+    {% if auteurs %}
+        <h2>Les auteurs</h2>
+
+        {% for auteur in auteurs %}
+            <h3>{{ auteur[1] }}</h3>
+            {% for tuple_oeuvre in auteurs[(auteur[0], auteur[1])] %}
+                {% for items in tuple_oeuvre %}
+                    <p>{{ items[1] }}</p>
+                    <ul>
+                    {% for codex in tuple_oeuvre[items] %}
+                        <li>{{ codex[1] }}</li><!-- Pour l'id, ce sera l'index 0 -->
+                    {% endfor %}
+                    </ul>
+
+                {% endfor %}
+
+
+
+            {% endfor %}
+
+        {% endfor %}
+
+    {% elif codices %}
+        <h2>Les codices</h2>
+        <p>{{ codices }}</p>
+
+    {% elif oeuvres %}
+        <h2>Les oeuvres</h2>
+        <p>{{ oeuvres }}</p>
+
+    {% endif %}
+{% endblock %}
