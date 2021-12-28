@@ -1,4 +1,5 @@
 from flask import Flask, render_template
+import json
 from ..appliMoissac import app
 from ..modeles.classes import Codices, Lieux, Unites_codico, Oeuvres, Contient, Personne
 from ..modeles.jointures import labelCodex
@@ -28,59 +29,80 @@ def index(quel_index):
             # Si l'auteur n'existe pas dans le dictionnaire auteurs,
             # l'ajoute comme clé (sous la forme d'un tuple)
             # avec comme valeur une liste d'un seul tuple contenant son id et son titre)
-            if not auteurs.get((auteur.rowid, auteur.nom)):
-                auteurs[(auteur.rowid, auteur.nom)] = [(item.id, item.titre)]
+            if not auteurs.get(auteur.rowid):
+                auteurs[auteur.rowid] = {
+                    "label": auteur.nom,
+                    "oeuvres": [
+                        {item.id: {
+                            "label": item.titre,
+                            "codices": []
+                            }
+                        }
+                    ]
+                }
             # Si l'auteur existe, ajoute l'oeuvre à la liste des valeurs
             else:
-                auteurs[(auteur.rowid, auteur.nom)].append((item.id, item.titre))
+                auteurs[auteur.rowid]["oeuvres"].append(
+                    {item.id: {
+                        "label": item.titre,
+                        "codices": []
+                        }
+                    }
+                )
         # Même traitement si l'oeuvre est simplement attribuée (on ajoute une simple mention en fin de titre)
-        elif item.attr:
+        if item.attr:
             auteur = Personne.query.get(item.attr)
-            # auteur.nom est le nom de l'auteur
-            # item.titre est le titre de l'oeuvre en question
     
-            # Si l'auteur n'existe pas, l'ajoute comme clé avec comme valeur une liste d'une seule oeuvre
-            if not auteurs.get((auteur.rowid, auteur.nom)):
-                auteurs[(auteur.rowid, auteur.nom)] = [(item.id, item.titre + " (attribution douteuse")]
+            # Si l'auteur n'existe pas dans le dictionnaire auteurs,
+            # l'ajoute comme clé (sous la forme d'un tuple)
+            # avec comme valeur une liste d'un seul tuple contenant son id et son titre)
+            if not auteurs.get(auteur.rowid):
+                auteurs[auteur.rowid] = {
+                    "label": auteur.nom,
+                    "oeuvres": [
+                        {item.id: {
+                            "label": f"{item.titre} (attribué à)",
+                            "codices": []
+                        }
+                        }
+                    ]
+                }
             # Si l'auteur existe, ajoute l'oeuvre à la liste des valeurs
             else:
-                auteurs[(auteur.rowid, auteur.nom)].append((item.id, item.titre + " (attribution douteuse"))
-        # Si l'oeuvre n'a pas d'auteur ni d'attribution, elle n'intéresse pas ce dictionnaire (pas de else).
-    
+                auteurs[auteur.rowid]["oeuvres"].append(
+                    {item.id: {
+                        "label": f"{item.titre} (attribué à)",
+                        "codices": []
+                    }
+                    }
+                )
+           
     auteurs_liste_avec_codex = {}
     # auteurs_liste_avec_codex est un dictionnaire construit à partir du dictionnaire auteurs
     # pour lequel chaque tuple contenant l'id d'une oeuvre et son titre est la clé d'un dictionnaire
     # dont les valeurs sont des listes de tuples composés de deux valeurs :
     #   1. int : l'id du codex
     #   2. str : le label du codex composé de son lieu de conservation et de sa cote
-    for auteur in auteurs:
-        auteurs_liste_avec_codex[auteur] = []
-        for oeuvre in auteurs[auteur]:
-            oeuvre_id = oeuvre[0]
-            UCs = Contient.query.filter(Contient.oeuvre == oeuvre_id).all()
-            oeuvre_avec_codex = {oeuvre: []}
-            for UC in UCs:
-                req = Unites_codico.query.filter(Unites_codico.id == UC.unites_codico).one()
-                code_id = req.code_id
-                codex_label = labelCodex(code_id)
-                # Ajout du codex au dictionnaire des auteurs, pour chaque oeuvre
-                # d'une liste de tuples contenant l'id du codex et son label
-                
-                # Pour ne pas ajouter deux fois le codex d'une oeuvre qui y serait conservée en plusieurs fragments
-                if codex_label not in oeuvre_avec_codex[oeuvre]:
-                    oeuvre_avec_codex[oeuvre].append(codex_label)
-            auteurs_liste_avec_codex[auteur].append(oeuvre_avec_codex)
+    for id_auteur in auteurs:
+        for dict_oeuvre in auteurs[id_auteur]["oeuvres"]:
+            for id_oeuvre in dict_oeuvre:
+                UCs = Contient.query.filter(Contient.oeuvre == id_oeuvre).all()
+                for UC in UCs:
+                    req = Unites_codico.query.filter(Unites_codico.id == UC.unites_codico).one()
+                    code_id = req.code_id
+                    codex = labelCodex(code_id)
+                    # Si l'oeuvre est présente dans le même codex sous plusieurs fragments
+                    # le codex n'est ajouté qu'une seule fois
+                    if not codex in dict_oeuvre[id_oeuvre]["codices"]:
+                        dict_oeuvre[id_oeuvre]["codices"].append(codex)
+
+    with open("json/auteurs.json", mode="w") as jsonf:
+        json.dump(auteurs, jsonf)
     
     auteurs = auteurs_liste_avec_codex
     codices = "Voici la liste des codices"
     oeuvres = "Voici la liste des oeuvres"
     
-    if quel_index == indexes[0]:
-        return render_template("pages/index.html", auteurs=auteurs)
-    elif quel_index == indexes[1]:
-        return render_template("pages/index.html", codices=codices)
-    elif quel_index == indexes[2]:
-        return render_template("pages/index.html", oeuvres=oeuvres)
     
 
 @app.route("/pages/codices/<int:num>")
@@ -88,7 +110,7 @@ def notice_codex(num):
     codex = Codices.query.get(num)
     
     # Pour le lieu de conservation et la cote du codex
-    label = labelCodex(num)[1]
+    label = labelCodex(num)[num]
     
     # Liste des unités codicologiques enfants du codex
     listUC_enfants = Unites_codico.query.filter(Unites_codico.code_id == num).order_by(Unites_codico.loc_init).all()
