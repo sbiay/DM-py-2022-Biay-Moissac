@@ -1,6 +1,7 @@
 from flask import Flask, render_template
 from ..appliMoissac import app
 from ..modeles.classes import Codices, Lieux, Unites_codico, Oeuvres, Contient, Personne
+from ..modeles.jointures import labelCodex
 
 
 @app.route("/")
@@ -10,21 +11,23 @@ def accueil():
 @app.route("/pages/<quel_index>")
 def index(quel_index):
     indexes = ["auteurs", "codices", "oeuvres"]
-    
-    # auteurs est un dictionnaire de dictionnaire
-    # Les clés de premier niveau sont des noms d'auteurs
-    # Les valeurs sont des dictionnaires, dont les clés sont des oeuvres et les valeurs sont
-    classOeuvres = Oeuvres.query.all()
+
     auteurs = {}
-    
+    # auteurs est un dictionnaire destiné à accueillir, pour chaque auteur de la classe Oeuvres
+    # - clés : tuple composé de deux éléments :
+    #   1. int : l'id de l'auteur
+    #   2. str : le nom de l'auteur selon la classe Personne
+    # - valeurs : liste de tuples, composés de deux éléments :
+    #   1. int : l'id de l'oeuvre
+    #   2. str : le titre de l'oeuvre selon la classe Oeuvres
+    classOeuvres = Oeuvres.query.all()
     for item in classOeuvres:
         if item.auteur:
             auteur = Personne.query.get(item.auteur)
-            # auteur.nom est le nom de l'auteur
-            # item.titre est le titre de l'oeuvre en question
             
-            # Si l'auteur n'existe pas, l'ajoute comme clé (sous la forme d'un tuple contenant son id et son nom)
-            # avec comme valeur une liste d'une seule oeuvre (sous la forme d'un tuple contenant son id et son titre)
+            # Si l'auteur n'existe pas dans le dictionnaire auteurs,
+            # l'ajoute comme clé (sous la forme d'un tuple)
+            # avec comme valeur une liste d'un seul tuple contenant son id et son titre)
             if not auteurs.get((auteur.rowid, auteur.nom)):
                 auteurs[(auteur.rowid, auteur.nom)] = [(item.id, item.titre)]
             # Si l'auteur existe, ajoute l'oeuvre à la liste des valeurs
@@ -42,9 +45,14 @@ def index(quel_index):
             # Si l'auteur existe, ajoute l'oeuvre à la liste des valeurs
             else:
                 auteurs[(auteur.rowid, auteur.nom)].append((item.id, item.titre + " (attribution douteuse"))
-                
-    # Ajoute au dictionnaire auteurs les codices qui contiennent chaque oeuvre :
+        # Si l'oeuvre n'a pas d'auteur ni d'attribution, elle n'intéresse pas ce dictionnaire (pas de else).
+    
     auteurs_liste_avec_codex = {}
+    # auteurs_liste_avec_codex est un dictionnaire construit à partir du dictionnaire auteurs
+    # pour lequel chaque tuple contenant l'id d'une oeuvre et son titre est la clé d'un dictionnaire
+    # dont les valeurs sont des listes de tuples composés de deux valeurs :
+    #   1. int : l'id du codex
+    #   2. str : le label du codex composé de son lieu de conservation et de sa cote
     for auteur in auteurs:
         auteurs_liste_avec_codex[auteur] = []
         for oeuvre in auteurs[auteur]:
@@ -54,13 +62,7 @@ def index(quel_index):
             for UC in UCs:
                 req = Unites_codico.query.filter(Unites_codico.id == UC.unites_codico).one()
                 code_id = req.code_id
-                cote = Codices.query.get(code_id).cote
-                if cote[:5] == "Latin":
-                    lieu_conserv = "Paris, BnF"
-                else:
-                    lieu_conserv = "Attention ! règle à créer"
-                codex_label = (code_id, f"{lieu_conserv}, {cote}")
-                
+                codex_label = labelCodex(code_id)
                 # Ajout du codex au dictionnaire des auteurs, pour chaque oeuvre
                 # d'une liste de tuples contenant l'id du codex et son label
                 
@@ -85,13 +87,8 @@ def index(quel_index):
 def notice_codex(num):
     codex = Codices.query.get(num)
     
-    # Pour le lieu de conservation du codex
-    id_lieu_cons = Codices.query.get(num).lieu_conservation
-    lieu_conservation = Lieux.query.get(id_lieu_cons)
-    if lieu_conservation.label == "Bibliothèque nationale de France":
-        lieu_conservation = lieu_conservation.localite + ", BnF"
-    else:
-        lieu_conservation = lieu_conservation.localite + ", " + lieu_conservation.label
+    # Pour le lieu de conservation et la cote du codex
+    label = labelCodex(num)[1]
     
     # Liste des unités codicologiques enfants du codex
     listUC_enfants = Unites_codico.query.filter(Unites_codico.code_id == num).order_by(Unites_codico.loc_init).all()
@@ -162,7 +159,7 @@ def notice_codex(num):
         # Si l'id passé dans l'URL n'est pas plus grand que la liste
         # de tous les codices, alors :
         return render_template("pages/codices.html",
-                               titre= f"{lieu_conservation}, {codex.cote}",
+                               titre= f"{label}",
                                reliure=codex.reliure_descript,
                                histoire=codex.histoire,
                                descUCs=descUCs)
