@@ -1,5 +1,5 @@
-from flask import Flask, render_template, url_for
 import json
+from flask import Flask, render_template, request, url_for
 from ..appliMoissac import app
 from ..modeles.classes import Codices, Lieux, Unites_codico, Oeuvres, Contient, Personne
 from ..modeles.jointures import labelCodex
@@ -207,3 +207,8 @@ def notice_codex(num):
     else:
         return render_template("pages/codices.html", message_erreur="Cette adresse ne correspond à aucune notice !")
     
+@app.route("/recherche")
+def recherche():
+    motclef = request.args.get("keyword", None)
+    with open("resultats-tests/test.txt" , mode="w") as f:
+        f.write(motclef)
