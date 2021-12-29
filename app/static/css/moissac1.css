@@ -8,13 +8,17 @@ body {
     background-color: #d96e49;
 }
 
+.grand_titre > nav {
+    margin-left: 80%;
+}
+
 .div_conteneur {
     display: flex;
 }
 
 .menu {
     position: fixed;
-    top: 115px;
+    top: 145px;
     height: 90%;
 }
 
