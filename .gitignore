@@ -14,3 +14,4 @@ app/db/injection.sql
 app/db/libMoissac.sqbpro
 app/db/injection*
 appel*.md
+resultats-tests/
