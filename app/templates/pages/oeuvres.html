@@ -1,42 +1,26 @@
 {% extends "conteneur.html" %}
 
 {% block corps %}
-    {% if auteurs %}
-        <h2>Table analytique des auteurs</h2>
-        <br>
+    <h2>Table analytique des oeuvres</h2>
+    <br>
+    {% for id_oeuvre in oeuvres %}
+        <h3>{{ oeuvres[id_oeuvre]["label"] }}</h3>
 
-        {% for id_auteur in auteurs %}
-            <h3>{{ auteurs[id_auteur]["label"] }}</h3>
-
-            {% for oeuvre in auteurs[id_auteur]["oeuvres"] %}
-
-                {% for id_oeuvre in oeuvre %}
-                    <p>{{ oeuvre[id_oeuvre]["label"] }}</p>
-
-                    {% for item in oeuvre[id_oeuvre]["codices"] %}
-                        <ul>
-                        {% for id_codex in item %}
-                            <li><a href="{{ url_for('notice_codex', num=id_codex)}}">{{item[id_codex]}}</a></li>
-                            <p></p>
-                        {% endfor %}
-                        </ul>
-                    {% endfor %}
-
-                {% endfor %}
-
-
+        {% if oeuvres[id_oeuvre]["auteur"] %}
+            {% for cle in oeuvres[id_oeuvre]["auteur"] %}
+                <a href="{{ url_for('index', quel_index="auteurs", _anchor="auteur" + cle|string) }}">{{ oeuvres[id_oeuvre]["auteur"][cle] }}</a>
+                <br>
             {% endfor %}
-
-
+        {% endif %}
+        <ul>
+        {% for item in oeuvres[id_oeuvre]["codices"] %}
+            {% for cle in item %}
+                <li><a href="{{ url_for('notice_codex', num=cle)}}">{{ item[cle] }}</a></li>
+            {% endfor %}
         {% endfor %}
+        </ul>
 
-    {% elif codices %}
-        <h2>Les codices</h2>
-        <p>{{ codices }}</p>
 
-    {% elif oeuvres %}
-        <h2>Les oeuvres</h2>
-        <p>{{ oeuvres }}</p>
+    {% endfor %}
 
-    {% endif %}
 {% endblock %}

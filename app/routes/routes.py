@@ -2,7 +2,7 @@ import json
 from flask import Flask, render_template, request, url_for
 from ..appliMoissac import app
 from ..modeles.classes import Codices, Lieux, Unites_codico, Oeuvres, Contient, Personne
-from ..modeles.jointures import labelCodex
+from ..modeles.jointures import labelCodex, toutes_oeuvres
 
 
 @app.route("/")
@@ -109,15 +109,15 @@ def index(quel_index):
 
     with open("resultats-tests/auteurs.json", mode="w") as jsonf:
         json.dump(auteurs, jsonf)
+
+    oeuvres = toutes_oeuvres()
     
     codices = "Voici la liste des codices"
-    oeuvres = "Voici la liste des oeuvres"
+    
     url_site = url_for("accueil")
 
     if quel_index == indexes[0]:
-        return render_template(
-            "pages/auteurs.html", auteurs=auteurs, url_site=url_site
-        )
+        return render_template("pages/auteurs.html", auteurs=auteurs, url_site=url_site)
     elif quel_index == indexes[1]:
         return render_template("pages/codices.html", codices=codices, url_site=url_site)
     elif quel_index == indexes[2]:

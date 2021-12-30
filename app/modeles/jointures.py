@@ -1,7 +1,6 @@
 import json
 from ..modeles.classes import Codices, Lieux, Unites_codico, Oeuvres, Contient, Personne
 
-
 def labelCodex(code_id):
     """Cette fonction prend comme argument l'identifiant d'un codex
     et retourne un dictionnaire :
@@ -59,7 +58,6 @@ def toutes_oeuvres():
     # test
     with open("resultats-tests/oeuvres.json", mode="w") as jsonf:
         json.dump(oeuvres, jsonf)
-    oeuvresJson = json.dumps(oeuvres)
     
-    return oeuvresJson
+    return oeuvres
     

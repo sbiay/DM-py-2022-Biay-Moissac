@@ -1,12 +1,11 @@
 {% extends "conteneur.html" %}
 
 {% block corps %}
-    {% if auteurs %}
-        <h2>Table analytique des auteurs</h2>
+    <h2>Table analytique des auteurs</h2>
         <br>
 
         {% for id_auteur in auteurs %}
-            <h3>{{ auteurs[id_auteur]["label"] }}</h3>
+            <h3 id="{{ "auteur" + id_auteur|string }}">{{ auteurs[id_auteur]["label"] }}</h3>
 
             {% for oeuvre in auteurs[id_auteur]["oeuvres"] %}
 
@@ -14,6 +13,7 @@
                     <p>{{ oeuvre[id_oeuvre]["label"] }}</p>
 
                     {% for item in oeuvre[id_oeuvre]["codices"] %}
+
                         <ul>
                         {% for id_codex in item %}
                             <li><a href="{{ url_for('notice_codex', num=id_codex)}}">{{item[id_codex]}}</a></li>
@@ -30,13 +30,4 @@
 
         {% endfor %}
 
-    {% elif codices %}
-        <h2>Les codices</h2>
-        <p>{{ codices }}</p>
-
-    {% elif oeuvres %}
-        <h2>Les oeuvres</h2>
-        <p>{{ oeuvres }}</p>
-
-    {% endif %}
 {% endblock %}
