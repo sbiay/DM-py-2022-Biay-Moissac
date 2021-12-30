@@ -1,4 +1,6 @@
 from ..appliMoissac import db
+# test
+#from ..appliTest import db
 
 # Définition de mes classes d'objets (ATTENTION, il faudra veiller à bien appliquer le modèle logique)
 class Codices(db.Model):
@@ -28,7 +30,7 @@ class Lieux(db.Model):
     label = db.Column(db.String(30))
     
 class Personne(db.Model):
-    rowid = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     nom = db.Column(db.Text, nullable=False)
     data_bnf = db.Column(db.Integer, nullable=True)
     

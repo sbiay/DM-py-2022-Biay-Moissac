@@ -1,3 +1,4 @@
+import json
 from ..modeles.classes import Codices, Lieux, Unites_codico, Oeuvres, Contient, Personne
 
 
@@ -23,3 +24,42 @@ def labelCodex(code_id):
     label = f"{lieu_conservation}, {cote}"
     dico[code_id] = label
     return dico
+
+def toutes_oeuvres():
+    """
+    Cette fonction retourne un fichier Json de toutes les oeuvres,
+    avec leur auteur et les codices qui les contiennent.
+    """
+    oeuvres = {}
+    classOeuvres = Oeuvres.query.order_by(Oeuvres.titre).all()
+    for objetOeuvre in classOeuvres:
+        oeuvres[objetOeuvre.id] = {
+            "label": objetOeuvre.titre,
+            "auteur": {},
+            "codices": []
+        }
+        # Pour renseigner les auteurs
+        if objetOeuvre.auteur:
+            objetAuteur = Personne.query.get(objetOeuvre.auteur)
+            oeuvres[objetOeuvre.id]["auteur"][objetAuteur.id] = objetAuteur.nom
+
+        # Pour renseigner les attributions apocryphes à des auteurs
+        if objetOeuvre.attr:
+            objetAuteur = Personne.query.get(objetOeuvre.attr)
+            oeuvres[objetOeuvre.id]["auteur"][objetAuteur.id] = str(objetAuteur.nom) + " (attribué à)"
+        
+        # Pour renseigner les codices
+        objetsContenu = Contient.query.filter(Contient.oeuvre == objetOeuvre.id).all()
+        for objetContenu in objetsContenu:
+            objetUC = Unites_codico.query.filter(Unites_codico.id == objetContenu.unites_codico).one()
+            code_id = objetUC.code_id
+            dictCodex = labelCodex(code_id)
+            oeuvres[objetOeuvre.id]["codices"].append(dictCodex)
+            
+    # test
+    with open("resultats-tests/oeuvres.json", mode="w") as jsonf:
+        json.dump(oeuvres, jsonf)
+    oeuvresJson = json.dumps(oeuvres)
+    
+    return oeuvresJson
+    

@@ -45,8 +45,8 @@ def index(quel_index):
                     - label : titre de l'oeuvre
                     - codices : une liste vide qui acceuillera les codices qui le contiennent
             """
-            if not auteurs.get(auteur.rowid):
-                auteurs[auteur.rowid] = {
+            if not auteurs.get(auteur.id):
+                auteurs[auteur.id] = {
                     "label": auteur.nom,
                     "oeuvres": [
                         {item.id: {
@@ -58,7 +58,7 @@ def index(quel_index):
                 }
             # Si l'auteur existe, ajoute l'oeuvre (item) à la liste des valeurs
             else:
-                auteurs[auteur.rowid]["oeuvres"].append(
+                auteurs[auteur.id]["oeuvres"].append(
                     {item.id: {
                         "label": item.titre,
                         "codices": []
@@ -72,8 +72,8 @@ def index(quel_index):
             # Si l'auteur n'existe pas dans le dictionnaire auteurs,
             # l'ajoute comme clé (sous la forme d'un tuple)
             # avec comme valeur une liste d'un seul tuple contenant son id et son titre)
-            if not auteurs.get(auteur.rowid):
-                auteurs[auteur.rowid] = {
+            if not auteurs.get(auteur.id):
+                auteurs[auteur.id] = {
                     "label": auteur.nom,
                     "oeuvres": [
                         {item.id: {
@@ -85,7 +85,7 @@ def index(quel_index):
                 }
             # Si l'auteur existe, ajoute l'oeuvre à la liste des valeurs
             else:
-                auteurs[auteur.rowid]["oeuvres"].append(
+                auteurs[auteur.id]["oeuvres"].append(
                     {item.id: {
                         "label": f"{item.titre} (attribué à)",
                         "codices": []
