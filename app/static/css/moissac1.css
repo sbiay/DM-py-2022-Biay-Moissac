@@ -3,12 +3,12 @@ body {
 }
 
 header > nav {
-  background-color: #c16157;
+  background-color: #a45337;
   padding: 20px;
 }
 
 h1 {
-  color: rgb(215, 198, 182);
+  color: #dad4c0;
 }
 
 header > nav > form > input {
@@ -23,10 +23,14 @@ header > nav > form > input {
 
 
 main {
-  color: rgb(215, 198, 182);
-  background-color: #313436;
+  color: #dad6d1;
+  background-color: #303132;
 }
 
 .humilite {
   max-width: 100%;
+}
+
+a {
+  color: #7f51ff;
 }
