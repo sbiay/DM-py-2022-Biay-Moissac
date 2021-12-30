@@ -107,7 +107,7 @@ def index(quel_index):
                     if not codex in dict_oeuvre[id_oeuvre]["codices"]:
                         dict_oeuvre[id_oeuvre]["codices"].append(codex)
 
-    with open("json/auteurs.json", mode="w") as jsonf:
+    with open("resultats-tests/auteurs.json", mode="w") as jsonf:
         json.dump(auteurs, jsonf)
     
     codices = "Voici la liste des codices"
