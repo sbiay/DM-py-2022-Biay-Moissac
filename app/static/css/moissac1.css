@@ -1,30 +1,22 @@
-body {
+header > nav {
+  background-color: #d96e49;
+  padding: 20px;
 }
 
-.grand_titre {
-    position: fixed;
-    width: 100%;
-    padding: 30px;
-    background-color: #d96e49;
+#lateral {
+  background-color: #d96e49;
+  padding: 0px;
 }
 
-.grand_titre > nav {
-    margin-left: 80%;
+h1 {
+  color: #e0ddd8;
 }
 
-.div_conteneur {
-    display: flex;
+main {
+  color: #e0ddd8;
+  background-color: #2b2d2e;
 }
 
-.menu {
-    position: fixed;
-    top: 145px;
-    height: 90%;
-}
-
-.div_conteneur > div {
-    margin-top: 115px;
-    margin-left: 20%;
-    padding: 50px;
-    width: 80%;
+.humilite {
+  max-width: 100%;
 }

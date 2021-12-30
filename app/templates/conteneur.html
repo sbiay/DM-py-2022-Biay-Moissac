@@ -1,27 +1,36 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-    <title>La librairie de l'abbaye de Moissac</title>
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/moissac1.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-reboot.css') }}">
-    <meta charset="UTF-8">
-</head>
+    <title>La librairie de l'abbaye de Moissac</title>
+  </head>
 <body>
 <header>
-    <div class="grand_titre">
-        <h1>La librairie de l'abbaye de Moissac</h1>
-        <nav class="navbar navbar-light bg-light justify-content-between">
+    <nav class="navbar navbar-light justify-content-between">
           <form class="form-inline">
-            <input class="form-control mr-sm-2" type="search" placeholder="Posez votre question" name="keyword" aria-label="Search">
+              <h1>La librairie de l'abbaye de Moissac</h1>
+              <input class="form-control mr-sm-2" type="search" placeholder="Posez votre question" name="keyword" aria-label="Search">
             <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
           </form>
-        </nav>
-    </div>
+    </nav>
 </header>
-<div class="div_conteneur"> <!--Ceci est la div de mon corps de document-->
-    <img class="menu" src="{{ url_for('static', filename='img/tests_accueil/btv1b105254751_f336.jpg')}}"
+
+<div class="container-fluid">
+    <div class="row">
+        <nav id="lateral" class="col-md-2">
+        <img class="humilite" src="{{ url_for('static', filename='img/tests_accueil/btv1b105254751_f336-c.jpg')}}"
              alt="Latin 2077 : Humilité">
-    <div>{% block corps %}Voici mon conteneur{% endblock %}</div>
+        </nav>
+    <main role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4"><div style="position: absolute; inset: 0px; overflow: hidden; pointer-events: none; visibility: hidden; z-index: -1;" class="chartjs-size-monitor"><div class="chartjs-size-monitor-expand" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;"><div style="position:absolute;width:1000000px;height:1000000px;left:0;top:0"></div></div><div class="chartjs-size-monitor-shrink" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;"><div style="position:absolute;width:200%;height:200%;left:0; top:0"></div></div></div>
+        {% block corps %}Voici mon conteneur{% endblock %}
+    </main>
+    </div>
 </div>
 </body>
 </html>
