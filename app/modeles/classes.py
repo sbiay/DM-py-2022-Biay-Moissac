@@ -1,6 +1,6 @@
 from ..appliMoissac import db
 # test
-#from ..appliTest import db
+# from ..appliTest import db
 
 # Définition de mes classes d'objets (ATTENTION, il faudra veiller à bien appliquer le modèle logique)
 class Codices(db.Model):

@@ -2,7 +2,7 @@ import json
 from flask import Flask, render_template, request, url_for
 from ..appliMoissac import app
 from ..modeles.classes import Codices, Lieux, Unites_codico, Oeuvres, Contient, Personne
-from ..modeles.jointures import labelCodex, toutes_oeuvres
+from ..modeles.jointures import labelCodex, toutes_oeuvres, tous_auteurs
 
 
 @app.route("/")
@@ -107,21 +107,20 @@ def index(quel_index):
                     if not codex in dict_oeuvre[id_oeuvre]["codices"]:
                         dict_oeuvre[id_oeuvre]["codices"].append(codex)
 
-    with open("resultats-tests/auteurs.json", mode="w") as jsonf:
-        json.dump(auteurs, jsonf)
+    
 
     oeuvres = toutes_oeuvres()
     
+    auteurs = tous_auteurs()
+    
     codices = "Voici la liste des codices"
     
-    url_site = url_for("accueil")
-
     if quel_index == indexes[0]:
-        return render_template("pages/auteurs.html", auteurs=auteurs, url_site=url_site)
+        return render_template("pages/auteurs.html", auteurs=auteurs)
     elif quel_index == indexes[1]:
-        return render_template("pages/codices.html", codices=codices, url_site=url_site)
+        return render_template("pages/codices.html", codices=codices)
     elif quel_index == indexes[2]:
-        return render_template("pages/oeuvres.html", oeuvres=oeuvres, url_site=url_site)
+        return render_template("pages/oeuvres.html", oeuvres=oeuvres)
     
 
 @app.route("/pages/codices/<int:num>")

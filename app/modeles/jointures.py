@@ -61,3 +61,38 @@ def toutes_oeuvres():
     
     return oeuvres
     
+def tous_auteurs():
+    personnes = {}
+    objetsPersonne = Personne.query.order_by(Personne.nom).all()
+    for objetPersonne in objetsPersonne:
+        personnes[objetPersonne.id] = {"label": objetPersonne.nom, "oeuvres": []}
+        
+    oeuvres = toutes_oeuvres()
+    for clePersonne in personnes:
+        for cleOeuvre in oeuvres:
+            for cleAuteur in oeuvres[cleOeuvre].get("auteur"):
+                if clePersonne == cleAuteur:
+                    if not oeuvres[cleOeuvre]["auteur"][cleAuteur][-13:] == " (attribué à)":
+                        personnes[clePersonne]["oeuvres"].append({
+                            cleOeuvre: {
+                                "label": oeuvres[cleOeuvre]["label"],
+                                "codices": oeuvres[cleOeuvre]["codices"]
+                            }
+                        })
+                    else:
+                        personnes[clePersonne]["oeuvres"].append({
+                            cleOeuvre: {
+                                "label": oeuvres[cleOeuvre]["label"] + " (attribué à)",
+                                "codices": oeuvres[cleOeuvre]["codices"]
+                            }
+                        })
+    # Créer un dictionnaire des auteurs ne comprenant que des personnes qui ont des oeuvres :
+    auteurs = {}
+    for clePersonne in personnes:
+        if personnes[clePersonne]["oeuvres"]:
+            auteurs[clePersonne] = personnes[clePersonne]
+
+    with open("resultats-tests/auteurs.json", mode="w") as jsonf:
+        json.dump(auteurs, jsonf)
+
+    return auteurs
