@@ -116,12 +116,12 @@ def index(quel_index):
 
     if quel_index == indexes[0]:
         return render_template(
-            "pages/index.html", auteurs=auteurs, url_site=url_site
+            "pages/auteurs.html", auteurs=auteurs, url_site=url_site
         )
     elif quel_index == indexes[1]:
-        return render_template("pages/index.html", codices=codices)
+        return render_template("pages/codices.html", codices=codices, url_site=url_site)
     elif quel_index == indexes[2]:
-        return render_template("pages/index.html", oeuvres=oeuvres)
+        return render_template("pages/oeuvres.html", oeuvres=oeuvres, url_site=url_site)
     
 
 @app.route("/pages/codices/<int:num>")
