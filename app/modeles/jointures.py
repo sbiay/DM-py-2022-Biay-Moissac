@@ -26,7 +26,7 @@ def labelCodex(code_id):
 
 def toutes_oeuvres():
     """
-    Cette fonction retourne un fichier Json de toutes les oeuvres,
+    Cette fonction retourne un dictionnaire de toutes les oeuvres,
     avec leur auteur et les codices qui les contiennent.
     """
     oeuvres = {}
@@ -62,16 +62,43 @@ def toutes_oeuvres():
     return oeuvres
     
 def tous_auteurs():
+    """
+    Cette fonction retourne un dictionnaire destiné contenant pour chaque auteur de la classe Oeuvres
+    les informations relatives aux oeuvres qu'il a écrites et aux codices qui les conservent
+    Il se structure de la façon suivante :
+    auteurs = {
+        "ID AUTEUR": {
+            "label": "NOM AUTEUR",
+            "oeuvres": [
+                {
+                "ID OEUVRE": {
+                    "label": "TITRE OEUVRE",
+                    "codices": [
+                        {
+                            "ID LIEU": "LIEU CONSERVATION"}]}}]}
+        }
+    """
+    
+    # On procède dans un premier temps à la création d'un dictionnaire sur le modèle précédemment décrit
+    # contenant toutes les personnes de la db.
     personnes = {}
     objetsPersonne = Personne.query.order_by(Personne.nom).all()
     for objetPersonne in objetsPersonne:
         personnes[objetPersonne.id] = {"label": objetPersonne.nom, "oeuvres": []}
         
+    """
+    On appelle la fonction toutes_oeuvres() dont on va parser le contenu et injecter certaines parties
+    dans le dictionnaire personnes.
+    Pour cela on compare :
+    - L'identifiant de chaque personne du dict personnes : 'clePersonne' ;
+    - avec l'identifiant de chaque auteur du dict oeuvres : 'cleAuteur'.
+    """
     oeuvres = toutes_oeuvres()
     for clePersonne in personnes:
         for cleOeuvre in oeuvres:
             for cleAuteur in oeuvres[cleOeuvre].get("auteur"):
                 if clePersonne == cleAuteur:
+                    # Une condition permet de distinguer les oeuvres dont les auteurs sont apocryphes
                     if not oeuvres[cleOeuvre]["auteur"][cleAuteur][-13:] == " (attribué à)":
                         personnes[clePersonne]["oeuvres"].append({
                             cleOeuvre: {
@@ -79,6 +106,7 @@ def tous_auteurs():
                                 "codices": oeuvres[cleOeuvre]["codices"]
                             }
                         })
+                    # La mention "attribué à", signe d'autorité apocryphe, est reportée dans le label de l'oeuvre
                     else:
                         personnes[clePersonne]["oeuvres"].append({
                             cleOeuvre: {
@@ -86,7 +114,7 @@ def tous_auteurs():
                                 "codices": oeuvres[cleOeuvre]["codices"]
                             }
                         })
-    # Créer un dictionnaire des auteurs ne comprenant que des personnes qui ont des oeuvres :
+    # On crée un dictionnaire des auteurs ne comprenant que des personnes qui ont des oeuvres :
     auteurs = {}
     for clePersonne in personnes:
         if personnes[clePersonne]["oeuvres"]:
