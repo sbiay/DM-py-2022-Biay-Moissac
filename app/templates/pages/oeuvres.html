@@ -8,7 +8,7 @@
 
         {% if oeuvres[id_oeuvre]["auteur"] %}
             {% for cle in oeuvres[id_oeuvre]["auteur"] %}
-                <a href="{{ url_for('index', quel_index="auteurs", _anchor="auteur" + cle|string) }}">{{ oeuvres[id_oeuvre]["auteur"][cle] }}</a>
+                <a href="{{ url_for('index', quel_index="auteurs", _anchor="auteur" + cle|string + "°") }}">{{ oeuvres[id_oeuvre]["auteur"][cle] }}</a>
                 <br>
             {% endfor %}
         {% endif %}

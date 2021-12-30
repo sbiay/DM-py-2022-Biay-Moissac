@@ -5,7 +5,7 @@
         <br>
 
         {% for id_auteur in auteurs %}
-            <h3 id="{{ "auteur" + id_auteur|string }}">{{ auteurs[id_auteur]["label"] }}</h3>
+            <h3 id="{{ "auteur" + id_auteur|string + "°" }}">{{ auteurs[id_auteur]["label"] }}</h3>
 
             {% for oeuvre in auteurs[id_auteur]["oeuvres"] %}
 
