@@ -27,7 +27,7 @@ def index(quel_index):
 
 @app.route("/pages/codices/<int:num>")
 def notice_codex(num):
-    codex = Codices.query.get(num)
+    codex = Codices.query.get_or_404(num)
     
     # Pour le lieu de conservation et la cote du codex
     label = labelCodex(num)[num]
@@ -93,20 +93,13 @@ def notice_codex(num):
     
     # A la fin de ma boucle sur les unités codicologiques, la liste descUCs contient les données
     # relatives à chacune.
+
+    return render_template("pages/codices.html",
+                           titre=f"{label}",
+                           reliure=codex.reliure_descript,
+                           histoire=codex.histoire,
+                           descUCs=descUCs)
     
-    # Test d'existence d'un index dans la liste codices :
-    codices = Codices.query.all()
-    
-    if num <= len(codices) and num !=0:
-        # Si l'id passé dans l'URL n'est pas plus grand que la liste
-        # de tous les codices, alors :
-        return render_template("pages/codices.html",
-                               titre= f"{label}",
-                               reliure=codex.reliure_descript,
-                               histoire=codex.histoire,
-                               descUCs=descUCs)
-    else:
-        return render_template("pages/codices.html", message_erreur="Cette adresse ne correspond à aucune notice !")
     
 @app.route("/recherche")
 def recherche():
