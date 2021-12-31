@@ -18,3 +18,4 @@ resultats-tests/
 app/appliTest.py
 user.sql
 app/comutTest.py
+*.db-journal
