@@ -1,5 +1,5 @@
 import json
-from flask import Flask, render_template, request, url_for
+from flask import flash, Flask, redirect, render_template, request, url_for
 from ..appliMoissac import app
 from ..modeles.classes import Codices, Lieux, Unites_codico, Oeuvres, Contient, Personne
 from ..modeles.jointures import labelCodex, toutes_oeuvres, tous_auteurs
@@ -9,10 +9,11 @@ from ..modeles.jointures import labelCodex, toutes_oeuvres, tous_auteurs
 def accueil():
     return render_template("pages/accueil.html")
 
+
 @app.route("/pages/<quel_index>")
 def index(quel_index):
     indexes = ["auteurs", "codices", "oeuvres"]
-
+    
     oeuvres = toutes_oeuvres()
     auteurs = tous_auteurs()
     codices = "Voici la liste des codices"
@@ -23,7 +24,7 @@ def index(quel_index):
         return render_template("pages/codices.html", codices=codices)
     elif quel_index == indexes[2]:
         return render_template("pages/oeuvres.html", oeuvres=oeuvres)
-    
+
 
 @app.route("/pages/codices/<int:num>")
 def notice_codex(num):
@@ -93,16 +94,34 @@ def notice_codex(num):
     
     # A la fin de ma boucle sur les unités codicologiques, la liste descUCs contient les données
     # relatives à chacune.
-
+    
     return render_template("pages/codices.html",
                            titre=f"{label}",
                            reliure=codex.reliure_descript,
                            histoire=codex.histoire,
                            descUCs=descUCs)
-    
-    
+
+
 @app.route("/recherche")
 def recherche():
     motclef = request.args.get("keyword", None)
-    with open("resultats-tests/test.txt" , mode="w") as f:
+    with open("resultats-tests/test.txt", mode="w") as f:
         f.write(motclef)
+
+@app.route("/inscription", methods=["GET", "POST"])
+def inscription():
+    if request.method == "POST":
+        statut, donnees = User.creer(
+            login=request.form.get("login", None),
+            email=request.form.get("email", None),
+            nom=request.form.get("nom", None),
+            motdepasse=request.form.get("motdepasse", None)
+        )
+        if statut is True:
+            flash("Enregistrement effectué. Identifiez-vous maintenant", "success")
+            return redirect(ulr_for('accueil'))
+        else:
+            flash("Les erreurs suivantes ont été rencontrées : " + ",".join(donnees), "error")
+            return render_template("pages/inscription.html")
+    else:
+        return render_template("pages/inscription.html")
