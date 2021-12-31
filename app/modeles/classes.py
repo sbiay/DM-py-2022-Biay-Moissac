@@ -1,6 +1,8 @@
-from ..appliMoissac import db
-# test
-# from ..appliTest import db
+from ..comutTest import test
+if test:
+    from ..appliTest import db
+else:
+    from ..appliMoissac import db
 
 # Définition de mes classes d'objets (ATTENTION, il faudra veiller à bien appliquer le modèle logique)
 class Codices(db.Model):
@@ -47,3 +49,9 @@ class Unites_codico(db.Model):
     date_pas_apres = db.Column(db.Integer, nullable=False)
     code_id = db.Column(db.Integer, nullable=False)
 
+class User(db.Model):
+    user_id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
+    user_nom = db.Column(db.Text, nullable=False)
+    user_login = db.Column(db.String(45), nullable=False, unique=True)
+    user_email = db.Column(db.Text, nullable=False)
+    user_password = db.Column(db.String(100), nullable=False)
