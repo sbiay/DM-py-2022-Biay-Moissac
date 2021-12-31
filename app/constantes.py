@@ -1,6 +1,6 @@
 from warnings import warn
 
-SECRET_KEY = "Bot !"
+SECRET_KEY = "lessanglotslongsdesviolonsdelautomne"
 
-if SECRET_KEY == "Bot !":
+if SECRET_KEY == "lessanglotslongsdesviolonsdelautomne":
     warn("Le secret par défaut n'a pas été changé !", Warning)

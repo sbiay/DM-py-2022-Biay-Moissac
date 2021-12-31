@@ -2,6 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 import os
+from .constantes import SECRET_KEY
 
 # Gestion des chemins
 chemin_actuel = os.path.dirname(os.path.abspath(__file__))
@@ -13,6 +14,7 @@ app = Flask("lib-moissac", template_folder=templates,
             static_folder=statics)
 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{chemin_actuel}/db/libMoissac.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SECRET_KEY'] = SECRET_KEY
 db = SQLAlchemy(app)
 login = LoginManager(app)
 
