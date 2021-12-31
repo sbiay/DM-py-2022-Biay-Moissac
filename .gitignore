@@ -16,3 +16,4 @@ app/db/injection*
 appel*.md
 resultats-tests/
 app/appliTest.py
+user.sql
