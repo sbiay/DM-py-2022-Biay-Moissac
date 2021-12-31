@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager
 import os
 
 # Gestion des chemins
@@ -13,6 +14,7 @@ app = Flask("lib-moissac", template_folder=templates,
 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{chemin_actuel}/db/libMoissac.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+login = LoginManager(app)
 
 # Import des classes
 from app.modeles.classes import Codices, Unites_codico, Oeuvres
