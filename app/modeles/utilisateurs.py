@@ -1,17 +1,24 @@
 from werkzeug.security import generate_password_hash, check_password_hash
-from ..comutTest import test
-if test:
-    from ..appliTest import db
-else:
-    from ..appliMoissac import db
+from flask_login import UserMixin
 
-class User(db.Model):
+from ..appliMoissac import db, login_manager
+
+class User(UserMixin, db.Model):
     user_id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
     user_nom = db.Column(db.Text, nullable=False)
     user_login = db.Column(db.String(45), nullable=False, unique=True)
     user_email = db.Column(db.Text, nullable=False)
     user_password = db.Column(db.String(100), nullable=False)
+    
+    def get_id(self):
+        """ Retourne l'id de l'objet actuellement utilisé afin de le rendre compatible le get_id de UserMixin
+        avec la propriété .id de notre user_id
 
+        :returns: ID de l'utilisateur
+        :rtype: int
+        """
+        return self.user_id
+    
     @staticmethod
     def creer(login, email, nom, motdepasse):
         """ Crée un compte utilisateur-rice. Retourne un tuple (booléen, User ou liste).
@@ -34,18 +41,18 @@ class User(db.Model):
             erreurs.append("Le nom fourni est vide")
         if not motdepasse or len(motdepasse) < 6:
             erreurs.append("Le mot de passe fourni est vide ou trop court")
-    
+        
         # On vérifie que personne n'a utilisé cet email ou ce login
         uniques = User.query.filter(
             db.or_(User.user_email == email, User.user_login == login)
         ).count()
         if uniques > 0:
             erreurs.append("L'email ou le login sont déjà inscrits dans notre base de données")
-    
+        
         # Si on a au moins une erreur
         if len(erreurs) > 0:
             return False, erreurs
-    
+        
         # On crée un utilisateur
         utilisateur = User(
             user_nom=nom,
@@ -54,19 +61,19 @@ class User(db.Model):
             user_password=generate_password_hash(motdepasse)
         )
         # generate_password_hash() est une fonction Werkzeug.
-    
+        
         try:
             # On l'ajoute au transport vers la base de données
             db.session.add(utilisateur)
             # On envoie le paquet
             db.session.commit()
-        
+            
             # On renvoie l'utilisateur
             return True, utilisateur
         except Exception as erreur:
             return False, [str(erreur)]
             # La gérer comme str n'est pas le meilleur moyen
-
+    
     @staticmethod
     def identification(login, motdepasse):
         """ Identifie un utilisateur. Si cela fonctionne, renvoie les données de l'utilisateur.
@@ -80,3 +87,10 @@ class User(db.Model):
         if utilisateur and check_password_hash(utilisateur.user_password, motdepasse):
             return utilisateur
         return "Le nom d'utilisateur ou le mot de passe est incorrect."
+
+
+@login_manager.user_loader
+def trouver_utilisateur_via_id(id):
+    """Cette fonction prend comme argument le login d'un utilisateur
+    et retourne les informations de la db le concernant"""
+    return User.query.get(int(id))
