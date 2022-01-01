@@ -19,9 +19,10 @@ db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 
 
-
-# Import des classes
-from app.modeles.classes import Codices, Unites_codico, Oeuvres
-from app.modeles.utilisateurs import User
-# Import des routes
-from app.routes import routes
+from app.comutTest import test
+if not test:
+    # Import des classes
+    from app.modeles.classes import Codices, Unites_codico, Oeuvres
+    from app.modeles.utilisateurs import User
+    # Import des routes
+    from app.routes import routes

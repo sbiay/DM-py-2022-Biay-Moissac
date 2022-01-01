@@ -1,8 +1,4 @@
-from ..comutTest import test
-if test:
-    from ..appliTest import db
-else:
-    from ..appliMoissac import db
+from ..appliMoissac import db
 
 # Définition de mes classes d'objets (ATTENTION, il faudra veiller à bien appliquer le modèle logique)
 class Codices(db.Model):
