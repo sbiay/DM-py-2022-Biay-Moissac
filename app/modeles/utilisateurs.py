@@ -1,13 +1,7 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 
-# Test
-from ..comutTest import test
-
-if test:
-    from ..appliTest import db, login
-else:
-    from ..appliMoissac import db, login
+from ..appliMoissac import db, login_manager
 
 class User(UserMixin, db.Model):
     user_id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
@@ -95,7 +89,7 @@ class User(UserMixin, db.Model):
         return "Le nom d'utilisateur ou le mot de passe est incorrect."
 
 
-@login.user_loader
+@login_manager.user_loader
 def trouver_utilisateur_via_id(id):
     """Cette fonction prend comme argument le login d'un utilisateur
     et retourne les informations de la db le concernant"""

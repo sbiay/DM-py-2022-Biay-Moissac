@@ -16,9 +16,12 @@ app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{chemin_actuel}/db/libMoissa
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = SECRET_KEY
 db = SQLAlchemy(app)
-login = LoginManager(app)
+login_manager = LoginManager(app)
+
+
 
 # Import des classes
 from app.modeles.classes import Codices, Unites_codico, Oeuvres
+from app.modeles.utilisateurs import User
 # Import des routes
 from app.routes import routes
