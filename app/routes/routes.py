@@ -1,14 +1,43 @@
 import json
 from flask import flash, Flask, redirect, render_template, request, url_for
-from ..appliMoissac import app
+from flask_login import login_user, current_user
+from ..appliMoissac import app, login
 from ..modeles.classes import Codices, Lieux, Unites_codico, Oeuvres, Contient, Personne
+from ..modeles.utilisateurs import User
 from ..modeles.jointures import labelCodex, toutes_oeuvres, tous_auteurs
+from ..comutTest import test
 
 
 @app.route("/")
 def accueil():
     return render_template("pages/accueil.html")
 
+@app.route("/connexion", methods=["POST", "GET"])
+def connexion():
+    """ Route gérant les connexions
+    """
+    if current_user.is_authenticated is True:
+        flash("Vous êtes déjà connecté-e", "info")
+        return redirect("/")
+    # Si on est en POST, cela veut dire que le formulaire a été envoyé
+    if request.method == "POST":
+        utilisateur = User.identification(
+            login=request.form.get("login", None),
+            motdepasse=request.form.get("motdepasse", None)
+        )
+        if utilisateur:
+            flash("Connexion effectuée", "success")
+            login_user(utilisateur)
+            return redirect("/")
+        else:
+            flash("Les identifiants n'ont pas été reconnus", "error")
+
+    return render_template("pages/connexion.html")
+
+# On définit que la page de connexion est celle définie par connexion() :
+# c'est un renvoi pour les users souhaitant effectuer une opération
+# nécessitant une connexion.
+login.login_view = 'connexion'
 
 @app.route("/pages/<quel_index>")
 def index(quel_index):
@@ -24,6 +53,25 @@ def index(quel_index):
         return render_template("pages/codices.html", codices=codices)
     elif quel_index == indexes[2]:
         return render_template("pages/oeuvres.html", oeuvres=oeuvres)
+
+
+@app.route("/inscription", methods=["GET", "POST"])
+def inscription():
+    if request.method == "POST":
+        statut, donnees = User.creer(
+            login=request.form.get("login", None),
+            email=request.form.get("email", None),
+            nom=request.form.get("nom", None),
+            motdepasse=request.form.get("motdepasse", None)
+        )
+        if statut is True:
+            flash("Enregistrement effectué. Identifiez-vous maintenant", "success")
+            return redirect(ulr_for('accueil'))
+        else:
+            flash("Les erreurs suivantes ont été rencontrées : " + ",".join(donnees), "error")
+            return render_template("pages/inscription.html")
+    else:
+        return render_template("pages/inscription.html")
 
 
 @app.route("/pages/codices/<int:num>")
@@ -95,11 +143,12 @@ def notice_codex(num):
     # A la fin de ma boucle sur les unités codicologiques, la liste descUCs contient les données
     # relatives à chacune.
     
-    return render_template("pages/codices.html",
-                           titre=f"{label}",
-                           reliure=codex.reliure_descript,
-                           histoire=codex.histoire,
-                           descUCs=descUCs)
+    if not test:
+        return render_template("pages/codices.html",
+                               titre=f"{label}",
+                               reliure=codex.reliure_descript,
+                               histoire=codex.histoire,
+                               descUCs=descUCs)
 
 
 @app.route("/recherche")
@@ -107,21 +156,3 @@ def recherche():
     motclef = request.args.get("keyword", None)
     with open("resultats-tests/test.txt", mode="w") as f:
         f.write(motclef)
-
-@app.route("/inscription", methods=["GET", "POST"])
-def inscription():
-    if request.method == "POST":
-        statut, donnees = User.creer(
-            login=request.form.get("login", None),
-            email=request.form.get("email", None),
-            nom=request.form.get("nom", None),
-            motdepasse=request.form.get("motdepasse", None)
-        )
-        if statut is True:
-            flash("Enregistrement effectué. Identifiez-vous maintenant", "success")
-            return redirect(ulr_for('accueil'))
-        else:
-            flash("Les erreurs suivantes ont été rencontrées : " + ",".join(donnees), "error")
-            return render_template("pages/inscription.html")
-    else:
-        return render_template("pages/inscription.html")

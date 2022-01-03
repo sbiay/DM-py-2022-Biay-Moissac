@@ -16,7 +16,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{chemin_actuel}/db/libMoissa
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = SECRET_KEY
 db = SQLAlchemy(app)
-login_manager = LoginManager(app)
+login = LoginManager(app)
 
 
 from app.comutTest import test

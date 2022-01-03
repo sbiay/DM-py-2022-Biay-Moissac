@@ -1,7 +1,7 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 
-from ..appliMoissac import db, login_manager
+from ..appliMoissac import db, login
 
 class User(UserMixin, db.Model):
     user_id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
@@ -11,8 +11,8 @@ class User(UserMixin, db.Model):
     user_password = db.Column(db.String(100), nullable=False)
     
     def get_id(self):
-        """ Retourne l'id de l'objet actuellement utilisé afin de le rendre compatible le get_id de UserMixin
-        avec la propriété .id de notre user_id
+        """ Retourne l'id de l'objet actuellement utilisé afin de rendre compatible le get_id de UserMixin
+        avec la propriété User.user_id
 
         :returns: ID de l'utilisateur
         :rtype: int
@@ -89,7 +89,7 @@ class User(UserMixin, db.Model):
         return "Le nom d'utilisateur ou le mot de passe est incorrect."
 
 
-@login_manager.user_loader
+@login.user_loader
 def trouver_utilisateur_via_id(id):
     """Cette fonction prend comme argument le login d'un utilisateur
     et retourne les informations de la db le concernant"""
