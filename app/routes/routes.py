@@ -26,6 +26,7 @@ def connexion():
             login=request.form.get("login", None),
             motdepasse=request.form.get("motdepasse", None)
         )
+        print(utilisateur)
         if utilisateur:
             flash("Connexion effectuée", "success")
             login_user(utilisateur)

@@ -86,7 +86,8 @@ class User(UserMixin, db.Model):
         utilisateur = User.query.filter(User.user_login == login).first()
         if utilisateur and check_password_hash(utilisateur.user_password, motdepasse):
             return utilisateur
-        return "Le nom d'utilisateur ou le mot de passe est incorrect."
+        else:
+            return None
 
 
 @login.user_loader
