@@ -1,6 +1,6 @@
 import json
 from flask import flash, Flask, redirect, render_template, request, url_for
-from flask_login import login_user, current_user
+from flask_login import login_user, current_user, logout_user
 from ..appliMoissac import app, login
 from ..modeles.classes import Codices, Lieux, Unites_codico, Oeuvres, Contient, Personne
 from ..modeles.utilisateurs import User
@@ -12,13 +12,14 @@ from ..comutTest import test
 def accueil():
     return render_template("pages/accueil.html")
 
+
 @app.route("/connexion", methods=["POST", "GET"])
 def connexion():
     """ Route gérant les connexions
     """
     if current_user.is_authenticated is True:
         flash("Vous êtes déjà connecté-e", "info")
-        return redirect("/")
+        return redirect(url_for('accueil'))
     # Si on est en POST, cela veut dire que le formulaire a été envoyé
     if request.method == "POST":
         utilisateur = User.identification(
@@ -28,16 +29,26 @@ def connexion():
         if utilisateur:
             flash("Connexion effectuée", "success")
             login_user(utilisateur)
-            return redirect("/")
+            return redirect(url_for('accueil'))
         else:
             flash("Les identifiants n'ont pas été reconnus", "error")
-
+    
     return render_template("pages/connexion.html")
+
 
 # On définit que la page de connexion est celle définie par connexion() :
 # c'est un renvoi pour les users souhaitant effectuer une opération
 # nécessitant une connexion.
 login.login_view = 'connexion'
+
+
+@app.route("/deconnexion", methods=["POST", "GET"])
+def deconnexion():
+    if current_user.is_authenticated is True:
+        logout_user()
+    flash("Vous êtes déconnecté-e", "info")
+    return redirect("/")
+
 
 @app.route("/pages/<quel_index>")
 def index(quel_index):
