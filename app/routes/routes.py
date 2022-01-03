@@ -18,7 +18,7 @@ def connexion():
     """ Route gérant les connexions
     """
     if current_user.is_authenticated is True:
-        flash("Vous êtes déjà connecté-e", "info")
+        flash("Vous êtes déjà connecté !", "info")
         return redirect(url_for('accueil'))
     # Si on est en POST, cela veut dire que le formulaire a été envoyé
     if request.method == "POST":
@@ -28,7 +28,7 @@ def connexion():
         )
         print(utilisateur)
         if utilisateur:
-            flash("Connexion effectuée", "success")
+            flash("Connexion effectuée.", "success")
             login_user(utilisateur)
             return redirect(url_for('accueil'))
         else:
@@ -47,8 +47,8 @@ login.login_view = 'connexion'
 def deconnexion():
     if current_user.is_authenticated is True:
         logout_user()
-    flash("Vous êtes déconnecté-e", "info")
-    return redirect("/")
+    flash("Vous êtes bien déconnecté.", "info")
+    return redirect(ulr_for('accueil'))
 
 
 @app.route("/pages/<quel_index>")
@@ -67,9 +67,10 @@ def index(quel_index):
         return render_template("pages/oeuvres.html", oeuvres=oeuvres)
 
 
-@app.route("/inscription", methods=["GET", "POST"])
+@app.route("/pages/inscription", methods=["GET", "POST"])
 def inscription():
     if request.method == "POST":
+        print("Formulaire envoyé !")
         statut, donnees = User.creer(
             login=request.form.get("login", None),
             email=request.form.get("email", None),
