@@ -3,7 +3,7 @@
 {% block corps %}
 
 <h1>Inscription</h1>
-<form class="form" method="POST" action="{{url_for("connexion")}}">
+<form class="form" method="POST" action="{{url_for("inscription", name="")}}">
   <div class="form-group row">
     <label for="register-name" class="col-sm-2 col-form-label">Nom</label>
     <div class="col-sm-10">
@@ -29,8 +29,7 @@
     </div>
   </div>
   <div>
-    <button type="submit" class="btn btn-primary">Connexion</button>
-    <a href="{{url_for("inscription")}}" class="btn btn-secondary">Inscription</a>
+    <button type="submit" class="btn btn-primary">Inscription</button>
   </div>
 </form>
 {% endblock %}

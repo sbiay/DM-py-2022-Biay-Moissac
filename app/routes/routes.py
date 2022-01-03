@@ -79,7 +79,7 @@ def inscription():
         )
         if statut is True:
             flash("Enregistrement effectué. Identifiez-vous maintenant", "success")
-            return redirect(ulr_for('accueil'))
+            return render_template("pages/connexion.html")
         else:
             flash("Les erreurs suivantes ont été rencontrées : " + ",".join(donnees), "error")
             return render_template("pages/inscription.html")
