@@ -13,7 +13,7 @@ def accueil():
     return render_template("pages/accueil.html")
 
 
-@app.route("/connexion", methods=["POST", "GET"])
+@app.route("/pages/connexion", methods=["POST", "GET"])
 def connexion():
     """ Route gérant les connexions
     """
@@ -26,7 +26,6 @@ def connexion():
             login=request.form.get("login", None),
             motdepasse=request.form.get("motdepasse", None)
         )
-        print(utilisateur)
         if utilisateur:
             flash("Connexion effectuée.", "success")
             login_user(utilisateur)
@@ -48,7 +47,7 @@ def deconnexion():
     if current_user.is_authenticated is True:
         logout_user()
     flash("Vous êtes bien déconnecté.", "info")
-    return redirect(ulr_for('accueil'))
+    return render_template("pages/accueil.html")
 
 
 @app.route("/pages/<quel_index>")
