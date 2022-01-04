@@ -8,8 +8,8 @@
 <div>
     <h3>Histoire</h3>
     <p>{{histoire}}</p>
-    <h3>Description de la reliure</h3>
-    <p>{{reliure}}</p>
+    <h3>Description matérielle</h3>
+    <p>{{materielle}}</p>
     {% if descUCs|length > 1 %}
         <h3>Contenu</h3>
         {% for UC in descUCs %}
@@ -25,7 +25,6 @@
         {% endfor %}
     {% else %}
         {% if descUCs[0]["description"] %}
-            <h3>Description physique du contenu</h3>
             <p>{{descUCs[0]["description"]}}</p>
         {% endif %}
         <h3>Date</h3>

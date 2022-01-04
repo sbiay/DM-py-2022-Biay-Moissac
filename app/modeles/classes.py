@@ -5,7 +5,7 @@ class Codices(db.Model):
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
     cote = db.Column(db.String)
     id_technique = db.Column(db.String(19))
-    reliure_descript = db.Column(db.Text)
+    descript_materielle = db.Column(db.Text)
     histoire = db.Column(db.Text)
     lieu_conservation = db.Column(db.Integer, nullable=False)
 
