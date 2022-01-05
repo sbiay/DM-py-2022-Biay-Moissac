@@ -13,8 +13,7 @@ def labelCodex(code_id):
     """
     dico = {}
     cote = Codices.query.get(code_id).cote
-    id_lieu_cons = Codices.query.get(code_id).lieu_conservation
-    lieu_conservation = Lieux.query.get(id_lieu_cons)
+    lieu_conservation = Codices.query.get(code_id).conservation
     if lieu_conservation.label == "Bibliothèque nationale de France":
         lieu_conservation = lieu_conservation.localite + ", BnF"
     else:
@@ -125,3 +124,6 @@ def tous_auteurs():
 
     return auteurs
 
+def nouvelle_jointure():
+    codex2 = Codices.query.get(2)
+    print(codex2.conservation.id)
