@@ -124,3 +124,4 @@ def tous_auteurs():
         json.dump(auteurs, jsonf)
 
     return auteurs
+

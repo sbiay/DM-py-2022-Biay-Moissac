@@ -157,7 +157,7 @@ def notice_codex(num):
     
     if not test:
         return render_template("pages/codices.html",
-                               titre=f"{label}",
+                               titre=label,
                                materielle=codex.descript_materielle,
                                histoire=codex.histoire,
                                descUCs=descUCs)
