@@ -124,6 +124,48 @@ def tous_auteurs():
 
     return auteurs
 
-def nouvelle_jointure():
-    codex2 = Codices.query.get(2)
-    print(codex2.conservation.id)
+def labelPersonne(idPersonne, forme):
+    nomPersonne = Personne.query.get(idPersonne).nom
+
+    # On retient pour la page le nom sans les parenthèses, sauf si elles contiennent un titre (pape,
+    # saint, etc)
+    
+    # Gestion des cas particuliers (Macer Floridus (auteur prétendu))
+    if idPersonne == 16:
+        return nomPersonne
+    
+    if forme == "court":
+        # Si le premier caractère après la parenthèse n'est pas un chiffre, c'est un titre (on dira "role"
+        # pour éviter les confusions avec les titres d'oeuvre)
+        # retenir :
+        if nomPersonne.split("(")[1][0] not in "0123456789":
+            role = nomPersonne.split("(")[1].split(",")[0]
+            # Le nom sans les dates, suivi du role
+            nom = f"{nomPersonne.split('(')[0][:-1]} ({role})"
+        else:
+            nom = f"{nomPersonne.split('(')[0][:-1]}"
+        return nom
+    else:
+        if nomPersonne.split("(")[1][0] not in "0123456789":
+            # Le nom sans les dates, suivi du role
+            parenthese = nomPersonne.split('(')[1][:-1]
+            role = parenthese.split(", ")[0]
+            dates = parenthese.split(", ")[1]
+            dateNaissance = dates.split("-")[0]
+            if dateNaissance[0] == "0":
+                dateNaissance = dateNaissance[1:]
+            dateMort = dates.split("-")[1]
+            if dateMort[0] == "0":
+                dateMort = dateMort[1:]
+            nom = f"{nomPersonne.split('(')[0][:-1]} ({role}, {dateNaissance}-{dateMort})"
+        else:
+            parenthese = nomPersonne.split('(')[1][:-1]
+            dates = parenthese.split("-")
+            dateNaissance = dates[0]
+            if dateNaissance[0] == "0":
+                dateNaissance = dateNaissance[1:]
+            dateMort = dates[1]
+            if dateMort[0] == "0":
+                dateMort = dateMort[1:]
+            nom = f"{nomPersonne.split('(')[0][:-1]} ({dateNaissance}-{dateMort})"
+            return nom
