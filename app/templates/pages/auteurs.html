@@ -10,7 +10,7 @@
             {% for oeuvre in auteurs[id_auteur]["oeuvres"] %}
 
                 {% for id_oeuvre in oeuvre %}
-                    <p>{{ oeuvre[id_oeuvre]["label"] }}</p>
+                    <a href="{{ url_for('index', quel_index="oeuvres", _anchor="oeuvre" + id_oeuvre|string + "°") }}">{{ oeuvre[id_oeuvre]["label"] }}</a>
 
                     {% for item in oeuvre[id_oeuvre]["codices"] %}
 
