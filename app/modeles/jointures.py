@@ -60,6 +60,9 @@ def labelPersonne(idPersonne, forme):
             # Le nom sans les dates, suivi du role
             parenthese = nomPersonne.split('(')[1][:-1]
             role = parenthese.split(", ")[0]
+            """Il faudrait traiter deux autres types de caractères :
+            - Les '?', à remplacer par un 'v.' avant la date
+            - Les '.', à remplacer par des '0' en ajoutant 'apr.' ou 'av.' en tête de la date"""
             dates = parenthese.split(", ")[1]
             dateNaissance = dates.split("-")[0]
             if dateNaissance[0] == "0":
