@@ -46,17 +46,16 @@ def labelPersonne(idPersonne, forme):
         return nomPersonne
     
     if forme == "court":
-        # Si le premier caractère après la parenthèse n'est pas un chiffre, c'est un titre (on dira "role"
-        # pour éviter les confusions avec les titres d'oeuvre)
-        # retenir :
         if nomPersonne.split("(")[1][0] not in "0123456789":
+            """Si le premier caractère après la parenthèse n'est pas un chiffre, c'est un titre
+            (on dira "role" pour éviter les confusions avec les titres d'oeuvre) retenir :"""
             role = nomPersonne.split("(")[1].split(",")[0]
             # Le nom sans les dates, suivi du role
             nom = f"{nomPersonne.split('(')[0][:-1]} ({role})"
         else:
             nom = f"{nomPersonne.split('(')[0][:-1]}"
         return nom
-    elif forme == "court":
+    elif forme == "long":
         if nomPersonne.split("(")[1][0] not in "0123456789":
             # Le nom sans les dates, suivi du role
             parenthese = nomPersonne.split('(')[1][:-1]
