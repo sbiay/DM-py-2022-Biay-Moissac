@@ -25,7 +25,7 @@ def labelCodex(code_id):
     return dico
 
 
-def labelPersonne(idPersonne, forme):
+def labelPersonne(idPersonne, forme=["court", "long"]):
     """
     Cette fonction prend comme argument l'identifiant d'une personne dans la db
     ainsi qu'un paramètre "forme" définissant la forme sous laquelle le nom de la personne est retournée par la fonction
