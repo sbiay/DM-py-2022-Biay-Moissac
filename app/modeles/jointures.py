@@ -102,12 +102,12 @@ def toutes_oeuvres():
         # Pour renseigner les auteurs
         if objetOeuvre.auteur:
             objetAuteur = Personne.query.get(objetOeuvre.auteur)
-            oeuvres[objetOeuvre.id]["auteur"][objetAuteur.id] = objetAuteur.nom
+            oeuvres[objetOeuvre.id]["auteur"][objetAuteur.id] = labelPersonne(objetAuteur.id, "court")
         
         # Pour renseigner les attributions apocryphes à des auteurs
         if objetOeuvre.attr:
             objetAuteur = Personne.query.get(objetOeuvre.attr)
-            oeuvres[objetOeuvre.id]["auteur"][objetAuteur.id] = str(objetAuteur.nom) + " (attribué à)"
+            oeuvres[objetOeuvre.id]["auteur"][objetAuteur.id] = str(labelPersonne(objetAuteur.id, "court")) + " (attribué à)"
         
         # Pour renseigner les codices
         objetsContenu = Contient.query.filter(Contient.oeuvre == objetOeuvre.id).all()
@@ -147,7 +147,7 @@ def tous_auteurs():
     personnes = {}
     objetsPersonne = Personne.query.order_by(Personne.nom).all()
     for objetPersonne in objetsPersonne:
-        personnes[objetPersonne.id] = {"label": objetPersonne.nom, "oeuvres": []}
+        personnes[objetPersonne.id] = {"label": labelPersonne(objetPersonne.id, "long"), "oeuvres": []}
     
     """
     On appelle la fonction toutes_oeuvres() dont on va parser le contenu et injecter certaines parties
