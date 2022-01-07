@@ -1,6 +1,7 @@
 import json
 from ..modeles.classes import Codices, Lieux, Unites_codico, Oeuvres, Contient, Personne
 
+
 def labelCodex(code_id):
     """Cette fonction prend comme argument l'identifiant d'un codex
     et retourne un dictionnaire :
@@ -23,6 +24,66 @@ def labelCodex(code_id):
     dico[code_id] = label
     return dico
 
+
+def labelPersonne(idPersonne, forme):
+    """
+    Cette fonction prend comme argument l'identifiant d'une personne dans la db
+    ainsi qu'un paramètre "forme" définissant la forme sous laquelle le nom de la personne est retournée par la fonction
+    :param idPersonne: clé primaire d'un objet de la classe Personne
+    :type idPersonne: int
+    :param forme: prend les valeurs "court" ou "long"
+    :type forme: str
+    :returns: nom d'une personne assortie ou non de ses dates selon que le paramètre forme est "court" ou "long".
+    :rtype: str
+    """
+    nomPersonne = Personne.query.get(idPersonne).nom
+    
+    # On retient pour la page le nom sans les parenthèses, sauf si elles contiennent un titre (pape,
+    # saint, etc)
+    
+    # Gestion des cas particuliers (Macer Floridus (auteur prétendu))
+    if idPersonne == 16:
+        return nomPersonne
+    
+    if forme == "court":
+        # Si le premier caractère après la parenthèse n'est pas un chiffre, c'est un titre (on dira "role"
+        # pour éviter les confusions avec les titres d'oeuvre)
+        # retenir :
+        if nomPersonne.split("(")[1][0] not in "0123456789":
+            role = nomPersonne.split("(")[1].split(",")[0]
+            # Le nom sans les dates, suivi du role
+            nom = f"{nomPersonne.split('(')[0][:-1]} ({role})"
+        else:
+            nom = f"{nomPersonne.split('(')[0][:-1]}"
+        return nom
+    elif forme == "court":
+        if nomPersonne.split("(")[1][0] not in "0123456789":
+            # Le nom sans les dates, suivi du role
+            parenthese = nomPersonne.split('(')[1][:-1]
+            role = parenthese.split(", ")[0]
+            dates = parenthese.split(", ")[1]
+            dateNaissance = dates.split("-")[0]
+            if dateNaissance[0] == "0":
+                dateNaissance = dateNaissance[1:]
+            dateMort = dates.split("-")[1]
+            if dateMort[0] == "0":
+                dateMort = dateMort[1:]
+            nom = f"{nomPersonne.split('(')[0][:-1]} ({role}, {dateNaissance}-{dateMort})"
+        else:
+            parenthese = nomPersonne.split('(')[1][:-1]
+            dates = parenthese.split("-")
+            dateNaissance = dates[0]
+            if dateNaissance[0] == "0":
+                dateNaissance = dateNaissance[1:]
+            dateMort = dates[1]
+            if dateMort[0] == "0":
+                dateMort = dateMort[1:]
+            nom = f"{nomPersonne.split('(')[0][:-1]} ({dateNaissance}-{dateMort})"
+            return nom
+    else:
+        print('''Le paramètre forme n'accepte que les valeurs "long" et "court"''')
+        return None
+
 def toutes_oeuvres():
     """
     Cette fonction retourne un dictionnaire de toutes les oeuvres,
@@ -40,7 +101,7 @@ def toutes_oeuvres():
         if objetOeuvre.auteur:
             objetAuteur = Personne.query.get(objetOeuvre.auteur)
             oeuvres[objetOeuvre.id]["auteur"][objetAuteur.id] = objetAuteur.nom
-
+        
         # Pour renseigner les attributions apocryphes à des auteurs
         if objetOeuvre.attr:
             objetAuteur = Personne.query.get(objetOeuvre.attr)
@@ -53,13 +114,14 @@ def toutes_oeuvres():
             code_id = objetUC.code_id
             dictCodex = labelCodex(code_id)
             oeuvres[objetOeuvre.id]["codices"].append(dictCodex)
-            
+    
     # test
     with open("resultats-tests/oeuvres.json", mode="w") as jsonf:
         json.dump(oeuvres, jsonf)
     
     return oeuvres
-    
+
+
 def tous_auteurs():
     """
     Cette fonction retourne un dictionnaire destiné contenant pour chaque auteur de la classe Oeuvres
@@ -84,7 +146,7 @@ def tous_auteurs():
     objetsPersonne = Personne.query.order_by(Personne.nom).all()
     for objetPersonne in objetsPersonne:
         personnes[objetPersonne.id] = {"label": objetPersonne.nom, "oeuvres": []}
-        
+    
     """
     On appelle la fonction toutes_oeuvres() dont on va parser le contenu et injecter certaines parties
     dans le dictionnaire personnes.
@@ -118,54 +180,8 @@ def tous_auteurs():
     for clePersonne in personnes:
         if personnes[clePersonne]["oeuvres"]:
             auteurs[clePersonne] = personnes[clePersonne]
-
+    
     with open("resultats-tests/auteurs.json", mode="w") as jsonf:
         json.dump(auteurs, jsonf)
-
+    
     return auteurs
-
-def labelPersonne(idPersonne, forme):
-    nomPersonne = Personne.query.get(idPersonne).nom
-
-    # On retient pour la page le nom sans les parenthèses, sauf si elles contiennent un titre (pape,
-    # saint, etc)
-    
-    # Gestion des cas particuliers (Macer Floridus (auteur prétendu))
-    if idPersonne == 16:
-        return nomPersonne
-    
-    if forme == "court":
-        # Si le premier caractère après la parenthèse n'est pas un chiffre, c'est un titre (on dira "role"
-        # pour éviter les confusions avec les titres d'oeuvre)
-        # retenir :
-        if nomPersonne.split("(")[1][0] not in "0123456789":
-            role = nomPersonne.split("(")[1].split(",")[0]
-            # Le nom sans les dates, suivi du role
-            nom = f"{nomPersonne.split('(')[0][:-1]} ({role})"
-        else:
-            nom = f"{nomPersonne.split('(')[0][:-1]}"
-        return nom
-    else:
-        if nomPersonne.split("(")[1][0] not in "0123456789":
-            # Le nom sans les dates, suivi du role
-            parenthese = nomPersonne.split('(')[1][:-1]
-            role = parenthese.split(", ")[0]
-            dates = parenthese.split(", ")[1]
-            dateNaissance = dates.split("-")[0]
-            if dateNaissance[0] == "0":
-                dateNaissance = dateNaissance[1:]
-            dateMort = dates.split("-")[1]
-            if dateMort[0] == "0":
-                dateMort = dateMort[1:]
-            nom = f"{nomPersonne.split('(')[0][:-1]} ({role}, {dateNaissance}-{dateMort})"
-        else:
-            parenthese = nomPersonne.split('(')[1][:-1]
-            dates = parenthese.split("-")
-            dateNaissance = dates[0]
-            if dateNaissance[0] == "0":
-                dateNaissance = dateNaissance[1:]
-            dateMort = dates[1]
-            if dateMort[0] == "0":
-                dateMort = dateMort[1:]
-            nom = f"{nomPersonne.split('(')[0][:-1]} ({dateNaissance}-{dateMort})"
-            return nom
