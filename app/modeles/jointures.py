@@ -25,10 +25,28 @@ def labelCodex(code_id):
     return dico
 
 
+def labelDate(chaine):
+    """Cette fonction prend une chaîne de caractère contenant une date et traite les informations
+    de type approximatif et les retourne en un certain format :
+    :param chaine: chaine de caractère à traiter
+    :type chaine: str
+    :returns: chaine exprimant une éventuelle approximation de date de la façon suivante : v. 1550, ou av./apr. 1550.
+    :returns type: str
+    """
+    if chaine[0] == "0":
+        chaine = chaine[1:]
+    if chaine[-1] == "?":
+        chaine = "v. " + chaine[:-1]
+    elif "." in chaine:
+        chaine = "apr. " + chaine.replace(".", "0")
+    return chaine
+
 def labelPersonne(idPersonne, forme=["court", "long"]):
     """
     Cette fonction prend comme argument l'identifiant d'une personne dans la db
-    ainsi qu'un paramètre "forme" définissant la forme sous laquelle le nom de la personne est retournée par la fonction
+    (correspondant à sa typographie selon Data-BNF)
+    ainsi qu'un paramètre "forme" définissant la forme courte ou longue (sans dates ou avec dates)
+    sous laquelle le nom de la personne est retourné par la fonction
     :param idPersonne: clé primaire d'un objet de la classe Personne
     :type idPersonne: int
     :param forme: prend les valeurs "court" ou "long"
@@ -41,9 +59,14 @@ def labelPersonne(idPersonne, forme=["court", "long"]):
     # On retient pour la page le nom sans les parenthèses, sauf si elles contiennent un titre (pape,
     # saint, etc)
     
-    # Gestion des cas particuliers (Macer Floridus (auteur prétendu))
+    # Gestion des cas particuliers
     if idPersonne == 16:
+        # Macer Floridus (auteur prétendu)
         return nomPersonne
+    elif idPersonne == 15:
+        # Odon de Meung (10..-10..)
+        if forme == "long":
+            return "Odon de Meung (XIe siècle)"
     
     if forme == "court":
         if nomPersonne.split("(")[1][0] not in "0123456789":
@@ -55,31 +78,28 @@ def labelPersonne(idPersonne, forme=["court", "long"]):
         else:
             nom = f"{nomPersonne.split('(')[0][:-1]}"
         return nom
+    
     elif forme == "long":
+        # Si l'on veut obtenir un label de nom avec les dates de la personne
         if nomPersonne.split("(")[1][0] not in "0123456789":
-            # Le nom sans les dates, suivi du role
+            # Si la forme d'autorité DataBNF place en tête de parenthèse non une date (chiffre) mais un rôle (lettre)
             parenthese = nomPersonne.split('(')[1][:-1]
             role = parenthese.split(", ")[0]
-            """Il faudrait traiter deux autres types de caractères :
-            - Les '?', à remplacer par un 'v.' avant la date
-            - Les '.', à remplacer par des '0' en ajoutant 'apr.' ou 'av.' en tête de la date"""
             dates = parenthese.split(", ")[1]
             dateNaissance = dates.split("-")[0]
-            if dateNaissance[0] == "0":
-                dateNaissance = dateNaissance[1:]
+            dateNaissance = labelDate(dateNaissance)
             dateMort = dates.split("-")[1]
-            if dateMort[0] == "0":
-                dateMort = dateMort[1:]
+            dateMort = labelDate(dateMort)
             nom = f"{nomPersonne.split('(')[0][:-1]} ({role}, {dateNaissance}-{dateMort})"
+            return nom
         else:
+            # Si les parenthèses ne contiennent que des dates
             parenthese = nomPersonne.split('(')[1][:-1]
             dates = parenthese.split("-")
             dateNaissance = dates[0]
-            if dateNaissance[0] == "0":
-                dateNaissance = dateNaissance[1:]
+            dateNaissance = labelDate(dateNaissance)
             dateMort = dates[1]
-            if dateMort[0] == "0":
-                dateMort = dateMort[1:]
+            dateMort = labelDate(dateMort)
             nom = f"{nomPersonne.split('(')[0][:-1]} ({dateNaissance}-{dateMort})"
             return nom
     else:
