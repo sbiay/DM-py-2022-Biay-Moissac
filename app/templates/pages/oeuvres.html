@@ -5,7 +5,7 @@
     <br>
     {% for id_oeuvre in oeuvres %}
         <h3 id="oeuvre{{ id_oeuvre }}°">{{ oeuvres[id_oeuvre]["label"] }}</h3>
-
+        <!-- Auteur ou attribution -->
         {% if oeuvres[id_oeuvre]["auteur"] %}
             {% for cle in oeuvres[id_oeuvre]["auteur"] %}
                 <a href="{{ url_for('index', quel_index="auteurs", _anchor="auteur" + cle|string + "°") }}">{{ oeuvres[id_oeuvre]["auteur"][cle] }}</a>
@@ -13,6 +13,7 @@
             {% endfor %}
         {% endif %}
         <ul>
+        <!-- Manuscrits contenant l'oeuvre -->
         {% for item in oeuvres[id_oeuvre]["codices"] %}
             {% for cle in item %}
                 <li><a href="{{ url_for('notice_codex', num=cle)}}">{{ item[cle] }}</a></li>
