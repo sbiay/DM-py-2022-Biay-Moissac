@@ -2,7 +2,7 @@ import json
 from flask import flash, Flask, redirect, render_template, request, url_for
 from flask_login import login_user, current_user, logout_user
 from ..appliMoissac import app, login
-from ..modeles.classes import Codices, Lieux, Unites_codico, Oeuvres, Contient, Personne
+from ..modeles.classes import Codices, Lieux, Unites_codico, Oeuvres, Contient, Personnes
 from ..modeles.utilisateurs import User
 from ..modeles.jointures import labelCodex, toutes_oeuvres, tous_auteurs
 from ..comutTest import test
@@ -130,7 +130,7 @@ def notice_codex(num):
             titre = Oeuvres.query.get(items.oeuvre).titre
             if auteur:
                 # Le nom sous la forme d'autorité (avec fonction et dates entre parenthèses)
-                nom = Personne.query.get(auteur).nom
+                nom = Personnes.query.get(auteur).nom
                 
                 # On retient pour la page le nom sans les parenthèses, sauf si elles contiennent un titre (pape,
                 # saint, etc)

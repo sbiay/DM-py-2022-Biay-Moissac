@@ -1,5 +1,5 @@
 import json
-from ..modeles.classes import Codices, Lieux, Unites_codico, Oeuvres, Contient, Personne
+from ..modeles.classes import Codices, Lieux, Unites_codico, Oeuvres, Contient, Personnes
 
 
 def labelCodex(code_id):
@@ -54,7 +54,7 @@ def labelPersonne(idPersonne, forme=["court", "long"]):
     :returns: nom d'une personne assortie ou non de ses dates selon que le paramètre forme est "court" ou "long".
     :rtype: str
     """
-    nomPersonne = Personne.query.get(idPersonne).nom
+    nomPersonne = Personnes.query.get(idPersonne).nom
     
     # On retient pour la page le nom sans les parenthèses, sauf si elles contiennent un titre (pape,
     # saint, etc)
@@ -121,12 +121,12 @@ def toutes_oeuvres():
         }
         # Pour renseigner les auteurs
         if objetOeuvre.auteur:
-            objetAuteur = Personne.query.get(objetOeuvre.auteur)
+            objetAuteur = Personnes.query.get(objetOeuvre.auteur)
             oeuvres[objetOeuvre.id]["auteur"][objetAuteur.id] = labelPersonne(objetAuteur.id, "court")
         
         # Pour renseigner les attributions apocryphes à des auteurs
         if objetOeuvre.attr:
-            objetAuteur = Personne.query.get(objetOeuvre.attr)
+            objetAuteur = Personnes.query.get(objetOeuvre.attr)
             oeuvres[objetOeuvre.id]["auteur"][objetAuteur.id] = str(labelPersonne(objetAuteur.id, "court")) + " (attribué à)"
         
         # Pour renseigner les codices
@@ -165,7 +165,7 @@ def tous_auteurs():
     # On procède dans un premier temps à la création d'un dictionnaire sur le modèle précédemment décrit
     # contenant toutes les personnes de la db.
     personnes = {}
-    objetsPersonne = Personne.query.order_by(Personne.nom).all()
+    objetsPersonne = Personnes.query.order_by(Personnes.nom).all()
     for objetPersonne in objetsPersonne:
         personnes[objetPersonne.id] = {"label": labelPersonne(objetPersonne.id, "long"), "oeuvres": []}
     

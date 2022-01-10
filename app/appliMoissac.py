@@ -22,7 +22,7 @@ login = LoginManager(app)
 from app.comutTest import test
 if not test:
     # Import des classes
-    from app.modeles.classes import Codices, Unites_codico, Oeuvres
+    from app.modeles.classes import Codices, Unites_codico, Oeuvres, Personnes, Lieux
     from app.modeles.utilisateurs import User
     # Import des routes
     from app.routes import routes
