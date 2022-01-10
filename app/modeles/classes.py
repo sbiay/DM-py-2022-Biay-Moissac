@@ -1,5 +1,6 @@
 from ..appliMoissac import db
 
+
 # Définition de mes classes d'objets (ATTENTION, il faudra veiller à bien appliquer le modèle logique)
 class Codices(db.Model):
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
@@ -7,14 +8,15 @@ class Codices(db.Model):
     id_technique = db.Column(db.String(19))
     descript_materielle = db.Column(db.Text)
     histoire = db.Column(db.Text)
-    lieu_conservation = db.Column(db.Integer, db.ForeignKey('lieux.id'))
+    conservation_id = db.Column(db.Integer, db.ForeignKey('lieux.id'))
     conservation = db.relationship("Lieux", back_populates="codex")
-    
+
 
 class Contient(db.Model):
     rowid = db.Column(db.Integer, primary_key=True)
     oeuvre = db.Column(db.Integer, nullable=False)
     unites_codico = db.Column(db.Integer, nullable=False)
+
 
 class Oeuvres(db.Model):
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
@@ -24,17 +26,20 @@ class Oeuvres(db.Model):
     auteur = db.Column(db.Integer, nullable=True)
     attr = db.Column(db.Integer, nullable=True)
 
+
 class Lieux(db.Model):
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
     localite = db.Column(db.String(20))
     label = db.Column(db.String(30))
     codex = db.relationship("Codices", back_populates="conservation")
-    
+
+
 class Personnes(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nom = db.Column(db.Text, nullable=False)
     data_bnf = db.Column(db.Integer, nullable=True)
-    
+
+
 class Unites_codico(db.Model):
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
     # Description physique
@@ -47,4 +52,3 @@ class Unites_codico(db.Model):
     date_pas_avant = db.Column(db.Integer, nullable=False)
     date_pas_apres = db.Column(db.Integer, nullable=False)
     code_id = db.Column(db.Integer, nullable=False)
-
