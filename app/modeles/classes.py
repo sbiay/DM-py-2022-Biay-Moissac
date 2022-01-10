@@ -11,6 +11,7 @@ class Codices(db.Model):
     conservation_id = db.Column(db.Integer, db.ForeignKey('lieux.id'))
     conservation = db.relationship("Lieux", back_populates="codex")
 
+# Reprendre ici le renommage des clés étrangères
 
 class Contient(db.Model):
     rowid = db.Column(db.Integer, primary_key=True)
