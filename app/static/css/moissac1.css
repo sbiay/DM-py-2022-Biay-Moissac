@@ -1,21 +1,23 @@
-body {
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-}
-
-header > nav {
+.navbar {
     background-color: #a45337;
     padding: 20px;
 }
 
 h1 {
     color: #dad4c0;
+    font-size: 1.5rem;
 }
 
 header > nav > form > input {
     margin-left: 800px;
 }
 
-.row {/* div située sous le bandeau supérieur */
+body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+
+.row { /* div située sous le bandeau supérieur */
     background-color: #d5c6b8;
 }
 
