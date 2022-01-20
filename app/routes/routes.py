@@ -1,6 +1,8 @@
-import json
+import json, requests
 from flask import flash, Flask, redirect, render_template, request, url_for
 from flask_login import login_user, current_user, logout_user
+from bs4 import BeautifulSoup
+
 from ..appliMoissac import app, login
 from ..modeles.classes import Codices, Lieux, Unites_codico, Oeuvres, Contient, Personnes
 from ..modeles.utilisateurs import User
@@ -165,6 +167,9 @@ def notice_codex(num):
 
 @app.route("/recherche")
 def recherche():
-    motclef = request.args.get("keyword", None)
-    with open("resultats-tests/test.txt", mode="w") as f:
-        f.write(motclef)
+    motscles = request.args.get("keyword", None)
+
+    # Parser la saisie du champ recherche
+    motscles = motscles.replace(" ", "+")
+
+    return redirect(url_for('accueil'))
