@@ -8,12 +8,11 @@ csv/
 json/
 dev_test.py
 exo-flask_alchemy.py
-fdr.md
+*.md
 */.idea
 app/db/injection.sql
 app/db/libMoissac.sqbpro
 app/db/injection*
-appel*.md
 resultats-tests/
 app/appliTest.py
 user.sql
