@@ -9,6 +9,15 @@
 .navbar a:hover {color: #ae8167;}
 
 /* Barre de navigation : bouton recherche */
+.btn-outline-success {
+    color: #ae8167;
+    border-color:#ae8167;
+}
+.btn-outline-success:hover {
+    background-color: #ae8167;
+    border-color:#dad6d1;
+}
+
 header > nav > form {
     margin-left: 800px;
 }
@@ -36,6 +45,8 @@ main {
 /* Liens hypertextes */
 a{color: #ae8167;}
 a:hover{color:#a45337;}
+
+
 
 .alert-success {
     color: #155724;

@@ -18,7 +18,7 @@
         <div class="collapse navbar-collapse" id="navbarScroll">
           <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style="--bs-scroll-height: 100px;">
             <li class="nav-item">
-              <a class="nav-link active" href="{{ url_for('accueil') }}"><span>Librairie de l'abbaye de Moissac</span></a>
+              <a class="nav-link active" href="{{ url_for('accueil') }}">Accueil</a>
             </li>
             <li class="nav-item">
               <a class="nav-link active" aria-current="page" href="{{ url_for('index', quel_index='auteurs')}}">Auteurs</a>
@@ -28,8 +28,8 @@
             </li>
           </ul>
           <form class="d-flex" action="{{url_for("recherche")}}">
-            <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="keyword">
-            <button class="btn btn-outline-success" type="submit">Search</button>
+            <input class="form-control me-2" type="search" placeholder="Texte ici" aria-label="Search" name="keyword">
+            <button class="btn btn-outline-success" type="submit">C'est parti !</button>
           </form>
         </div>
       </div>
