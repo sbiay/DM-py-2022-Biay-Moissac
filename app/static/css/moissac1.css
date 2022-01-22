@@ -1,14 +1,15 @@
+/* Barre de navigation */
 .navbar {
     background-color: #a45337;
     padding: 20px;
 }
 
-h1 {
-    color: #dad4c0;
-    font-size: 1.5rem;
-}
+/* Liens hypertextes propres à la barre de navigation */
+.navbar a {color: #dad6d1;}
+.navbar a:hover {color: #ae8167;}
 
-header > nav > form > input {
+/* Barre de navigation : bouton recherche */
+header > nav > form {
     margin-left: 800px;
 }
 
@@ -16,8 +17,8 @@ body {
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
-
-.row { /* div située sous le bandeau supérieur */
+/* div située sous le bandeau supérieur */
+.row {
     background-color: #d5c6b8;
 }
 
@@ -32,9 +33,9 @@ main {
     background-color: #303132;
 }
 
-a {
-    color: #ae8167;
-}
+/* Liens hypertextes */
+a{color: #ae8167;}
+a:hover{color:#a45337;}
 
 .alert-success {
     color: #155724;
