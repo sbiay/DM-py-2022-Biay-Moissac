@@ -51,21 +51,17 @@ class Oeuvres(db.Model):
     partie_de = db.Column(db.Boolean, nullable=True)
     unites_codico = db.relationship('Unites_codico', secondary=contient, backref='Oeuvres')
     auteur = db.Column(db.Integer, db.ForeignKey('personnes.id'))
-    lien_auteur = db.relationship("Personnes", back_populates='oeuvres_aut')
-    #attr = db.Column(db.Integer, db.ForeignKey('personnes.id'))
-    #lien_attr = db.relationship("Personnes", back_populates='oeuvres_attr')
-    """
-    Pour pouvoir gérer deux clés étrangères vers la même table, il faut les desambiguiser :
-    https://docs.sqlalchemy.org/en/14/orm/join_conditions.html
-    """
+    lien_auteur = db.relationship("Personnes", back_populates='oeuvres_aut', foreign_keys=auteur)
+    attr = db.Column(db.Integer, db.ForeignKey('personnes.id'))
+    lien_attr = db.relationship("Personnes", back_populates='oeuvres_attr', foreign_keys=attr)
 
 
 class Personnes(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nom = db.Column(db.Text, nullable=False)
     data_bnf = db.Column(db.Integer, nullable=True)
-    oeuvres_aut = db.relationship("Oeuvres", back_populates='lien_auteur')
-    #oeuvres_attr = db.relationship("Oeuvres", back_populates='lien_attr')
+    oeuvres_aut = db.relationship("Oeuvres", back_populates='lien_auteur', foreign_keys=Oeuvres.auteur)
+    oeuvres_attr = db.relationship("Oeuvres", back_populates='lien_attr', foreign_keys=Oeuvres.attr)
 
 
 class Lieux(db.Model):
