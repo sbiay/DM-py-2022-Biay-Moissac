@@ -27,9 +27,9 @@
               <a class="nav-link active" aria-current="page" href="{{ url_for('index', quel_index='oeuvres')}}">Œuvres</a>
             </li>
           </ul>
-          <form class="d-flex" action="{{url_for("recherche")}}">
+          <form class="d-flex" method="GET" action="{{url_for("recherche")}}">
             <input class="form-control me-2" type="search" placeholder="Texte ici" aria-label="Search" name="keyword">
-            <button class="btn btn-outline-success" type="submit">C'est parti !</button>
+            <button class="btn btn-outline-success" type="submit" role="button">C'est parti !</button>
           </form>
         </div>
       </div>

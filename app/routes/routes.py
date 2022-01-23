@@ -168,8 +168,16 @@ def notice_codex(num):
 @app.route("/recherche")
 def recherche():
     motscles = request.args.get("keyword", None)
-
-    # Parser la saisie du champ recherche
-    motscles = motscles.replace(" ", "+")
-
-    return redirect(url_for('accueil'))
+    
+    # Eliminer les caractères inutiles
+    caracteresInutiles = ",.!"
+    for caractere in caracteresInutiles:
+        motscles = motscles.replace(caractere, "")
+    # Eliminer les caractères potentiellements dangereux
+    caracteresInterdits = """<>\;"&#^'`?%{}[]|()"""
+    for caractere in caracteresInterdits:
+        motscles = motscles.replace(caractere, "")
+    # Convertir les mots-clés en liste
+    motscles = motscles.split(" ")
+    print(motscles)
+    return render_template("pages/resultats.html")

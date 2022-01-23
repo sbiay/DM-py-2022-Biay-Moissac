@@ -3,7 +3,15 @@ from bs4 import BeautifulSoup
 from ..appliMoissac import db
 from ..modeles.classes import Codices, Unites_codico, Oeuvres, Contient
 
-def requeteOeuvres(saisie):
+def rechercheSimple(motscles):
+    """
+    :param motscles: saisie du champ recherche nettoyée
+    :type motscles: list
+    """
+    # Charger les identifiants ark pertinents pour la recherche sur les auteurs et sur les oeuvres
+    # J'ai pour cela besoin de tous les ark intéressants de ma base
+
+def requeteOeuvres(motscles):
     """
     Cette fonction prend comme argument la saisie d'un utilisateur,
     adresse à data.bnf.fr une requête get à partir de cette saisie,
@@ -11,11 +19,6 @@ def requeteOeuvres(saisie):
     retourne la liste de clés primaires des codices contenant ces oeuvres.
     """
     
-    # Parser la saisie du champ recherche
-    motscles = saisie.replace(" ", "+")
-    
-    # Ecrire la requête
-    r = requests.get(f"https://data.bnf.fr/fr/search?term={motscles}")
     
     # Charger les identifiants ark pertinents pour la recherche sur les auteurs
     oeuvres = Oeuvres.query.all()
@@ -23,6 +26,9 @@ def requeteOeuvres(saisie):
     for oeuvre in oeuvres:
         if oeuvre.data_bnf:
             ark_oeuvres.append(oeuvre.data_bnf)
+    
+    # Ecrire la requête
+    r = requests.get(f"https://data.bnf.fr/fr/search?term={motscles}")
 
     # Parser la réponse
     reponses = []  # Contient une liste d'identifiants ark
@@ -64,8 +70,6 @@ def creationDataBNF(motscles, objet=["auteur", "oeuvre"]):
     
     # Faire une requête data.bnf à partir des mots-clés
     r = requests.get(f"https://data.bnf.fr/fr/search?term={motscles}")
-    with open("/home/sbiay/chantiers/moissac/resultats-tests/test.html", mode="w") as f:
-        f.write(r.text)
     
     # Transformer la réponse HTML de data.bnf en objet BeautifulSoup afin de pouvoir le parser
     soup = BeautifulSoup(r.text, features="lxml")
