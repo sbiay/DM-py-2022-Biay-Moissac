@@ -1,6 +1,6 @@
 .idea/*
 Dufour_1972_Scriptorium/*
-dev_test.py
+test.py
 db/libMoissac.db-journal
 db/libMoissac.sqbpro
 *__pycache__*
