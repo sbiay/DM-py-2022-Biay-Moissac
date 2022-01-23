@@ -10,6 +10,7 @@ class Codices(db.Model):
     histoire = db.Column(db.Text)
     conservation_id = db.Column(db.Integer, db.ForeignKey('lieux.id'))
     conservation = db.relationship("Lieux", back_populates="codex")
+    unites_codico = db.relationship("Unites_codico", back_populates="codex")
 
 # Reprendre ici le renommage des clés étrangères
 
@@ -52,4 +53,5 @@ class Unites_codico(db.Model):
     loc_fin_v = db.Column(db.Boolean, default=None)
     date_pas_avant = db.Column(db.Integer, nullable=False)
     date_pas_apres = db.Column(db.Integer, nullable=False)
-    code_id = db.Column(db.Integer, nullable=False)
+    code_id = db.Column(db.Integer, db.ForeignKey('codices.id'))
+    codex = db.relationship('Codices', back_populates="unites_codico")
