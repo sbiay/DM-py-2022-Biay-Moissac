@@ -1,21 +1,25 @@
 {% extends "conteneur.html" %}
 
+{% block headTitle %}
+    <title>{{titre}}|Librairie de Moissac</title>
+{% endblock %}
+
 {% block corps %}
 {% if titre %}
 <header>
-    <h2>{{titre}}</h2>
+    <h1>{{titre}}</h1>
 </header>
 <div>
-    <h3>Histoire</h3>
+    <h2>Histoire</h2>
     <p>{{histoire}}</p>
     {% if materielle %}
-      <h3>Description matérielle</h3>
+      <h2>Description matérielle</h2>
       <p>{{materielle}}</p>
     {% endif %}
     {% if descUCs|length > 1 %}
-        <h3>Contenu</h3>
+        <h2>Contenu</h2>
         {% for UC in descUCs %}
-            <h4>{{UC["localisation"]}} ({{UC["date"]}})</h4>
+            <h3>{{UC["localisation"]}} ({{UC["date"]}})</h3>
             {% if UC["description"] %}
                 <p>{{UC["description"]}}</p>
             {% endif %}
@@ -27,12 +31,12 @@
         {% endfor %}
     {% else %}
         {% if descUCs[0]["description"] %}
-            <h3>Paléographie</h3>
+            <h2>Paléographie</h2>
             <p>{{descUCs[0]["description"]}}</p>
         {% endif %}
-        <h3>Date</h3>
+        <h2>Date</h2>
         <p>{{descUCs[0]["date"]}}</p>
-        <h3>Textes</h3>
+        <h2>Textes</h2>
         {% for oeuvres in descUCs[0]["contenu"] %}
             <ul>
                 <li>{{oeuvres[0]}}, {{oeuvres[1]}}</li>
@@ -43,7 +47,7 @@
 
 
 {% else %}
-<h2>{{message_erreur}}</h2>
+<p>{{message_erreur}}</p>
 
 {% endif %}
 

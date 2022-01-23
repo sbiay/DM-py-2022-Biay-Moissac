@@ -1,7 +1,11 @@
 {% extends "conteneur.html" %}
 
+{% block headTitle %}
+    <title>Auteurs|Librairie de Moissac</title>
+{% endblock %}
+
 {% block corps %}
-    <h2>Table analytique des auteurs</h2>
+    <h1>Les auteurs</h1>
         <br>
 
         {% for id_auteur in auteurs %}

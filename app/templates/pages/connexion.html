@@ -1,5 +1,9 @@
 {% extends "conteneur.html" %}
 
+{% block headTitle %}
+    <title>Connexion|Librairie de Moissac</title>
+{% endblock %}
+
 {% block corps %}
     <h1>Connexion</h1>
     <form class="form" method="POST" action="{{url_for("connexion")}}">
