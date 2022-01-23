@@ -13,6 +13,7 @@ class Codices(db.Model):
     conservation = db.relationship("Lieux", back_populates="codex")
     unites_codico = db.relationship("Unites_codico", back_populates="codex")
 
+
 # Ancienne classe
 """
 class Contient(db.Model):
@@ -22,9 +23,10 @@ class Contient(db.Model):
 """
 # Table de relation
 contient = Table('contient', db.metadata,
-                  Column('oeuvre', ForeignKey('oeuvres.id')),
-                  Column('unites_codico', ForeignKey('unites_codico.id'))
-                  )
+                 Column('oeuvre', ForeignKey('oeuvres.id')),
+                 Column('unites_codico', ForeignKey('unites_codico.id'))
+                 )
+
 
 class Unites_codico(db.Model):
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
@@ -41,14 +43,29 @@ class Unites_codico(db.Model):
     codex = db.relationship('Codices', back_populates="unites_codico")
     contenu = db.relationship('Oeuvres', secondary=contient, backref='Unites_codico')
 
+
 class Oeuvres(db.Model):
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
     titre = db.Column(db.Text, nullable=False)
     data_bnf = db.Column(db.Integer, nullable=True)
     partie_de = db.Column(db.Boolean, nullable=True)
-    auteur = db.Column(db.Integer, nullable=True)
-    attr = db.Column(db.Integer, nullable=True)
     unites_codico = db.relationship('Unites_codico', secondary=contient, backref='Oeuvres')
+    auteur = db.Column(db.Integer, db.ForeignKey('personnes.id'))
+    lien_auteur = db.relationship("Personnes", back_populates='oeuvres_aut')
+    #attr = db.Column(db.Integer, db.ForeignKey('personnes.id'))
+    #lien_attr = db.relationship("Personnes", back_populates='oeuvres_attr')
+    """
+    Pour pouvoir gérer deux clés étrangères vers la même table, il faut les desambiguiser :
+    https://docs.sqlalchemy.org/en/14/orm/join_conditions.html
+    """
+
+
+class Personnes(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nom = db.Column(db.Text, nullable=False)
+    data_bnf = db.Column(db.Integer, nullable=True)
+    oeuvres_aut = db.relationship("Oeuvres", back_populates='lien_auteur')
+    #oeuvres_attr = db.relationship("Oeuvres", back_populates='lien_attr')
 
 
 class Lieux(db.Model):
@@ -56,11 +73,5 @@ class Lieux(db.Model):
     localite = db.Column(db.String(20))
     label = db.Column(db.String(30))
     codex = db.relationship("Codices", back_populates="conservation")
-
-
-class Personnes(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    nom = db.Column(db.Text, nullable=False)
-    data_bnf = db.Column(db.Integer, nullable=True)
 
 
