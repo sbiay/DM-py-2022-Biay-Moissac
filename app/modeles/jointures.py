@@ -1,6 +1,27 @@
 import json
-from ..modeles.classes import Codices, Lieux, Unites_codico, Oeuvres, Contient, Personnes
+from ..modeles.classes import Codices, Lieux, Unites_codico, Oeuvres, Personnes
 from .traitements import labelCodex, labelPersonne
+
+
+def codexJson(codex_id):
+    codex = Codices.query.get(codex_id)
+    
+    description = {
+        "id": codex.id,
+        "lieu_conservation": f"{codex.conservation.localite}, {codex.conservation.label}",
+        "cote": f"{labelCodex(codex_id)[codex.id]}",
+        "id_technique": codex.id_technique,
+        "description_materielle": codex.descript_materielle,
+        "histoire": codex.histoire,
+        "contenu": {}
+    }
+    
+    for unite in codex.unites_codico:
+        description["contenu"][unite.id] = {
+            "contenu": {}
+        }
+    print(description)
+
 
 def toutes_oeuvres():
     """
