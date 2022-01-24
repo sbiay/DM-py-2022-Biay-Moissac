@@ -13,12 +13,12 @@ def codexJson(codex_id):
         "id_technique": codex.id_technique,
         "description_materielle": codex.descript_materielle,
         "histoire": codex.histoire,
-        "contenu": {}
+        "contenu": []
     }
     
     for unite in codex.unites_codico:
         description["contenu"][unite.id] = {
-            "contenu": {}
+            "contenu": []
         }
     print(description)
 
