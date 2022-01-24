@@ -25,7 +25,7 @@ def labelCodex(code_id):
 
 def labelDate(chaine):
     """Cette fonction prend une chaîne de caractère contenant une date et traite les informations
-    de type approximatif et les retourne en un certain format :
+    de type approximatif et les retourne mises en forme :
     :param chaine: chaine de caractère à traiter
     :type chaine: str
     :returns: chaine exprimant une éventuelle approximation de date de la façon suivante : v. 1550, ou av./apr. 1550.
@@ -45,7 +45,7 @@ def labelPersonne(idPersonne, forme=["court", "long"]):
     Cette fonction prend comme argument l'identifiant d'une personne dans la db
     (correspondant à sa typographie selon Data-BNF)
     ainsi qu'un paramètre "forme" définissant la forme courte ou longue (sans dates ou avec dates)
-    sous laquelle le nom de la personne est retourné par la fonction
+    sous laquelle le nom de la personne est retourné par la fonction.
     :param idPersonne: clé primaire d'un objet de la classe Personne
     :type idPersonne: int
     :param forme: prend les valeurs "court" ou "long"
