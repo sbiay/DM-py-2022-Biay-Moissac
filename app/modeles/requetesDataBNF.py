@@ -72,7 +72,7 @@ def creationDataBNF(motscles, objet=["auteur", "oeuvre"]):
     r = requests.get(f"https://data.bnf.fr/fr/search?term={motscles}")
     
     # Transformer la réponse HTML de data.bnf en objet BeautifulSoup afin de pouvoir le parser
-    soup = BeautifulSoup(r.text, features="lxml")
+    soup = BeautifulSoup(r.text, "html.parser")
     reponses = []
     for index, span in enumerate(soup.find_all('span')):
         # Les label que l'on souhaite récupérer sont contenus dans des spans dépourvus de class, sauf le premier
