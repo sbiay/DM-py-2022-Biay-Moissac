@@ -63,11 +63,3 @@ class Lieux(db.Model):
     label = db.Column(db.String(30))
     codex = db.relationship("Codices", back_populates="conservation")
 
-# La table de relations "provenances" lie les classes "Lieux" et "Codices"
-provenances = Table("provenances")
-"""
-contient = Table("contient", db.metadata,
-                 Column("oeuvre", ForeignKey("oeuvres.id")),
-                 Column("unites_codico", ForeignKey("unites_codico.id"))
-                 )
-                 """
