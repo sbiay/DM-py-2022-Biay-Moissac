@@ -10,8 +10,15 @@ class Codices(db.Model):
     descript_materielle = db.Column(db.Text)
     histoire = db.Column(db.Text)
     conservation_id = db.Column(db.Integer, db.ForeignKey("lieux.id"))
-    conservation = db.relationship("Lieux", back_populates="codex")
+    lieu_conservation = db.relationship("Lieux", back_populates="conserve")
     unites_codico = db.relationship("Unites_codico", back_populates="codex")
+
+
+class Lieux(db.Model):
+    id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
+    localite = db.Column(db.String(20))
+    label = db.Column(db.String(30))
+    conserve = db.relationship("Codices", back_populates="lieu_conservation")
 
 
 # Table de relation "contient"
@@ -25,7 +32,7 @@ class Unites_codico(db.Model):
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
     # Description physique
     descript = db.Column(db.Text)
-    # Localisation d"une unité dans un codex (f. n-f. m)
+    # Localisation d'une unité dans un codex (f. n-f. m)
     loc_init = db.Column(db.Integer, default=None)
     loc_init_v = db.Column(db.Boolean, default=None)
     loc_fin = db.Column(db.Integer, default=None)
@@ -55,11 +62,3 @@ class Personnes(db.Model):
     data_bnf = db.Column(db.Integer, nullable=True)
     oeuvres_aut = db.relationship("Oeuvres", back_populates="lien_auteur", foreign_keys=Oeuvres.auteur)
     oeuvres_attr = db.relationship("Oeuvres", back_populates="lien_attr", foreign_keys=Oeuvres.attr)
-
-
-class Lieux(db.Model):
-    id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
-    localite = db.Column(db.String(20))
-    label = db.Column(db.String(30))
-    codex = db.relationship("Codices", back_populates="conservation")
-
