@@ -1,7 +1,15 @@
 from ..appliMoissac import db
 from sqlalchemy import Table, Column, ForeignKey
 
-
+"""
+# La table de relations "provenances" lie les classes "Lieux" et "Codices"
+provient = Table("provenances", db.metadata,
+                    Column("codex", ForeignKey("codices.id")),
+                    Column("lieu", ForeignKey("lieux.id")),
+                    Column("cas_particulier"), ForeignKey("unites_codico.id"),
+                    Column("origine", db.Boolean, nullable=False),
+                    Column("remarque", db.Text, nullable=True))
+"""
 # Définition de mes classes d'objets (ATTENTION, il faudra veiller à bien appliquer le modèle logique)
 class Codices(db.Model):
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
@@ -10,8 +18,16 @@ class Codices(db.Model):
     descript_materielle = db.Column(db.Text)
     histoire = db.Column(db.Text)
     conservation_id = db.Column(db.Integer, db.ForeignKey("lieux.id"))
-    conservation = db.relationship("Lieux", back_populates="codex")
+    lieu_conservation = db.relationship("Lieux", back_populates="conserve")
     unites_codico = db.relationship("Unites_codico", back_populates="codex")
+    #provenances = db.relationship("Lieux", secondary=provient, backref="Codices")
+
+class Lieux(db.Model):
+    id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
+    localite = db.Column(db.String(20))
+    label = db.Column(db.String(30))
+    conserve = db.relationship("Codices", back_populates="lieu_conservation")
+    #provient_de = db.relationship("Codices", secondary=provient, backref="Lieux")
 
 
 # Table de relation "contient"
@@ -25,7 +41,7 @@ class Unites_codico(db.Model):
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
     # Description physique
     descript = db.Column(db.Text)
-    # Localisation d"une unité dans un codex (f. n-f. m)
+    # Localisation d'une unité dans un codex (f. n-f. m)
     loc_init = db.Column(db.Integer, default=None)
     loc_init_v = db.Column(db.Boolean, default=None)
     loc_fin = db.Column(db.Integer, default=None)
@@ -57,17 +73,3 @@ class Personnes(db.Model):
     oeuvres_attr = db.relationship("Oeuvres", back_populates="lien_attr", foreign_keys=Oeuvres.attr)
 
 
-class Lieux(db.Model):
-    id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
-    localite = db.Column(db.String(20))
-    label = db.Column(db.String(30))
-    codex = db.relationship("Codices", back_populates="conservation")
-
-# La table de relations "provenances" lie les classes "Lieux" et "Codices"
-provenances = Table("provenances")
-"""
-contient = Table("contient", db.metadata,
-                 Column("oeuvre", ForeignKey("oeuvres.id")),
-                 Column("unites_codico", ForeignKey("unites_codico.id"))
-                 )
-                 """

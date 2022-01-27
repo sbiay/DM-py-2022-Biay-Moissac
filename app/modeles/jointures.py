@@ -8,7 +8,7 @@ def codexJson(codex_id):
     
     description = {
         "id": codex.id,
-        "lieu_conservation": f"{codex.conservation.localite}, {codex.conservation.label}",
+        "lieu_conservation": f"{codex.lieu_conservation.localite}, {codex.lieu_conservation.label}",
         "cote": f"{labelCodex(codex_id)[codex.id]}",
         "id_technique": codex.id_technique,
         "description_materielle": codex.descript_materielle,
