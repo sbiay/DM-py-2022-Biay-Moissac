@@ -2,13 +2,24 @@ from ..appliMoissac import db
 from sqlalchemy import Table, Column, ForeignKey
 
 # La table de relations "provenances" lie les classes "Lieux" et "Codices"
-provient = Table("provenances", db.metadata,
-                 Column("codex", ForeignKey("codices.id")),
-                 Column("lieu", ForeignKey("lieux.id")),
-                 Column("cas_particulier"), ForeignKey("unites_codico.id"),
-                 Column("origine", db.Boolean, nullable=False),
-                 Column("remarque", db.Text, nullable=True))
+# Tuto intéressant (https://docs.sqlalchemy.org/en/14/orm/basic_relationships.html#association-object)
+"""provient = Table("provenances", db.metadata,
+                 Column("codex", ForeignKey("codices.id"), primary_key=True),
+                 Column("lieu", ForeignKey("lieux.id"), primary_key=True),
+                 
+                 )
+"""
+""" Il faut également modéliser ces attributs de la table "provenances" :
+                Column("remarque", db.Text, nullable=True)
+                Column("cas_particulier"), ForeignKey("unites_codico.id"),
+                Column("origine", db.Boolean, nullable=False),
+                 """
 
+class Provenances(db.Model):
+    id_codex = Column(ForeignKey("codices.id"), primary_key=True),
+    id_lieu = Column(ForeignKey("lieux.id"), primary_key=True),
+    provenance = db.relationship("Lieux", back_populates="provenances")
+    provient = db.relationship("Codices", back_populates="provient_de")
 
 # Définition de mes classes d'objets (ATTENTION, il faudra veiller à bien appliquer le modèle logique)
 class Codices(db.Model):
@@ -20,7 +31,7 @@ class Codices(db.Model):
     conservation_id = db.Column(db.Integer, db.ForeignKey("lieux.id"))
     lieu_conservation = db.relationship("Lieux", back_populates="conserve")
     unites_codico = db.relationship("Unites_codico", back_populates="codex")
-    provenances = db.relationship("Lieux", secondary=provient, backref="Codices")
+    provient_de = db.relationship("Provenances", back_populates="provient")
 
 
 class Lieux(db.Model):
@@ -28,7 +39,7 @@ class Lieux(db.Model):
     localite = db.Column(db.String(20))
     label = db.Column(db.String(30))
     conserve = db.relationship("Codices", back_populates="lieu_conservation")
-    provient_de = db.relationship("Codices", secondary=provient, backref="Lieux")
+    provenances = db.relationship("Provenances", back_populates="provenance")
 
 
 # Table de relation "contient"
