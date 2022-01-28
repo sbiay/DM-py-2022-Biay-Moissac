@@ -2,7 +2,6 @@ from ..appliMoissac import db
 from sqlalchemy import Table, Column, ForeignKey
 
 # La table de relations "provenances" lie les classes "Lieux" et "Codices"
-# Tuto intéressant (https://docs.sqlalchemy.org/en/14/orm/basic_relationships.html#association-object)
 """provient = Table("provenances", db.metadata,
                  Column("codex", ForeignKey("codices.id"), primary_key=True),
                  Column("lieu", ForeignKey("lieux.id"), primary_key=True),
