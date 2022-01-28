@@ -7,18 +7,15 @@ class Provenances(db.Model):
     rowid = db.Column(db.Integer, primary_key=True)
     codex = db.Column(db.Integer, db.ForeignKey("codices.id"))
     lieu = db.Column(db.Integer, db.ForeignKey("lieux.id"))
-    provient = db.relationship("Codices", back_populates="provient_de", foreign_keys=codex)
-    provenance = db.relationship("Lieux", back_populates="provenances", foreign_keys=lieu)
     origine = db.Column(db.Boolean)
-    """
-    Pour faire une jointure sur la provenance d'un codex :
+    remarque = db.Column(db.Text)
+    cas_particulier = db.Column(db.Integer, db.ForeignKey("unites_codico.id"))
+    """On procédera à des jointures à la main en raison des différents attributs portés sur la relation :
     codex = Codices.query.get(3)
-        for id_lieu in codex.provient_de:
-        objetLieu = Lieux.query.get(id_lieu.lieu)
-        print(f"{objetLieu.localite}, {objetLieu.label}")
+    provenances = Provenances.query.filter(Provenances.codex == 3).all()
+    for provenance in provenances:
+        print(f"{Lieux.query.get(provenance.lieu).localite}, {Lieux.query.get(provenance.lieu).label}")
     """
-
-
 class Codices(db.Model):
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
     cote = db.Column(db.String)
@@ -28,7 +25,6 @@ class Codices(db.Model):
     conservation_id = db.Column(db.Integer, db.ForeignKey("lieux.id"))
     lieu_conservation = db.relationship("Lieux", back_populates="conserve")
     unites_codico = db.relationship("Unites_codico", back_populates="codex")
-    provient_de = db.relationship("Provenances", back_populates="provient")
 
 
 class Lieux(db.Model):
@@ -36,7 +32,6 @@ class Lieux(db.Model):
     localite = db.Column(db.String(20))
     label = db.Column(db.String(30))
     conserve = db.relationship("Codices", back_populates="lieu_conservation")
-    provenances = db.relationship("Provenances", back_populates="provenance")
 
 
 # Table de relation "contient"
