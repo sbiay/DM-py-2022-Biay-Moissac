@@ -16,6 +16,8 @@ class Provenances(db.Model):
     for provenance in provenances:
         print(f"{Lieux.query.get(provenance.lieu).localite}, {Lieux.query.get(provenance.lieu).label}")
     """
+
+
 class Codices(db.Model):
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
     cote = db.Column(db.String)
