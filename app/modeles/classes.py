@@ -1,26 +1,24 @@
 from ..appliMoissac import db
 from sqlalchemy import Table, Column, ForeignKey
 
+
 # La table de relations "provenances" lie les classes "Lieux" et "Codices"
-"""provient = Table("provenances", db.metadata,
-                 Column("codex", ForeignKey("codices.id"), primary_key=True),
-                 Column("lieu", ForeignKey("lieux.id"), primary_key=True),
-                 
-                 )
-"""
-""" Il faut également modéliser ces attributs de la table "provenances" :
-                Column("remarque", db.Text, nullable=True)
-                Column("cas_particulier"), ForeignKey("unites_codico.id"),
-                Column("origine", db.Boolean, nullable=False),
-                 """
-
 class Provenances(db.Model):
-    id_codex = Column(ForeignKey("codices.id"), primary_key=True),
-    id_lieu = Column(ForeignKey("lieux.id"), primary_key=True),
-    provenance = db.relationship("Lieux", back_populates="provenances")
-    provient = db.relationship("Codices", back_populates="provient_de")
+    rowid = db.Column(db.Integer, primary_key=True)
+    codex = db.Column(db.Integer, db.ForeignKey("codices.id"))
+    lieu = db.Column(db.Integer, db.ForeignKey("lieux.id"))
+    provient = db.relationship("Codices", back_populates="provient_de", foreign_keys=codex)
+    provenance = db.relationship("Lieux", back_populates="provenances", foreign_keys=lieu)
+    origine = db.Column(db.Boolean)
+    """
+    Pour faire une jointure sur la provenance d'un codex :
+    codex = Codices.query.get(3)
+        for id_lieu in codex.provient_de:
+        objetLieu = Lieux.query.get(id_lieu.lieu)
+        print(f"{objetLieu.localite}, {objetLieu.label}")
+    """
 
-# Définition de mes classes d'objets (ATTENTION, il faudra veiller à bien appliquer le modèle logique)
+
 class Codices(db.Model):
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
     cote = db.Column(db.String)
