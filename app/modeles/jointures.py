@@ -65,6 +65,7 @@ def codexJson(codex_id):
         "description_materielle": codex.descript_materielle,
         "histoire": codex.histoire,
         "contenu": [],
+        "origine": [],
         "provenances": []
     }
     
@@ -102,16 +103,21 @@ def codexJson(codex_id):
     
     # Pour les provenances et l'origine du manuscrit, on opère des jointures manuelles sur la classe Provenances
     for provenance in Provenances.query.filter(Provenances.codex == codex_id):
+        # Pour l'origine du codices
         if provenance.origine:
             id = Lieux.query.get(provenance.lieu).id
             label = Lieux.query.get(provenance.lieu).label
             localite = Lieux.query.get(provenance.lieu).localite
-            description["origine"] = {
+            dicoOrigine = {
                 "lieu_id": id,
                 "label": label,
-                "localite": f"{localite} ({provenance.remarque})",
+                "localite": localite,
                 "cas_particulier": provenance.cas_particulier
             }
+            if provenance.remarque:
+                dicoOrigine["label"] = f"{label} ({provenance.remarque})"
+            description["origine"].append(dicoOrigine)
+        # Pour les autres provenances du codex
         else:
             id = Lieux.query.get(provenance.lieu).id
             label = Lieux.query.get(provenance.lieu).label
@@ -119,9 +125,11 @@ def codexJson(codex_id):
             dicoProvenance = {
                 "lieu_id": id,
                 "label": label,
-                "localite": f"{localite} ({provenance.remarque})",
+                "localite": localite,
                 "cas_particulier": provenance.cas_particulier
             }
+            if provenance.remarque:
+                dicoProvenance["label"] = f"{label} ({provenance.remarque})"
             description["provenances"].append(dicoProvenance)
 
     # Test : export

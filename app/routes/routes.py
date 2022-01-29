@@ -95,13 +95,15 @@ def notice_codex(num):
     
     # Réassignation de la variable codex par l'objet Json retourné par la fonction codexJson()
     codex = json.loads(codexJson(num))
-    print(type(codex))
+    print(codex["origine"])
     
     if not test:
         return render_template("pages/codices.html",
                                titre=codex["label"],
                                materielle=codex["description_materielle"],
                                histoire=codex["histoire"],
+                               provenances=codex["provenances"],
+                               origine=codex["origine"],
                                descUCs=codex["contenu"])
 
 

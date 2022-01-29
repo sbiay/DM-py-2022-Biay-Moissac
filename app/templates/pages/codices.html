@@ -12,6 +12,23 @@
 <div>
     <h2>Histoire</h2>
     <p>{{histoire}}</p>
+    <h3>Origine</h3>
+    {% for lieu in origine %}
+    {% if not lieu["cas_particulier"] %}
+      <ul>
+        <li>{{ lieu["localite"] }}, {{ lieu["label"] }}{% if lieu["remarque"] %} ({{ lieu["remarque"] }}){% endif %}.</li>
+      </ul>
+    {% endif %}
+    {% endfor %}
+    {% for provenance in provenances %}
+        {% if not provenance["cas_particulier"] %}
+        <h3>Provenances</h3>
+        <ul>
+          <li>{{ provenance["localite"] }}, {{ provenance["label"] }}.</li>
+        </ul>
+        {% endif %}
+    {% endfor %}
+
     {% if materielle %}
       <h2>Description matérielle</h2>
       <p>{{materielle}}</p>
@@ -34,7 +51,6 @@
                   {% else %}
                     <li><i>{{oeuvres["titre"]}}</i>.</li>
                   {% endif %}
-
                 </ul>
             {% endfor %}
         {% endfor %}
@@ -46,10 +62,18 @@
         <h2>Date</h2>
         <p>{{descUCs[0]["date"]}}</p>
         <h2>Textes</h2>
-        {% for oeuvres in descUCs[0]["contenu"] %}
+        {% for oeuvres in descUCs[0]["oeuvres"] %}
             <ul>
-                <li>{{oeuvres[0]}}, {{oeuvres[1]}}</li>
-            </ul>
+                  {% if oeuvres["auteur"] and oeuvres["attr"] %}
+                    <li>{{oeuvres["auteur"]}}, <i>{{oeuvres["titre"]}}</i> (attribué à {{ oeuvres["attr"] }}).</li>
+                  {% elif oeuvres["auteur"] and not oeuvres["attr"] %}
+                    <li>{{oeuvres["auteur"]}}, <i>{{oeuvres["titre"]}}</i>.</li>
+                  {% elif not oeuvres["auteur"] and oeuvres["attr"] %}
+                    <li><i>{{oeuvres["titre"]}}</i> (attribué à {{ oeuvres["attr"] }})..</li>
+                  {% else %}
+                    <li><i>{{oeuvres["titre"]}}</i>.</li>
+                  {% endif %}
+                </ul>
         {% endfor %}
     {% endif %}
 </div>
