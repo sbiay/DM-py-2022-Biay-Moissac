@@ -1,4 +1,33 @@
-from .classes import Codices, Personnes
+from .classes import Codices, Personnes, Unites_codico
+
+def localisationUC(uc_id):
+    """
+    Cette fonction prend comme argument l'identifiant d'une unité codicologique (un objet de la classe Unites_codico)
+    et retourne une chaîne de caractères indiquant les foliotations de début et de fin de l'unité.
+    :param uc_id: identifiant d'un objet de la classe Unites_codico
+    :uc_id type: int
+    :returns: chaîne de caractères indiquant les foliotations de début et de fin de l'unité
+    :return type: str
+    Exemple de valeur de retour : "f. 1v-120v"
+    """
+    # Assigner l'unité codicologique à partir de son identifiant
+    UC = Unites_codico.query.get_or_404(uc_id)
+    
+    # Si l'UC n'a pas de localisation de début, elle n'en a pas du tout, la fonction retourne alors None
+    if not UC.loc_init:
+        return None
+    else:
+        # Conditions portant sur le booléen relatif aux recto/verso au début et à la fin de l'UC
+        if UC.loc_init_v:
+            rvdebut = "v"
+        else:
+            rvdebut = ""
+        if UC.loc_fin_v:
+            rvfin = "v"
+        else:
+            rvfin = ""
+        locUC = f"f. {str(UC.loc_init)}{rvdebut}-{str(UC.loc_fin)}{rvfin}"
+    return locUC
 
 def labelCodex(code_id):
     """Cette fonction prend comme argument l'identifiant d'un codex
