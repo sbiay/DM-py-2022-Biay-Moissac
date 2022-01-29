@@ -23,9 +23,18 @@
             {% if UC["description"] %}
                 <p>{{UC["description"]}}</p>
             {% endif %}
-            {% for oeuvres in UC["contenu"] %}
+            {% for oeuvres in UC["oeuvres"] %}
                 <ul>
-                    <li>{{oeuvres[0]}}, <i>{{oeuvres[1]}}</i>.</li>
+                  {% if oeuvres["auteur"] and oeuvres["attr"] %}
+                    <li>{{oeuvres["auteur"]}}, <i>{{oeuvres["titre"]}}</i> (attribué à {{ oeuvres["attr"] }}).</li>
+                  {% elif oeuvres["auteur"] and not oeuvres["attr"] %}
+                    <li>{{oeuvres["auteur"]}}, <i>{{oeuvres["titre"]}}</i>.</li>
+                  {% elif not oeuvres["auteur"] and oeuvres["attr"] %}
+                    <li><i>{{oeuvres["titre"]}}</i> (attribué à {{ oeuvres["attr"] }})..</li>
+                  {% else %}
+                    <li><i>{{oeuvres["titre"]}}</i>.</li>
+                  {% endif %}
+
                 </ul>
             {% endfor %}
         {% endfor %}
