@@ -32,25 +32,25 @@ def localisationUC(uc_id):
     return locUC
 
 def labelCodex(code_id):
-    """Cette fonction prend comme argument l'identifiant d'un codex
-    et retourne un dictionnaire :
+    """Cette fonction prend comme argument l'identifiant d'un codex et retourne un dictionnaire :
     :param code_id: identifiant d'un codex selon la classe Codices
     :type code_id: int
     :returns: dictionnaire dont :
-       - la clé est l'id du codex (int)
-       - la valeur est le label (str) composé de son lieu de conservation et de sa cote.
+       - la clé "codex_id" prend pour valeur le paramètre code_id (int)
+       - la clé label prend pour valeur une string composée de son lieu de conservation et de sa cote.
     :rtype: dict
     """
-    dico = {}
     cote = Codices.query.get(code_id).cote
-    lieu_conservation = Codices.query.get(code_id).conservation
+    lieu_conservation = Codices.query.get(code_id).lieu_conservation
     if lieu_conservation.label == "Bibliothèque nationale de France":
         lieu_conservation = lieu_conservation.localite + ", BnF"
     else:
         lieu_conservation = lieu_conservation.localite + ", " + lieu_conservation.label
-    
     label = f"{lieu_conservation}, {cote}"
-    dico[code_id] = label
+    dico = {
+        "codex_id": code_id,
+        "label": label
+    }
     return dico
 
 

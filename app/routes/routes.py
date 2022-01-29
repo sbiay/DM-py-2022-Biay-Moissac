@@ -95,25 +95,12 @@ def notice_codex(num):
     # Pour le lieu de conservation et la cote du codex
     label = labelCodex(num)[num]
     
-    # Liste des unités codicologiques enfants du codex
-    listUC_enfants = Unites_codico.query.filter(Unites_codico.code_id == num).order_by(Unites_codico.loc_init).all()
-    
     # Eléments descriptifs de chaque unité codicologique
     descUCs = []
     for UC in listUC_enfants:
         descUC = {}
         descUC["description"] = UC.descript
         
-        # Conditions portant sur le booléen relatif aux recto/verso au début et à la fin de l'UC
-        if UC.loc_init_v:
-            rvdebut = "v"
-        else:
-            rvdebut = ""
-        if UC.loc_fin_v:
-            rvfin = "v"
-        else:
-            rvfin = ""
-        descUC["localisation"] = f"f. {str(UC.loc_init)}{rvdebut}-{str(UC.loc_fin)}{rvfin}"
         
         descUC["date"] = f"entre {UC.date_pas_avant} et {UC.date_pas_apres}"
         
