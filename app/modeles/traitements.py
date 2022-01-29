@@ -2,8 +2,10 @@ from .classes import Codices, Personnes, Unites_codico
 
 def localisationUC(uc_id):
     """
-    Cette fonction prend comme argument l'identifiant d'une unité codicologique (un objet de la classe Unites_codico)
-    et retourne une chaîne de caractères indiquant les foliotations de début et de fin de l'unité.
+    Cette fonction prend comme argument l'identifiant d'une unité codicologique (un objet de la classe Unites_codico) et,
+    si cette dernière possède des informations de localisation,
+    la fonction retourne une chaîne de caractères indiquant les foliotations de début et de fin de l'unité,
+    sinon elle retourne None.
     :param uc_id: identifiant d'un objet de la classe Unites_codico
     :uc_id type: int
     :returns: chaîne de caractères indiquant les foliotations de début et de fin de l'unité
