@@ -4,7 +4,7 @@ from flask_login import login_user, current_user, logout_user
 from bs4 import BeautifulSoup
 
 from ..appliMoissac import app, login
-from ..modeles.classes import Codices, Lieux, Unites_codico, Oeuvres, Contient, Personnes
+from ..modeles.classes import Codices, Lieux, Unites_codico, Oeuvres, Personnes, Provenances
 from ..modeles.utilisateurs import User
 from ..modeles.jointures import labelCodex, toutes_oeuvres, tous_auteurs
 from ..comutTest import test
