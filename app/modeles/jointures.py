@@ -50,7 +50,6 @@ def codexJson(codex_id):
         "lieu_id": 1,
         "label": "abbaye Saint-Pierre",
         "localite": "Moissac",
-        "remarque": null,
         "cas_particulier": null
         }
     }
@@ -110,8 +109,7 @@ def codexJson(codex_id):
             description["origine"] = {
                 "lieu_id": id,
                 "label": label,
-                "localite": localite,
-                "remarque": provenance.remarque,
+                "localite": f"{localite} ({provenance.remarque})",
                 "cas_particulier": provenance.cas_particulier
             }
         else:
@@ -121,8 +119,7 @@ def codexJson(codex_id):
             dicoProvenance = {
                 "lieu_id": id,
                 "label": label,
-                "localite": localite,
-                "remarque": provenance.remarque,
+                "localite": f"{localite} ({provenance.remarque})",
                 "cas_particulier": provenance.cas_particulier
             }
             description["provenances"].append(dicoProvenance)
