@@ -167,31 +167,19 @@ def toutes_oeuvres():
     oeuvres = []
     classOeuvres = Oeuvres.query.order_by(Oeuvres.titre).all()
     for objetOeuvre in classOeuvres:
-        oeuvre = {
-            "oeuvre_id": objetOeuvre.id,
-            "label": objetOeuvre.titre,
-            "auteur": {},
-            "codices": []
-        }
-        # Pour renseigner les auteurs
-        if objetOeuvre.auteur:
-            objetAuteur = Personnes.query.get(objetOeuvre.auteur)
-            oeuvres[objetOeuvre.id]["auteur"][objetAuteur.id] = labelPersonne(objetAuteur.id, "court")
-        
-        # Pour renseigner les attributions apocryphes à des auteurs
-        if objetOeuvre.attr:
-            objetAuteur = Personnes.query.get(objetOeuvre.attr)
-            oeuvres[objetOeuvre.id]["auteur"][objetAuteur.id] = str(
-                labelPersonne(objetAuteur.id, "court")) + " (attribué à)"
+        # Décrire les métadonnées d'une oeuvre grâce à la fonction dicoOeuvre()
+        oeuvre = dicoOeuvre(objetOeuvre)
         
         # Pour renseigner les codices
-        objetsContenu = Contient.query.filter(Contient.oeuvre == objetOeuvre.id).all()
-        for objetContenu in objetsContenu:
-            objetUC = Unites_codico.query.filter(Unites_codico.id == objetContenu.unites_codico).one()
-            code_id = objetUC.code_id
-            dictCodex = labelCodex(code_id)
-            oeuvres[objetOeuvre.id]["codices"].append(dictCodex)
-    
+        tous_codices = Codices.query.all()
+        codices = []
+        for codex in tous_codices:
+            # Pour chaque dictionnaire d'oeuvre (item) contenu dans un codex
+            for uc in codexJson(codex.id)["contenu"]:
+                for item in uc["oeuvres"]:
+                    if oeuvre["oeuvre_id"] == item["oeuvre_id"]:
+                        codices.append(codex)
+        oeuvre["codices"] = codices
     # test
     with open("resultats-tests/oeuvres.json", mode="w") as jsonf:
         json.dump(oeuvres, jsonf)
