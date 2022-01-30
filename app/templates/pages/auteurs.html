@@ -10,7 +10,7 @@
 
         {% for auteur in auteurs %}
             <!-- auteur est un tuple du type (2, 'Ambroise (saint, v. 340-397)')-->
-            <h3 id="{{ "auteur" + auteur[0]|string + "°" }}">{{ auteur[1] }}</h3>
+            <h2 id="{{ "auteur" + auteur[0]|string + "°" }}">{{ auteur[1] }}</h2>
 
             {% for oeuvre in oeuvres %}
 
