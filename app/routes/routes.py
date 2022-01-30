@@ -7,6 +7,7 @@ from ..appliMoissac import app, login
 from ..modeles.classes import Codices, Lieux, Unites_codico, Oeuvres, Personnes, Provenances
 from ..modeles.utilisateurs import User
 from ..modeles.jointures import labelCodex, toutes_oeuvres, tous_auteurs, codexJson
+from ..modeles.traitements import labelPersonne
 from ..comutTest import test
 
 
@@ -55,11 +56,20 @@ def deconnexion():
 @app.route("/pages/<quel_index>")
 def index(quel_index=["auteurs", "codices", "oeuvres"]):
     oeuvres = json.loads(toutes_oeuvres())
-    #auteurs = tous_auteurs()
+    
+    # Pour obtenir une liste des noms d'auteurs ordonnée alphabétiquement
+    personnes = Personnes.query.order_by(Personnes.nom).all()
+    # La liste auteurs contiendra une liste de tuples formés de l'identifiant et du nom long d'un auteur
+    auteurs = []
+    for personne in personnes:
+        print(personne.nom + " - aut: " + str(personne.oeuvres_aut) + " - attr: " + str(personne.oeuvres_attr))
+        if personne.oeuvres_aut or personne.oeuvres_attr:
+            auteurs.append((personne.id, labelPersonne(personne.id, forme="long")))
+    print(auteurs)
     codices = "Voici la liste des codices"
     
     if quel_index == "auteurs":
-        return render_template("pages/auteurs.html", auteurs=auteurs)
+        return render_template("pages/auteurs.html", auteurs=auteurs, oeuvres=oeuvres)
     elif quel_index == "codices":
         return render_template("pages/codices.html", codices=codices)
     elif quel_index == "oeuvres":
