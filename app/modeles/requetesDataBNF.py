@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 from ..appliMoissac import db
 from ..modeles.classes import Codices, Unites_codico, Oeuvres
 
+
 def rechercheSimple(motscles):
     """
     :param motscles: saisie du champ recherche nettoyée
@@ -11,6 +12,7 @@ def rechercheSimple(motscles):
     # Charger les identifiants ark pertinents pour la recherche sur les auteurs et sur les oeuvres
     # J'ai pour cela besoin de tous les ark intéressants de ma base
 
+
 def requeteOeuvres(motscles):
     """
     Cette fonction prend comme argument la saisie d'un utilisateur,
@@ -18,7 +20,6 @@ def requeteOeuvres(motscles):
     croise les réponses de data.bnf avec les identifiants ark des oeuvres enregistrées dans la base libMoissac,
     retourne la liste de clés primaires des codices contenant ces oeuvres.
     """
-    
     
     # Charger les identifiants ark pertinents pour la recherche sur les auteurs
     oeuvres = Oeuvres.query.all()
@@ -29,7 +30,7 @@ def requeteOeuvres(motscles):
     
     # Ecrire la requête
     r = requests.get(f"https://data.bnf.fr/fr/search?term={motscles}")
-
+    
     # Parser la réponse
     reponses = []  # Contient une liste d'identifiants ark
     for ligne in r.text.split("\n"):
