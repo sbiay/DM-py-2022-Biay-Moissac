@@ -54,15 +54,15 @@ def deconnexion():
 
 @app.route("/pages/<quel_index>")
 def index(quel_index=["auteurs", "codices", "oeuvres"]):
-    oeuvres = toutes_oeuvres()
-    auteurs = tous_auteurs()
+    oeuvres = json.loads(toutes_oeuvres())
+    #auteurs = tous_auteurs()
     codices = "Voici la liste des codices"
     
-    if quel_index == indexes[0]:
+    if quel_index == "auteurs":
         return render_template("pages/auteurs.html", auteurs=auteurs)
-    elif quel_index == indexes[1]:
+    elif quel_index == "codices":
         return render_template("pages/codices.html", codices=codices)
-    elif quel_index == indexes[2]:
+    elif quel_index == "oeuvres":
         return render_template("pages/oeuvres.html", oeuvres=oeuvres)
 
 

@@ -12,8 +12,10 @@ def dicoOeuvre(objetOeuvre):
      "titre": "Institutions c\u00e9nobitiques",
      "data.bnf": 13771861,
      "partie_de": null,
+     "auteur_id": 1,
      "auteur": "Jean Cassien (saint)",
-     "auteur_ark": 12044269, "attr": null
+     "auteur_ark": 12044269,
+     "attr": null
     }
     :param objetOeuvre: objet de la classe Oeuvres
     :type objetOeuvre: dict
@@ -27,15 +29,39 @@ def dicoOeuvre(objetOeuvre):
         "partie_de": objetOeuvre.partie_de,
     }
     if objetOeuvre.lien_auteur:
+        dico["auteur_id"] = objetOeuvre.lien_auteur.id
         dico["auteur"] = labelPersonne(objetOeuvre.lien_auteur.id, "court")
         dico["auteur_ark"] = objetOeuvre.lien_auteur.data_bnf
     else:
         dico["auteur"] = None
     if objetOeuvre.lien_attr:
+        dico["attr_id"] = objetOeuvre.lien_attr.id
         dico["attr"] = labelPersonne(objetOeuvre.lien_attr.id, "court")
         dico["attr_ark"] = objetOeuvre.lien_attr.data_bnf
     else:
         dico["attr"] = None
+    return dico
+
+def dicoConservation(codex_id):
+    """
+    Cette fonction prend comme argument l'identifiant d'un objet de la classe Codices
+    et retourne un dictionnaire de forme suivante :
+     {
+      'lieu_id': 2,
+      'localite': 'Paris',
+      'label': 'Bibliothèque nationale de France'
+     }
+    :param codex_id: identifiant d'un objet de la classe Codices
+    :type codex_id: int
+    :returns: métadonnées d'un lieu de conservation
+    :return type: dict
+    """
+    objetCodex = Codices.query.get(codex_id)
+    dico = {
+        "lieu_id": objetCodex.lieu_conservation.id,
+        "localite": objetCodex.lieu_conservation.localite,
+        "label": objetCodex.lieu_conservation.label
+    }
     return dico
 
 def codexJson(codex_id):
@@ -161,8 +187,56 @@ def codexJson(codex_id):
 
 def toutes_oeuvres():
     """
-    Cette fonction retourne un dictionnaire de toutes les oeuvres,
-    avec leur auteur et les codices qui les contiennent.
+    Cette fonction retourne un objet Json de toutes les oeuvres,
+    avec les métadonnées des auteurs et des codices qui les contiennent.
+    :return type: Json
+    Exemple :
+    [
+     {
+        "oeuvre_id": 14,
+        "titre": "Ad Trasimundum",
+        "data.bnf": null,
+        "partie_de": null,
+        "auteur_id": 7,
+        "auteur": "Fulgence de Ruspe (saint)",
+        "auteur_ark": 12127708,
+        "attr": null,
+        "contenue_dans": [
+            {
+                "codex_id": 2,
+                "lieu_conservation": {
+                    "lieu_id": 2,
+                    "localite": "Paris",
+                    "label": "Biblioth\u00e8que nationale de France"
+                },
+                "label": "Paris, BnF, Latin 2077",
+                "id_technique": "ark:/12148/cc599714"
+            }
+        ]
+     },
+     {
+        "oeuvre_id": 21,
+        "titre": "Adversus Elipandum",
+        "data.bnf": null,
+        "partie_de": null,
+        "auteur_id": 11,
+        "auteur": "Alcuin",
+        "auteur_ark": 12030679,
+        "attr": null,
+        "contenue_dans": [
+            {
+                "codex_id": 3,
+                "lieu_conservation": {
+                    "lieu_id": 2,
+                    "localite": "Paris",
+                    "label": "Biblioth\u00e8que nationale de France"
+                },
+                "label": "Paris, BnF, Latin 2388",
+                "id_technique": "ark:/12148/cc60220h"
+            }
+        ]
+     }
+    ]
     """
     oeuvres = []
     classOeuvres = Oeuvres.query.order_by(Oeuvres.titre).all()
@@ -170,21 +244,24 @@ def toutes_oeuvres():
         # Décrire les métadonnées d'une oeuvre grâce à la fonction dicoOeuvre()
         oeuvre = dicoOeuvre(objetOeuvre)
         
-        # Pour renseigner les codices
-        tous_codices = Codices.query.all()
-        codices = []
-        for codex in tous_codices:
-            # Pour chaque dictionnaire d'oeuvre (item) contenu dans un codex
-            for uc in codexJson(codex.id)["contenu"]:
-                for item in uc["oeuvres"]:
-                    if oeuvre["oeuvre_id"] == item["oeuvre_id"]:
-                        codices.append(codex)
-        oeuvre["codices"] = codices
+        # Pour renseigner les codices contenant l'oeuvre
+        oeuvre["contenue_dans"] = []
+        for objetUC in Oeuvres.query.get(objetOeuvre.id).unites_codico:
+            objetCodex = objetUC.codex
+            dicoCodex = {
+                "codex_id": objetCodex.id,
+                "lieu_conservation": dicoConservation(objetCodex.id),
+                "label": labelCodex(objetCodex.id)["label"],
+                "id_technique": objetCodex.id_technique,
+            }
+            oeuvre["contenue_dans"].append(dicoCodex)
+        oeuvres.append(oeuvre)
+        
     # test
     with open("resultats-tests/oeuvres.json", mode="w") as jsonf:
         json.dump(oeuvres, jsonf)
     
-    return oeuvres
+    return json.dumps(oeuvres)
 
 
 def tous_auteurs():
