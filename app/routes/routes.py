@@ -53,9 +53,7 @@ def deconnexion():
 
 
 @app.route("/pages/<quel_index>")
-def index(quel_index):
-    indexes = ["auteurs", "codices", "oeuvres"]
-    
+def index(quel_index=["auteurs", "codices", "oeuvres"]):
     oeuvres = toutes_oeuvres()
     auteurs = tous_auteurs()
     codices = "Voici la liste des codices"

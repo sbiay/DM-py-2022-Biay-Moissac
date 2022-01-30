@@ -43,6 +43,7 @@
             {% for oeuvres in UC["oeuvres"] %}
                 <ul>
                   {% if oeuvres["auteur"] and oeuvres["attr"] %}
+                      <!-- Poser des liens -->
                     <li>{{oeuvres["auteur"]}}, <i>{{oeuvres["titre"]}}</i> (attribué à {{ oeuvres["attr"] }}).</li>
                   {% elif oeuvres["auteur"] and not oeuvres["attr"] %}
                     <li>{{oeuvres["auteur"]}}, <i>{{oeuvres["titre"]}}</i>.</li>
@@ -69,7 +70,7 @@
                   {% elif oeuvres["auteur"] and not oeuvres["attr"] %}
                     <li>{{oeuvres["auteur"]}}, <i>{{oeuvres["titre"]}}</i>.</li>
                   {% elif not oeuvres["auteur"] and oeuvres["attr"] %}
-                    <li><i>{{oeuvres["titre"]}}</i> (attribué à {{ oeuvres["attr"] }})..</li>
+                    <li><i>{{oeuvres["titre"]}}</i> (attribué à {{ oeuvres["attr"] }}).</li>
                   {% else %}
                     <li><i>{{oeuvres["titre"]}}</i>.</li>
                   {% endif %}

@@ -3,6 +3,41 @@ from ..modeles.classes import Codices, Lieux, Unites_codico, Oeuvres, Personnes,
 from .traitements import labelCodex, labelPersonne, localisationUC
 
 
+def dicoOeuvre(objetOeuvre):
+    """
+    Cette fonction prend comme argument un objet de la classe Oeuvres
+    et retourne un dictionnaire de forme suivante :
+    {
+     "oeuvre_id": 1,
+     "titre": "Institutions c\u00e9nobitiques",
+     "data.bnf": 13771861,
+     "partie_de": null,
+     "auteur": "Jean Cassien (saint)",
+     "auteur_ark": 12044269, "attr": null
+    }
+    :param objetOeuvre: objet de la classe Oeuvres
+    :type objetOeuvre: dict
+    :returns: description des métadonnées d'une oeuvre
+    :return type: dict
+    """
+    dico = {
+        "oeuvre_id": objetOeuvre.id,
+        "titre": objetOeuvre.titre,
+        "data.bnf": objetOeuvre.data_bnf,
+        "partie_de": objetOeuvre.partie_de,
+    }
+    if objetOeuvre.lien_auteur:
+        dico["auteur"] = labelPersonne(objetOeuvre.lien_auteur.id, "court")
+        dico["auteur_ark"] = objetOeuvre.lien_auteur.data_bnf
+    else:
+        dico["auteur"] = None
+    if objetOeuvre.lien_attr:
+        dico["attr"] = labelPersonne(objetOeuvre.lien_attr.id, "court")
+        dico["attr_ark"] = objetOeuvre.lien_attr.data_bnf
+    else:
+        dico["attr"] = None
+    return dico
+
 def codexJson(codex_id):
     """
     Cette fonction prend pour argument l'identifiant d'un objet de la classe Codices
@@ -81,22 +116,7 @@ def codexJson(codex_id):
         
         # Pour chaque oeuvre contenue dans l'objet UC courant, on ajoutera un dictionnaire décrivant ses métadonnées
         for objetOeuvre in objetUC.contenu:
-            dicoUCcourante = {
-                    "oeuvre_id": objetOeuvre.id,
-                    "titre": objetOeuvre.titre,
-                    "data.bnf": objetOeuvre.data_bnf,
-                    "partie_de": objetOeuvre.partie_de,
-                }
-            if objetOeuvre.lien_auteur:
-                dicoUCcourante["auteur"] = labelPersonne(objetOeuvre.lien_auteur.id, "court")
-                dicoUCcourante["auteur_ark"] = objetOeuvre.lien_auteur.data_bnf
-            else:
-                dicoUCcourante["auteur"] = None
-            if objetOeuvre.lien_attr:
-                dicoUCcourante["attr"] = labelPersonne(objetOeuvre.lien_attr.id, "court")
-                dicoUCcourante["attr_ark"] = objetOeuvre.lien_attr.data_bnf
-            else:
-                dicoUCcourante["attr"] = None
+            dicoUCcourante = dicoOeuvre(objetOeuvre)
             
             dicoUC["oeuvres"].append(dicoUCcourante)
         description["contenu"].append(dicoUC)
@@ -131,22 +151,24 @@ def codexJson(codex_id):
             if provenance.remarque:
                 dicoProvenance["label"] = f"{label} ({provenance.remarque})"
             description["provenances"].append(dicoProvenance)
-
+    
     # Test : export
     with open("resultats-tests/codex.json", mode="w") as jsonf:
         json.dump(description, jsonf)
     
     return json.dumps(description)
 
+
 def toutes_oeuvres():
     """
     Cette fonction retourne un dictionnaire de toutes les oeuvres,
     avec leur auteur et les codices qui les contiennent.
     """
-    oeuvres = {}
+    oeuvres = []
     classOeuvres = Oeuvres.query.order_by(Oeuvres.titre).all()
     for objetOeuvre in classOeuvres:
-        oeuvres[objetOeuvre.id] = {
+        oeuvre = {
+            "oeuvre_id": objetOeuvre.id,
             "label": objetOeuvre.titre,
             "auteur": {},
             "codices": []

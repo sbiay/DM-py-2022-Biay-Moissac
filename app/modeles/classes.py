@@ -10,11 +10,7 @@ class Provenances(db.Model):
     origine = db.Column(db.Boolean)
     remarque = db.Column(db.Text)
     cas_particulier = db.Column(db.Integer, db.ForeignKey("unites_codico.id"))
-    """On procédera à des jointures à la main en raison des différents attributs portés sur la relation :
-    codex = Codices.query.get(3)
-    provenances = Provenances.query.filter(Provenances.codex == 3).all()
-    for provenance in provenances:
-        print(f"{Lieux.query.get(provenance.lieu).localite}, {Lieux.query.get(provenance.lieu).label}")
+    """On procédera à des jointures à la main en raison des différents attributs portés sur la relation.
     """
 
 
