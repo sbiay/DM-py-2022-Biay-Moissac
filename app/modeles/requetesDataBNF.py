@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from ..appliMoissac import db
-from ..modeles.classes import Codices, Unites_codico, Oeuvres, Contient
+from ..modeles.classes import Codices, Unites_codico, Oeuvres
 
 def rechercheSimple(motscles):
     """
@@ -72,7 +72,7 @@ def creationDataBNF(motscles, objet=["auteur", "oeuvre"]):
     r = requests.get(f"https://data.bnf.fr/fr/search?term={motscles}")
     
     # Transformer la réponse HTML de data.bnf en objet BeautifulSoup afin de pouvoir le parser
-    soup = BeautifulSoup(r.text, features="lxml")
+    soup = BeautifulSoup(r.text, "html.parser")
     reponses = []
     for index, span in enumerate(soup.find_all('span')):
         # Les label que l'on souhaite récupérer sont contenus dans des spans dépourvus de class, sauf le premier
@@ -85,7 +85,7 @@ def creationDataBNF(motscles, objet=["auteur", "oeuvre"]):
                 premiereOeuvre = index + 1
             elif span.string == 'Thèmes':
                 premierTheme = index + 1
-    
+    print(reponses)
     # Liste des catégories de tri des réponses par défaut dans data.bnf
     categories = ["Auteurs", "Organisations", "Œuvres", "Thèmes", "Lieux", "Spectacles", "Périodiques"]
     categories_presentes = []
@@ -103,6 +103,7 @@ def creationDataBNF(motscles, objet=["auteur", "oeuvre"]):
     index_oeuvres = categories_presentes.index("Œuvres")
     
     # Pour la liste propre des noms d'auteurs
+    # Attention : si la catégorie est en dernière position : IndexError
     auteurs = reponses[
               index_categories_presentes[index_auteurs][1]
               :

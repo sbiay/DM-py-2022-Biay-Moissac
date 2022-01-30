@@ -7,21 +7,28 @@
 {% block corps %}
     <h1>Les œuvres</h1>
     <br>
-    {% for id_oeuvre in oeuvres %}
-        <h2 id="oeuvre{{ id_oeuvre }}°">{{ oeuvres[id_oeuvre]["label"] }}</h2>
+    {% for oeuvre in oeuvres %}
+        <h2 id="oeuvre{{ oeuvre["oeuvre_id"] }}°">{{ oeuvre["titre"] }}</h2>
+
         <!-- Auteur ou attribution -->
-        {% if oeuvres[id_oeuvre]["auteur"] %}
-            {% for cle in oeuvres[id_oeuvre]["auteur"] %}
-                <a href="{{ url_for('index', quel_index="auteurs", _anchor="auteur" + cle|string + "°") }}">{{ oeuvres[id_oeuvre]["auteur"][cle] }}</a>
-                <br>
-            {% endfor %}
+        {% if oeuvre["auteur"] and oeuvre["attr"] %}
+            <a href="{{ url_for('index', quel_index="auteurs", _anchor="auteur" + oeuvre["auteur_id"]|string + "°") }}">{{ oeuvre["auteur"] }}</a>
+            <br>
+            <a href="{{ url_for('index', quel_index="auteurs", _anchor="auteur" + oeuvre["attr_id"]|string + "°") }}">{{ oeuvre["attr"] }} (attribué à)</a>
+        {% elif oeuvre["auteur"] and not oeuvre["attr"] %}
+            <a href="{{ url_for('index', quel_index="auteurs", _anchor="auteur" + oeuvre["auteur_id"]|string + "°") }}">{{ oeuvre["auteur"] }}</a>
+        {% elif oeuvre["attr"] and not oeuvre["auteur"] %}
+            <a href="{{ url_for('index', quel_index="auteurs", _anchor="auteur" + oeuvre["attr_id"]|string + "°") }}">{{ oeuvre["attr"] }} (attribué à)</a>
+        {% endif %}
+
+        <!-- Ni auteur ni attribution -->
+        {% if not oeuvre["auteur"] and not oeuvre["attr"] %}
+        Anonyme.
         {% endif %}
         <ul>
         <!-- Manuscrits contenant l'oeuvre -->
-        {% for item in oeuvres[id_oeuvre]["codices"] %}
-            {% for cle in item %}
-                <li><a href="{{ url_for('notice_codex', num=cle)}}">{{ item[cle] }}</a></li>
-            {% endfor %}
+        {% for codex in oeuvre["contenue_dans"] %}
+            <li><a href="{{ url_for('notice_codex', num=codex["codex_id"])}}">{{ codex["label"] }}</a></li>
         {% endfor %}
         </ul>
 
