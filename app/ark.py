@@ -29,11 +29,12 @@ def modificationArk(classe):
     tous_objets = classe.query.all()
     with open("app/db/injection.sql", mode="w") as f:
         for objet in tous_objets:
-            modifier = objet.data_bnf
-            """stmt = (
-                update(classe).
-                    where(classe.data_bnf == modifier).
-                    values(data_bnf=f'{arkModif(modifier)}')
-                )
-            """
-            f.write(f'''UPDATE {classe.__tablename__} SET data_bnf = "{arkModif(modifier)}" WHERE data_bnf = "{modifier}";\n''')
+            if objet.data_bnf:
+                modifier = objet.data_bnf
+                """stmt = (
+                    update(classe).
+                        where(classe.data_bnf == modifier).
+                        values(data_bnf=f'{arkModif(modifier)}')
+                    )
+                """
+                f.write(f'''UPDATE {classe.__tablename__} SET data_bnf = "{arkModif(modifier)}" WHERE data_bnf = "{modifier}";\n''')
