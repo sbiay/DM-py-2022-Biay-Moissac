@@ -31,10 +31,12 @@ def modificationArk(classe):
         for objet in tous_objets:
             if objet.data_bnf:
                 modifier = objet.data_bnf
-                """stmt = (
-                    update(classe).
-                        where(classe.data_bnf == modifier).
-                        values(data_bnf=f'{arkModif(modifier)}')
+                
+                
+                f.write(f'''UPDATE {classe.__tablename__} SET data_bnf = "{arkModif(modifier)}" WHERE data_bnf = "{modifier}";\n''')
+                """Modèle présenté dans la doc (il faudrait l'adapter avec l'objet db.session
+                stmt = (update(classe).
+                    where(classe.data_bnf == modifier).
+                    values(data_bnf=f'{arkModif(modifier)}')
                     )
                 """
-                f.write(f'''UPDATE {classe.__tablename__} SET data_bnf = "{arkModif(modifier)}" WHERE data_bnf = "{modifier}";\n''')
