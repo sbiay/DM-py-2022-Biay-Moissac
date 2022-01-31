@@ -9,7 +9,7 @@ def dicoOeuvre(objetOeuvre):
     et retourne un dictionnaire de forme suivante :
     {
      "oeuvre_id": 1,
-     "titre": "Institutions c\u00e9nobitiques",
+     "titre": "Institutions cénobitiques",
      "data.bnf": 13771861,
      "partie_de": null,
      "auteur_id": 1,
@@ -17,23 +17,28 @@ def dicoOeuvre(objetOeuvre):
      "auteur_ark": 12044269,
      "attr": null
     }
-    :param objetOeuvre: objet de la classe Oeuvres
+    :param objetOeuvre: un objet de la classe Oeuvres
     :type objetOeuvre: dict
     :returns: description des métadonnées d'une oeuvre
     :return type: dict
     """
+    # Les métadonnées seront décrites dans le dictionnaire "dico"
     dico = {
         "oeuvre_id": objetOeuvre.id,
         "titre": objetOeuvre.titre,
         "data.bnf": objetOeuvre.data_bnf,
         "partie_de": objetOeuvre.partie_de,
     }
+    # Si un auteur est référencé, on ajoute trois types de données
     if objetOeuvre.lien_auteur:
         dico["auteur_id"] = objetOeuvre.lien_auteur.id
+        # On utilise la fonction labelPersonne() pour renseigner la forme courte du nom (sans dates)
         dico["auteur"] = labelPersonne(objetOeuvre.lien_auteur.id, "court")
         dico["auteur_ark"] = objetOeuvre.lien_auteur.data_bnf
+    # Sinon, un seul champ est renseigné
     else:
         dico["auteur"] = None
+    # Même chose pour les attributions (auteurs apocryphes)
     if objetOeuvre.lien_attr:
         dico["attr_id"] = objetOeuvre.lien_attr.id
         dico["attr"] = labelPersonne(objetOeuvre.lien_attr.id, "court")
