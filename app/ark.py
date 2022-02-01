@@ -22,7 +22,7 @@ def arkModif(numero):
     
     return ark
 
-def modificationArk(classe):
+def injectionArk(classe):
     """
     :tables type: list
     """
