@@ -29,7 +29,7 @@ def dicoOeuvre(objetOeuvre):
         "data.bnf": objetOeuvre.data_bnf,
         "partie_de": objetOeuvre.partie_de,
     }
-    # Si un auteur est référencé, on ajoute trois types de données
+    # Si un auteur est référencé, on ajoute trois types de données (trois clés à "dico")
     if objetOeuvre.lien_auteur:
         dico["auteur_id"] = objetOeuvre.lien_auteur.id
         # On utilise la fonction labelPersonne() pour renseigner la forme courte du nom (sans dates)
@@ -56,12 +56,15 @@ def dicoConservation(codex_id):
       'localite': 'Paris',
       'label': 'Bibliothèque nationale de France'
      }
+    
     :param codex_id: identifiant d'un objet de la classe Codices
     :type codex_id: int
     :returns: métadonnées d'un lieu de conservation
     :return type: dict
     """
+    # Charger un objet de la classe Codices à partir de son identifiant
     objetCodex = Codices.query.get(codex_id)
+    # Renseigner les couples clé-valeur du dictionnaire à partir de la propriété "lieu_conservation" de l'objet
     dico = {
         "lieu_id": objetCodex.lieu_conservation.id,
         "localite": objetCodex.lieu_conservation.localite,
@@ -73,12 +76,14 @@ def codexJson(codex_id):
     """
     Cette fonction prend pour argument l'identifiant d'un objet de la classe Codices
     et retourne un objet Json décrivant toutes les métadonnées du codex.
+    
     :params codex_id: identifiant d'un objet de la classe Codices
     :codex_id type: int
     :returns: description des métadonnées d'un codex
     :return type: Json
     
-    Modèle de contenu du Json retourné : {
+    Exemple de contenu du Json retourné :
+    {
      "codex_id": 1,
      "lieu_conservation": "Paris, Biblioth\u00e8que nationale de France",
      "label": "Paris, BnF, Latin 2989",
@@ -89,16 +94,17 @@ def codexJson(codex_id):
         {
             "uc_id": 1,
             "localisation": null,
-            "description": "\u00c9criture minuscule caroline d\u2019une main principale.",
+            "description": "Ecriture minuscule caroline d'une main principale.",
             "date": "entre 975 et 1000",
             "oeuvres": [
                 {
                     "oeuvre_id": 1,
-                    "titre": "Institutions c\u00e9nobitiques",
-                    "data.bnf": 13771861,
+                    "titre": "Institutions cénobitiques",
+                    "data.bnf": ark:/12148/cb13771861w,
                     "partie_de": null,
                     "auteur": "Jean Cassien (saint)",
-                    "auteur_ark": 12044269, "attr": null
+                    "auteur_ark": ark:/12148/cb12044269r,
+                    "attr": null
                 }
             ]
         }
@@ -121,11 +127,14 @@ def codexJson(codex_id):
     }
     """
     
+    # Charger un objet de la classe Codices à partir de sa clé primaire
     codex = Codices.query.get_or_404(codex_id)
     
+    # Initier le dictionnaire "description" avec les champs situés à la racine du futur objet Json
     description = {
         "codex_id": codex.id,
         "lieu_conservation": f"{codex.lieu_conservation.localite}, {codex.lieu_conservation.label}",
+        # Le label du codex est formé à partir du script labelCodex()
         "label": f"{labelCodex(codex_id)['label']}",
         "id_technique": codex.id_technique,
         "description_materielle": codex.descript_materielle,
@@ -135,8 +144,8 @@ def codexJson(codex_id):
         "provenances": []
     }
     
+    # Pour la liste "contenu", écrire un dictionnaire contenant les informations relatives à chaque UC
     listObjetsUC = codex.unites_codico
-    # Pour écrire un dictionnaire contenant les informations relatives à chaque UC
     for objetUC in listObjetsUC:
         dicoUC = {}
         dicoUC["uc_id"] = objetUC.id
