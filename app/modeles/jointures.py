@@ -204,8 +204,8 @@ def codexJson(codex_id):
 
 def toutes_oeuvres():
     """
-    Cette fonction retourne un objet Json de toutes les oeuvres,
-    avec les métadonnées des auteurs et des codices qui les contiennent.
+    Cette fonction retourne un objet Json de toutes les oeuvres de la base,
+    avec les métadonnées de leurs auteurs et des codices qui les contiennent.
     :return type: Json
     Exemple :
     [
@@ -255,10 +255,13 @@ def toutes_oeuvres():
      }
     ]
     """
+    # On initie une liste vide, puis on assigne l'ensemble des objets de la classe Oeuvres à classOeuvres
     oeuvres = []
     classOeuvres = Oeuvres.query.order_by(Oeuvres.titre).all()
+    
+    # On boucle sur chaque objet
     for objetOeuvre in classOeuvres:
-        # Décrire les métadonnées d'une oeuvre grâce à la fonction dicoOeuvre()
+        # On décrit les métadonnées d'une oeuvre grâce à la fonction dicoOeuvre()
         oeuvre = dicoOeuvre(objetOeuvre)
         
         # Pour renseigner les codices contenant l'oeuvre
@@ -267,7 +270,9 @@ def toutes_oeuvres():
             objetCodex = objetUC.codex
             dicoCodex = {
                 "codex_id": objetCodex.id,
+                # Pour le lieu de conservation, on fait appel à la fonction dicoConservation
                 "lieu_conservation": dicoConservation(objetCodex.id),
+                # Pour le label du codex, on fait appel à la fonction labelCodex
                 "label": labelCodex(objetCodex.id)["label"],
                 "id_technique": objetCodex.id_technique,
             }
@@ -278,6 +283,7 @@ def toutes_oeuvres():
     with open("resultats-tests/oeuvres.json", mode="w") as jsonf:
         json.dump(oeuvres, jsonf)
     
+    # On retourne la liste des oeuvres sous la forme d'un objet Json
     return json.dumps(oeuvres)
 
 
