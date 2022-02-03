@@ -72,18 +72,17 @@ def dicoConservation(codex_id):
     }
     return dico
 
+
 def codexJson(codex_id):
     """
     Cette fonction prend pour argument l'identifiant d'un objet de la classe Codices
     et retourne un objet Json décrivant toutes les métadonnées du codex.
-    
     :params codex_id: identifiant d'un objet de la classe Codices
     :codex_id type: int
     :returns: description des métadonnées d'un codex
     :return type: Json
-    
-    Exemple de contenu du Json retourné :
-    {
+
+    Modèle de contenu du Json retourné : {
      "codex_id": 1,
      "lieu_conservation": "Paris, Biblioth\u00e8que nationale de France",
      "label": "Paris, BnF, Latin 2989",
@@ -94,17 +93,16 @@ def codexJson(codex_id):
         {
             "uc_id": 1,
             "localisation": null,
-            "description": "Ecriture minuscule caroline d'une main principale.",
+            "description": "\u00c9criture minuscule caroline d\u2019une main principale.",
             "date": "entre 975 et 1000",
             "oeuvres": [
                 {
                     "oeuvre_id": 1,
-                    "titre": "Institutions cénobitiques",
-                    "data.bnf": ark:/12148/cb13771861w,
+                    "titre": "Institutions c\u00e9nobitiques",
+                    "data.bnf": 13771861,
                     "partie_de": null,
                     "auteur": "Jean Cassien (saint)",
-                    "auteur_ark": ark:/12148/cb12044269r,
-                    "attr": null
+                    "auteur_ark": 12044269, "attr": null
                 }
             ]
         }
@@ -127,14 +125,11 @@ def codexJson(codex_id):
     }
     """
     
-    # Charger un objet de la classe Codices à partir de sa clé primaire
     codex = Codices.query.get_or_404(codex_id)
     
-    # Initier le dictionnaire "description" avec les champs situés à la racine du futur objet Json
     description = {
         "codex_id": codex.id,
         "lieu_conservation": f"{codex.lieu_conservation.localite}, {codex.lieu_conservation.label}",
-        # Le label du codex est formé à partir du script labelCodex()
         "label": f"{labelCodex(codex_id)['label']}",
         "id_technique": codex.id_technique,
         "description_materielle": codex.descript_materielle,
@@ -144,8 +139,8 @@ def codexJson(codex_id):
         "provenances": []
     }
     
-    # Pour la liste "contenu", écrire un dictionnaire contenant les informations relatives à chaque UC
     listObjetsUC = codex.unites_codico
+    # Pour écrire un dictionnaire contenant les informations relatives à chaque UC
     for objetUC in listObjetsUC:
         dicoUC = {}
         dicoUC["uc_id"] = objetUC.id
@@ -155,28 +150,35 @@ def codexJson(codex_id):
         dicoUC["oeuvres"] = []
         
         # Pour chaque oeuvre contenue dans l'objet UC courant, on ajoutera un dictionnaire décrivant ses métadonnées
+        # en faisant appel à la fonction dicoOeuvre
         for objetOeuvre in objetUC.contenu:
             dicoUCcourante = dicoOeuvre(objetOeuvre)
-            
             dicoUC["oeuvres"].append(dicoUCcourante)
+        
+        # On ajoute le dictionnaire décrivant le contenu de l'unité codicologique courante au dictionnaire description
         description["contenu"].append(dicoUC)
     
     # Pour les provenances et l'origine du manuscrit, on opère des jointures manuelles sur la classe Provenances
     for provenance in Provenances.query.filter(Provenances.codex == codex_id):
-        # Pour l'origine du codices
+        # Pour l'origine du codices, on pose comme condition que l'attirbut booléen "origine" soit True
         if provenance.origine:
             id = Lieux.query.get(provenance.lieu).id
             label = Lieux.query.get(provenance.lieu).label
             localite = Lieux.query.get(provenance.lieu).localite
+            # On ajoute les variables précédentes à un dictionnaire
             dicoOrigine = {
                 "lieu_id": id,
                 "label": label,
                 "localite": localite,
                 "cas_particulier": provenance.cas_particulier
             }
+            # L'attribut remarque, s'il existe, apporte un complément au label (approximation, incertitude) :
+            # on les joints dans une chaîne unique.
             if provenance.remarque:
                 dicoOrigine["label"] = f"{label} ({provenance.remarque})"
+            
             description["origine"].append(dicoOrigine)
+        
         # Pour les autres provenances du codex
         else:
             id = Lieux.query.get(provenance.lieu).id
@@ -196,6 +198,7 @@ def codexJson(codex_id):
     with open("resultats-tests/codex.json", mode="w") as jsonf:
         json.dump(description, jsonf)
     
+    # On retourne le dictionnaire description sous la forme d'un fichier Json
     return json.dumps(description)
 
 
