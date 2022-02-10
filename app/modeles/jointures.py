@@ -307,46 +307,24 @@ def tous_auteurs():
     
     # On procède dans un premier temps à la création d'un dictionnaire sur le modèle précédemment décrit
     # contenant toutes les personnes de la db.
-    personnes = {}
+    personnes = []
     objetsPersonne = Personnes.query.order_by(Personnes.nom).all()
     for objetPersonne in objetsPersonne:
-        personnes[objetPersonne.id] = {"label": labelPersonne(objetPersonne.id, "long"), "oeuvres": []}
-    
-    """
-    On appelle la fonction toutes_oeuvres() dont on va parser le contenu et injecter certaines parties
-    dans le dictionnaire personnes.
-    Pour cela on compare :
-    - L'identifiant de chaque personne du dict personnes : 'clePersonne' ;
-    - avec l'identifiant de chaque auteur du dict oeuvres : 'cleAuteur'.
-    """
+        personnes.append(
+            {
+                "id_personne": objetPersonne.id,
+                "ark_personne": objetPersonne.data_bnf,
+                "label": labelPersonne(objetPersonne.id, "long"),
+                "oeuvres": []
+            }
+        )
+        
+    # On appelle la fonction toutes_oeuvres() dont on va parser le contenu et injecter certaines parties
+    # dans la liste "personnes"
+    # Pour cela on compare :
+    # - L'identifiant de chaque personne (clé "id_personne" dans chaque item de la liste "personnes") ;
+    # - L'identifiant de chaque auteur du dict oeuvres : 'cleAuteur'.
     oeuvres = toutes_oeuvres()
-    for clePersonne in personnes:
-        for cleOeuvre in oeuvres:
-            for cleAuteur in oeuvres[cleOeuvre].get("auteur"):
-                if clePersonne == cleAuteur:
-                    # Une condition permet de distinguer les oeuvres dont les auteurs sont apocryphes
-                    if not oeuvres[cleOeuvre]["auteur"][cleAuteur][-13:] == " (attribué à)":
-                        personnes[clePersonne]["oeuvres"].append({
-                            cleOeuvre: {
-                                "label": oeuvres[cleOeuvre]["label"],
-                                "codices": oeuvres[cleOeuvre]["codices"]
-                            }
-                        })
-                    # La mention "attribué à", signe d'autorité apocryphe, est reportée dans le label de l'oeuvre
-                    else:
-                        personnes[clePersonne]["oeuvres"].append({
-                            cleOeuvre: {
-                                "label": oeuvres[cleOeuvre]["label"] + " (attribué à)",
-                                "codices": oeuvres[cleOeuvre]["codices"]
-                            }
-                        })
-    # On crée un dictionnaire des auteurs ne comprenant que des personnes qui ont des oeuvres :
-    auteurs = {}
-    for clePersonne in personnes:
-        if personnes[clePersonne]["oeuvres"]:
-            auteurs[clePersonne] = personnes[clePersonne]
     
-    with open("resultats-tests/auteurs.json", mode="w") as jsonf:
-        json.dump(auteurs, jsonf)
     
-    return auteurs
+    #return auteurs
