@@ -290,21 +290,37 @@ def toutes_oeuvres():
 
 def tous_auteurs():
     """
-    Cette fonction retourne un dictionnaire destiné contenant pour chaque auteur de la classe Oeuvres
-    les informations relatives aux oeuvres qu'il a écrites et aux codices qui les conservent
+    Cette fonction retourne un objet Json contenant pour chaque objet de la classe Personnes
+    ses métadonnées et les informations relatives aux oeuvres qu'il a écrites (ou qui lui sont attribuées)
+    et aux codices qui les conservent.
+    :returns: objet contenant une liste de dictionnaires décrivant les métadonnées des personnes et de leurs oeuvres
+    :return type: Json
+    
     Il se structure de la façon suivante :
-    auteurs = {
-        "ID AUTEUR": {
-            "label": "NOM AUTEUR",
-            "oeuvres": [
-                {
-                "ID OEUVRE": {
-                    "label": "TITRE OEUVRE",
-                    "codices": [
-                        {
-                            "ID LIEU": "LIEU CONSERVATION"}]}}]}
-        }
-    """
+    [
+     {
+      "personne_id": 11,
+      "personne_ark": "ark:/12148/cb120306790",
+      "label": "Alcuin (v. 732-804)",
+      "oeuvres": [
+        {
+          "oeuvre_id": 21,
+          "titre": "Adversus Elipandum",
+          "relation": "a pour auteur",
+          "contenue_dans": [
+            {
+              "codex_id": 3,
+              "lieu_conservation": {
+                "lieu_id": 2,
+                "localite": "Paris",
+                "label": "Biblioth\u00e8que nationale de France"
+              },
+              "label": "Paris, BnF, Latin 2388",
+              "id_technique": "ark:/12148/cc60220h"
+            }
+          ]
+      }
+     """
     
     # On procède dans un premier temps à la création d'un dictionnaire sur le modèle précédemment décrit
     # contenant toutes les personnes de la db.
@@ -330,34 +346,48 @@ def tous_auteurs():
         # On trie les oeuvres alphabétiquement selon l'attribut "titre"
         oeuvres.sort(key=attrgetter('titre'))
         
-        # On récupère les attributs des objets de la classe Oeuvres contenus dans la liste "oeuvres"
-        # et on les organise dans un dictionnaire sur le modèle de la fonction toutes_oeuvres()
+        # On boucle sur les objets de la classe Oeuvre contenus dans la liste "oeuvres"
+        # afin de récupérer leurs attributs et de les organiser dans un dictionnaire
+        # sur le modèle de la fonction toutes_oeuvres()
         for oeuvre in oeuvres:
             # On applique la fonction dicoOeuvre() à nos objets
             donneesOeuvre_recup = dicoOeuvre(oeuvre)
+            # Les données relatives aux auteurs et aux attributions du dictionnaire "donneesOeuvre_recup"
+            # n'étant pas à retenir, car déjà renseignés comme clés primaires du dictionnaire dicoPersonnes,
+            # on assigne un nouveau dictionnaire, "donneesOeuvre_nouv", pour y transférer seulament les clés pertinentes
             donneesOeuvre_nouv = {
                 "oeuvre_id": donneesOeuvre_recup["oeuvre_id"],
                 "titre": donneesOeuvre_recup["titre"]
             }
             # On créé une nouvelle donnée si l'oeuvre possède un auteur
             if donneesOeuvre_recup["auteur"]:
+                # On vérifie que la personne en cours de traitement corresponde à l'auteur de l'oeuvre
                 if donneesOeuvre_recup["auteur_id"] == objetPersonne.id:
+                    # On crée alors un couple clé-valeur pour qualifier la relation de l'oeuvre à la personne
                     donneesOeuvre_nouv["relation"] = "a pour auteur"
-            # Si une oeuvre possède une attribution
+            # Si une oeuvre possède une attribution (même démarche)
             if donneesOeuvre_recup["attr"]:
                 if donneesOeuvre_recup["attr_id"] == objetPersonne.id:
                     donneesOeuvre_nouv["relation"] = "a pour attribution"
-            # On renseigne les codices qui contiennent l'oeuvre en mobilisant la fonction toutes_oeuvres()
+            
+            # On renseigne les métadonnées des codices qui contiennent l'oeuvre courante
+            # Pour cela, on mobilise dans un premier temps le Json retourné par la fonction toutes_oeuvres()
             corpus = json.loads(toutes_oeuvres())
+            # On parse chaque oeuvre du corpus
             for item in corpus:
+                # On établit le lien entre l'id d'une oeuvre du corpus et celui de l'oeuvre courante
                 if item["oeuvre_id"] == donneesOeuvre_nouv["oeuvre_id"]:
+                    # On récupère alors la clé "contenue_dans" pour l'ajouter au dictionnaire "donneesOeuvre_nouv"
                     donneesOeuvre_nouv["contenue_dans"] = item["contenue_dans"]
+            
+            # On ajoute enfin les métadonnées de l'oeuvre aux métadonnées de la personne
             dicoPersonne["oeuvres"].append(donneesOeuvre_nouv)
 
         # On ajout le dictionnaire complet à la liste
         personnes.append(dicoPersonne)
         
+    # On écrit le dictionnaire "personnes" dans un fichier Json
     with open("resultats-tests/auteurs.json", mode="w") as f:
         json.dump(personnes, f)
         
-    #return auteurs
+    return json.dumps(personnes)
