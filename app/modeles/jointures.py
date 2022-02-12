@@ -1,4 +1,5 @@
 import json
+from operator import attrgetter
 from ..modeles.classes import Codices, Lieux, Unites_codico, Oeuvres, Personnes, Provenances
 from .traitements import labelCodex, labelPersonne, localisationUC
 
@@ -310,21 +311,59 @@ def tous_auteurs():
     personnes = []
     objetsPersonne = Personnes.query.order_by(Personnes.nom).all()
     for objetPersonne in objetsPersonne:
-        personnes.append(
-            {
-                "id_personne": objetPersonne.id,
-                "ark_personne": objetPersonne.data_bnf,
+        # On crée un dictionnaire pour renseigner les métadonnées de chaque personne
+        dicoPersonne = {
+                "personne_id": objetPersonne.id,
+                "personne_ark": objetPersonne.data_bnf,
+                # On appelle la fonction labelPersonne pour écrire le nom complet de la personne
                 "label": labelPersonne(objetPersonne.id, "long"),
                 "oeuvres": []
             }
-        )
+        # On récupère toutes les oeuvres attribuées à un auteur
+        oeuvres = []
+        if objetPersonne.oeuvres_attr:
+            for oeuvre in objetPersonne.oeuvres_attr:
+                oeuvres.append(oeuvre)
+        if objetPersonne.oeuvres_aut:
+            for oeuvre in objetPersonne.oeuvres_aut:
+                oeuvres.append(oeuvre)
+        # On trie les oeuvres alphabétiquement selon l'attribut "titre"
+        oeuvres.sort(key=attrgetter('titre'))
         
-    # On appelle la fonction toutes_oeuvres() dont on va parser le contenu et injecter certaines parties
-    # dans la liste "personnes"
-    # Pour cela on compare :
-    # - L'identifiant de chaque personne (clé "id_personne" dans chaque item de la liste "personnes") ;
-    # - L'identifiant de chaque auteur du dict oeuvres : 'cleAuteur'.
-    oeuvres = toutes_oeuvres()
-    
-    
+        # On récupère les attributs des objets de la classe Oeuvres contenus dans la liste "oeuvres"
+        # et on les organise dans un dictionnaire sur le modèle de la fonction toutes_oeuvres()
+        for oeuvre in oeuvres:
+            # On applique la fonction dicoOeuvre() à nos objets
+            donneesOeuvre = dicoOeuvre(oeuvre)
+            # On créé une nouvelle donnée si l'oeuvre possède un auteur
+            if donneesOeuvre["auteur"]:
+                donneesOeuvre["relation"] = "a pour auteur"
+            # Si une oeuvre possède une attribution
+            elif donneesOeuvre["attr"]:
+                donneesOeuvre["relation"] = "a pour attribution"
+                
+            # On retire à présent les clés redondantes par rapport au dictionnaire dicoPersonne
+            if donneesOeuvre["attr"]:
+                print(donneesOeuvre["attr"])
+            """
+                donneesOeuvre.pop("auteur_ark")
+                donneesOeuvre.pop("auteur_id")
+                donneesOeuvre.pop("auteur")
+                donneesOeuvre.pop("attr_ark")
+                donneesOeuvre.pop("attr_id")
+                donneesOeuvre.pop("attr")
+            """
+            # On renseigne les codices qui contiennent l'oeuvre en mobilisant la fonction toutes_oeuvres()
+            corpus = json.loads(toutes_oeuvres())
+            for item in corpus:
+                if item["oeuvre_id"] == donneesOeuvre["oeuvre_id"]:
+                    donneesOeuvre["contenue_dans"] = item["contenue_dans"]
+            dicoPersonne["oeuvres"].append(donneesOeuvre)
+        
+        # On ajout le dictionnaire complet à la liste
+        personnes.append(dicoPersonne)
+        
+    with open("resultats-tests/auteurs.json", mode="w") as f:
+        json.dump(personnes, f)
+        
     #return auteurs
