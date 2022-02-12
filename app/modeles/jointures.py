@@ -334,32 +334,26 @@ def tous_auteurs():
         # et on les organise dans un dictionnaire sur le modèle de la fonction toutes_oeuvres()
         for oeuvre in oeuvres:
             # On applique la fonction dicoOeuvre() à nos objets
-            donneesOeuvre = dicoOeuvre(oeuvre)
+            donneesOeuvre_recup = dicoOeuvre(oeuvre)
+            donneesOeuvre_nouv = {
+                "oeuvre_id": donneesOeuvre_recup["oeuvre_id"],
+                "titre": donneesOeuvre_recup["titre"]
+            }
             # On créé une nouvelle donnée si l'oeuvre possède un auteur
-            if donneesOeuvre["auteur"]:
-                donneesOeuvre["relation"] = "a pour auteur"
+            if donneesOeuvre_recup["auteur"]:
+                if donneesOeuvre_recup["auteur_id"] == objetPersonne.id:
+                    donneesOeuvre_nouv["relation"] = "a pour auteur"
             # Si une oeuvre possède une attribution
-            elif donneesOeuvre["attr"]:
-                donneesOeuvre["relation"] = "a pour attribution"
-                
-            # On retire à présent les clés redondantes par rapport au dictionnaire dicoPersonne
-            if donneesOeuvre["attr"]:
-                print(donneesOeuvre["attr"])
-            """
-                donneesOeuvre.pop("auteur_ark")
-                donneesOeuvre.pop("auteur_id")
-                donneesOeuvre.pop("auteur")
-                donneesOeuvre.pop("attr_ark")
-                donneesOeuvre.pop("attr_id")
-                donneesOeuvre.pop("attr")
-            """
+            if donneesOeuvre_recup["attr"]:
+                if donneesOeuvre_recup["attr_id"] == objetPersonne.id:
+                    donneesOeuvre_nouv["relation"] = "a pour attribution"
             # On renseigne les codices qui contiennent l'oeuvre en mobilisant la fonction toutes_oeuvres()
             corpus = json.loads(toutes_oeuvres())
             for item in corpus:
-                if item["oeuvre_id"] == donneesOeuvre["oeuvre_id"]:
-                    donneesOeuvre["contenue_dans"] = item["contenue_dans"]
-            dicoPersonne["oeuvres"].append(donneesOeuvre)
-        
+                if item["oeuvre_id"] == donneesOeuvre_nouv["oeuvre_id"]:
+                    donneesOeuvre_nouv["contenue_dans"] = item["contenue_dans"]
+            dicoPersonne["oeuvres"].append(donneesOeuvre_nouv)
+
         # On ajout le dictionnaire complet à la liste
         personnes.append(dicoPersonne)
         
