@@ -55,26 +55,18 @@ def deconnexion():
 
 @app.route("/pages/<quel_index>")
 def index(quel_index=["auteurs", "codices", "oeuvres"]):
+    # Charger les oeuvres sous la forme d'une liste
     oeuvres = json.loads(toutes_oeuvres())
-    
     # Pour obtenir une liste des noms d'auteurs ordonnée alphabétiquement
-    personnes = Personnes.query.order_by(Personnes.nom).all()
-    # La liste auteurs contiendra une liste de tuples formés de l'identifiant et du nom long d'un auteur
-    auteurs = []
-    for personne in personnes:
-        print(personne.nom + " - aut: " + str(personne.oeuvres_aut) + " - attr: " + str(personne.oeuvres_attr))
-        if personne.oeuvres_aut or personne.oeuvres_attr:
-            auteurs.append((personne.id, labelPersonne(personne.id, forme="long")))
-    print(auteurs)
+    auteurs = json.loads(tous_auteurs())
     codices = "Voici la liste des codices"
-    
+
     if quel_index == "auteurs":
         return render_template("pages/auteurs.html", auteurs=auteurs, oeuvres=oeuvres)
     elif quel_index == "codices":
         return render_template("pages/codices.html", codices=codices)
     elif quel_index == "oeuvres":
         return render_template("pages/oeuvres.html", oeuvres=oeuvres)
-
 
 @app.route("/pages/inscription", methods=["GET", "POST"])
 def inscription():
