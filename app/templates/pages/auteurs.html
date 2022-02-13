@@ -9,39 +9,24 @@
         <br>
 
         {% for auteur in auteurs %}
-            <!-- auteur est un tuple du type (2, 'Ambroise (saint, v. 340-397)')-->
-            <h2 id="{{ "auteur" + auteur[0]|string + "°" }}">{{ auteur[1] }}</h2>
+            <!-- auteur est un dictionnaire-->
+            <h2 id="{{ "auteur" + auteur["personne_id"]|string + "°" }}">{{ auteur["label"] }}</h2>
 
-            {% for oeuvre in oeuvres %}
+            {% for oeuvre in auteur["oeuvres"] %}
 
-                {% if auteur[0] == oeuvre["auteur_id"] %}
                     <!-- Pour les titres des oeuvres -->
                     <a href="{{ url_for('index', quel_index="oeuvres", _anchor="oeuvre" + oeuvre["oeuvre_id"]|string + "°") }}">
-                        <i>{{ oeuvre["titre"] }}</i></a> :
+                        <i>{{ oeuvre["titre"] }}</i></a>
+                    {% if oeuvre["relation"] == "a pour attribution" %}
+                    <span> (attribué à)</span>
+                    {% endif %}
                     <!-- Pour les codices qui les contiennent-->
                     {% for codex in oeuvre["contenue_dans"] %}
                         <ul>
                             <li><a href="{{ url_for('notice_codex', num=codex["codex_id"])}}">{{codex["label"]}}</a></li>
                         </ul>
                     {% endfor %}
-                {% elif auteur[0] == oeuvre["attr_id"] %}
-                    <!-- Pour les titres des oeuvres -->
-                    <a href="{{ url_for('index', quel_index="oeuvres", _anchor="oeuvre" + oeuvre["oeuvre_id"]|string + "°") }}">
-                        <i>{{ oeuvre["titre"] }}</i></a> (attribué à) :
-                    <!-- Pour les codices qui les contiennent-->
-                    {% for codex in oeuvre["contenue_dans"] %}
-                        <ul>
-                            <li><a href="{{ url_for('notice_codex', num=codex["codex_id"])}}">{{codex["label"]}}</a></li>
-                        </ul>
-                    {% endfor %}
-
-
-                {% endif %}
-
-
             {% endfor %}
-
-
         {% endfor %}
 
 {% endblock %}
