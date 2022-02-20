@@ -95,7 +95,6 @@ def notice_codex(num):
     
     # Réassignation de la variable codex par l'objet Json retourné par la fonction codexJson()
     codex = json.loads(codexJson(num))
-    print(codex["origine"])
     
     if not test:
         return render_template("pages/codices.html",
@@ -109,17 +108,27 @@ def notice_codex(num):
 
 @app.route("/recherche")
 def recherche():
+    # On récupère la chaîne de requête passée dans l'URL
     motscles = request.args.get("keyword", None)
     
-    # Eliminer les caractères inutiles
-    caracteresInutiles = ",.!"
-    for caractere in caracteresInutiles:
-        motscles = motscles.replace(caractere, "")
-    # Eliminer les caractères potentiellements dangereux
-    caracteresInterdits = """<>\;"&#^'`?%{}[]|()"""
+    # Eliminer les caractères inutiles ou potentiellement dangereux
+    caracteresInterdits = """,.!<>\;"&#^'`?%{}[]|()"""
     for caractere in caracteresInterdits:
         motscles = motscles.replace(caractere, "")
     # Convertir les mots-clés en liste
     motscles = motscles.split(" ")
     print(motscles)
+    
+    # On boucle sur chaque mot-clé
+    for mot in motscles:
+        True
+    
+    # On cherche chaque mot-clé sur Data-BNF
+    
+    # On cherche chaque mot-clé dans tous les champs des codices
+    
+    # Les résultats sont un dictionnaire dont les codices sont les clés et les valeurs, un score : à chaque
+    # match pour un codex, le score augmente de 1.
+    
+    # On retourne en premier les résultats qui ont un score supérieur à 2, puis de 2, puis de 1
     return render_template("pages/resultats.html")
