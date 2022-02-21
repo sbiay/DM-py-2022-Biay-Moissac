@@ -119,16 +119,24 @@ def recherche():
     motscles = motscles.split(" ")
     print(motscles)
     
+    # On charge les codices de la base, en initiant un dictionnaire
+    # dont les clés sont les id des codices
+    # et les valeurs sont les scores de la recherche (par défaut 0)
+    
     # On boucle sur chaque mot-clé
     for mot in motscles:
         True
     
     # On cherche chaque mot-clé sur Data-BNF
     
-    # On cherche chaque mot-clé dans tous les champs des codices
+    # On cherche chaque mot-clé dans une liste de champs pertinents des notices de codices
+    # Utiliser pour cela le dictionnaire récupérable grâce à la fonction codexJson()
     
     # Les résultats sont un dictionnaire dont les codices sont les clés et les valeurs, un score : à chaque
     # match pour un codex, le score augmente de 1.
     
     # On retourne en premier les résultats qui ont un score supérieur à 2, puis de 2, puis de 1
+    
+    # On affichera comme résultat le label du codex grâce à la fonction labelCodex(code_id)
+    
     return render_template("pages/resultats.html")
