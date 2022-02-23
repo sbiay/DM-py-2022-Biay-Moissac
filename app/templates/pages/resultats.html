@@ -6,5 +6,32 @@
 
 {% block corps %}
     <h1>Résultats</h1>
+    <table class="table table-striped table-hover">
+        <thead>
+        <tr>
+            <th id="col1" scope="col">Label</th>
+            <th id="col3" scope="col">Lien</th>
+        </tr>
+      <tbody id="listeResultats">
+        {% for resultat in resultats %}
+            {% if resultat["score"] > 2 %}
+            <tr>
+                <td>{{ resultat["label"] }}</td>
+                <td><a href="{{ url_for('notice_codex', num=resultat["codex_id"])}}">Lien vers la notice</a></td>
+            </tr>
+            {% elif resultat["score"] == 2 %}
+            <tr>
+                <td>{{ resultat["label"] }}</td>
+                <td><a href="{{ url_for('notice_codex', num=resultat["codex_id"])}}">Lien vers la notice</a></td>
+            </tr>
+            {% elif resultat["score"] == 1 %}
+            <tr>
+                <td>{{ resultat["label"] }}</td>
+                <td><a href="{{ url_for('notice_codex', num=resultat["codex_id"])}}">Lien vers la notice</a></td>
+            </tr>
+            {% endif %}
+        {% endfor %}
+      </tbody>
+    </table>
 
 {% endblock %}

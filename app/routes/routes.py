@@ -117,26 +117,50 @@ def recherche():
         motscles = motscles.replace(caractere, "")
     # Convertir les mots-clés en liste
     motscles = motscles.split(" ")
-    print(motscles)
     
-    # On charge les codices de la base, en initiant un dictionnaire
-    # dont les clés sont les id des codices
-    # et les valeurs sont les scores de la recherche (par défaut 0)
+    # On initie la liste des résultats
+    scoresCodices = []
+    # On charge les codices de la base en les triant
+    codices = Codices.query.all()
     
+    # On trie les codices alphanumériquement par Lieu de conservation (localité, puis nom d'institution) puis par cote
+    listeLabelCodices = [labelCodex(codex.id)["label"] for codex in codices]
+    triLabels = sorted(listeLabelCodices)
+    
+    # On boucle sur les labels de codices triés pour ensuite traiter chaque codex dans l'ordre alphanumérique
+    for label in triLabels:
+        for codex in codices:
+            if label == labelCodex(codex.id)["label"]:
+                # Pour chaque codex, on écrit un dictionnaire
+                dicoCodex = {
+                    "codex_id": codex.id,
+                    "label": labelCodex(codex.id)["label"],
+                    "score": 0
+                }
+                scoresCodices.append(dicoCodex)
+
     # On boucle sur chaque mot-clé
     for mot in motscles:
-        True
+        
+        # On cherche chaque mot-clé dans une liste de champs pertinents des notices de codices
+        # On boucle sur chaque clé du dictionnaire scoresCodices
+        for item in scoresCodices:
+            # Pour charger les données d'un codex on les récupère grâce à la fonction codexJson()
+            # et on les transforme en dictionnaire
+            donneesCodex = codexJson(item["codex_id"])
+        
+            # On cherche une occurrence du mot-clé courant dans les données
+            if mot in donneesCodex:
+                # Si une ou plusieurs occurrences sont trouvées, le score augmente de 1
+                item["score"] += 1
     
     # On cherche chaque mot-clé sur Data-BNF
     
-    # On cherche chaque mot-clé dans une liste de champs pertinents des notices de codices
-    # Utiliser pour cela le dictionnaire récupérable grâce à la fonction codexJson()
+    
     
     # Les résultats sont un dictionnaire dont les codices sont les clés et les valeurs, un score : à chaque
     # match pour un codex, le score augmente de 1.
     
-    # On retourne en premier les résultats qui ont un score supérieur à 2, puis de 2, puis de 1
+    # PENSER à passer les mots-clés ainsi que le contenu des notices en lower case pour améliorer les chances
     
-    # On affichera comme résultat le label du codex grâce à la fonction labelCodex(code_id)
-    
-    return render_template("pages/resultats.html")
+    return render_template("pages/resultats.html", resultats=scoresCodices)
