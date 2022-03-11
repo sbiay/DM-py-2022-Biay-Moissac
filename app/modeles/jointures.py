@@ -391,3 +391,55 @@ def tous_auteurs():
         json.dump(personnes, f)
         
     return json.dumps(personnes)
+
+def tous_ark():
+    """
+    Cette fonction charge dans un dictionnaire tous les identifiants arks contenus dans la base
+    :return type: dict
+    
+    Modèle du dictionnaire retourné {
+     'arkOeuvres': {
+        'ark:/12148/cb13771861w': [1],      # La valeur est une liste des identifiants des codices concernés
+        'ark:/12148/cb17908174f': [2, 4],
+        ...
+     'arkPersonnes': {
+        'ark:/12148/cb12044269r': [1],
+        'ark:/12148/cb11889551s': [2, 3]
+        ...
+        }
+    }
+    """
+    
+    tousArk = {
+        "arkOeuvres": {},
+        "arkPersonnes": {}
+    }
+    
+    # On charge d'abord tous les codices
+    codices = Codices.query.all()
+    # On boucle sur chaque id pour récupérer, grâce à la fonction codexJson() les données de chaque codex
+    for codex in codices:
+        donneesCodex = json.loads(codexJson(codex.id))
+        for item in donneesCodex["contenu"]:
+            for oeuvre in item["oeuvres"]:
+                # Si l'oeuvre possède un ark
+                if oeuvre["data.bnf"]:
+                    # Si cet identifiant n'a pas encore été créé dans tousArk, on ajoute l'id du codex dans une liste
+                    if not tousArk["arkOeuvres"].get(oeuvre["data.bnf"]):
+                        tousArk["arkOeuvres"][oeuvre["data.bnf"]] = [codex.id]
+                    else:
+                        if codex.id not in tousArk["arkOeuvres"][oeuvre["data.bnf"]]:
+                            tousArk["arkOeuvres"][oeuvre["data.bnf"]].append(codex.id)
+                if oeuvre.get("auteur_ark"):
+                    if not tousArk["arkPersonnes"].get(oeuvre["auteur_ark"]):
+                        tousArk["arkPersonnes"][oeuvre["auteur_ark"]] = [codex.id]
+                    else:
+                        if codex.id not in tousArk["arkPersonnes"][oeuvre["auteur_ark"]]:
+                            tousArk["arkPersonnes"][oeuvre["auteur_ark"]].append(codex.id)
+                if oeuvre.get("attr_ark"):
+                    if not tousArk["arkPersonnes"].get(oeuvre["attr_ark"]):
+                        tousArk["arkPersonnes"][oeuvre["attr_ark"]] = [codex.id]
+                    else:
+                        if codex.id not in tousArk["arkPersonnes"][oeuvre["attr_ark"]]:
+                            tousArk["arkPersonnes"][oeuvre["attr_ark"]].append(codex.id)
+    return tousArk

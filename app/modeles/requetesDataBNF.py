@@ -1,35 +1,22 @@
-import requests
+import requests, json
 from bs4 import BeautifulSoup
 from ..appliMoissac import db
 from ..modeles.classes import Codices, Unites_codico, Oeuvres
+from ..modeles.jointures import codexJson
 
-def rechercheSimple(motscles):
-    """
-    :param motscles: saisie du champ recherche nettoyée
-    :type motscles: list
-    """
-    # Charger les identifiants ark pertinents pour la recherche sur les auteurs et sur les oeuvres
-    # J'ai pour cela besoin de tous les ark intéressants de ma base
-
-def requeteOeuvres(motscles):
+def requeteDataBNF(motcle, tousArk):
     """
     Cette fonction prend comme argument la saisie d'un utilisateur,
     adresse à data.bnf.fr une requête get à partir de cette saisie,
-    croise les réponses de data.bnf avec les identifiants ark des oeuvres enregistrées dans la base libMoissac,
-    retourne la liste de clés primaires des codices contenant ces oeuvres.
+    croise les réponses de data.bnf avec les identifiants ark enregistrés dans la base libMoissac,
+    retourne la liste de clés primaires des codices contenant ark.
+    :return type: list
     """
     
     
-    # Charger les identifiants ark pertinents pour la recherche sur les auteurs
-    oeuvres = Oeuvres.query.all()
-    ark_oeuvres = []
-    for oeuvre in oeuvres:
-        if oeuvre.data_bnf:
-            ark_oeuvres.append(oeuvre.data_bnf)
-    
-    # Ecrire la requête
-    r = requests.get(f"https://data.bnf.fr/fr/search?term={motscles}")
-
+    # On écrit la requête
+    r = requests.get(f"https://data.bnf.fr/fr/search?term={motcle}")
+    """
     # Parser la réponse
     reponses = []  # Contient une liste d'identifiants ark
     for ligne in r.text.split("\n"):
@@ -57,7 +44,7 @@ def requeteOeuvres(motscles):
                     codices.append(codex.id)
     print(codices)
     return codices
-
+"""
 
 def creationDataBNF(motscles, objet=["auteur", "oeuvre"]):
     """

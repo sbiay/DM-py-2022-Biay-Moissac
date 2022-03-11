@@ -6,8 +6,9 @@ from bs4 import BeautifulSoup
 from ..appliMoissac import app, login
 from ..modeles.classes import Codices, Lieux, Unites_codico, Oeuvres, Personnes, Provenances
 from ..modeles.utilisateurs import User
-from ..modeles.jointures import labelCodex, toutes_oeuvres, tous_auteurs, codexJson
+from ..modeles.jointures import codexJson, labelCodex, tous_auteurs, tous_ark, toutes_oeuvres
 from ..modeles.traitements import labelPersonne
+from ..modeles.requetesDataBNF import requeteDataBNF
 from ..comutTest import test
 
 
@@ -111,19 +112,21 @@ def recherche():
     # On récupère la chaîne de requête passée dans l'URL
     motscles = request.args.get("keyword", None)
     
-    # Eliminer les caractères inutiles ou potentiellement dangereux
+    # On élimine les caractères inutiles ou potentiellement dangereux
     caracteresInterdits = """,.!<>\;"&#^'`?%{}[]|()"""
     for caractere in caracteresInterdits:
-        motscles = motscles.replace(caractere, "")
-    # Convertir les mots-clés en liste
+        # On passe également les mots en bas de casse
+        motscles = motscles.replace(caractere, "").lower()
+    # On convertit les mots-clés en liste
     motscles = motscles.split(" ")
     
     # On initie la liste des résultats
     scoresCodices = []
-    # On charge les codices de la base en les triant
+
+    # On charge les codices de la base
     codices = Codices.query.all()
     
-    # On trie les codices alphanumériquement par Lieu de conservation (localité, puis nom d'institution) puis par cote
+    # On trie les codices alphanumériquement par lieu de conservation (localité, puis nom d'institution) puis par cote
     listeLabelCodices = [labelCodex(codex.id)["label"] for codex in codices]
     triLabels = sorted(listeLabelCodices)
     
@@ -139,28 +142,33 @@ def recherche():
                 }
                 scoresCodices.append(dicoCodex)
 
+    # On charge les arks de la base de donnée
+    tousArk = tous_ark()
+    
     # On boucle sur chaque mot-clé
     for mot in motscles:
-        
         # On cherche chaque mot-clé dans une liste de champs pertinents des notices de codices
-        # On boucle sur chaque clé du dictionnaire scoresCodices
+        # On boucle sur dictionnaire de scoresCodices
         for item in scoresCodices:
             # Pour charger les données d'un codex on les récupère grâce à la fonction codexJson()
-            # et on les transforme en dictionnaire
             donneesCodex = codexJson(item["codex_id"])
+            donneesCodex = donneesCodex.lower()
         
             # On cherche une occurrence du mot-clé courant dans les données
             if mot in donneesCodex:
                 # Si une ou plusieurs occurrences sont trouvées, le score augmente de 1
                 item["score"] += 1
     
-    # On cherche chaque mot-clé sur Data-BNF
-    
-    
+        # On cherche chaque mot-clé sur Data-BNF
+        resultatsDataBNF = requeteDataBNF(mot, tousArk)
     
     # Les résultats sont un dictionnaire dont les codices sont les clés et les valeurs, un score : à chaque
     # match pour un codex, le score augmente de 1.
     
-    # PENSER à passer les mots-clés ainsi que le contenu des notices en lower case pour améliorer les chances
+    # On définit un booléen pour indiquer le succès ou non de la recherche
+    bredouille = True
+    for codex in scoresCodices:
+        if codex["score"] != 0:
+            bredouille = False
     
-    return render_template("pages/resultats.html", resultats=scoresCodices)
+    return render_template("pages/resultats.html", resultats=scoresCodices, bredouille=bredouille)
