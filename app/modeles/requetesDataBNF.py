@@ -9,42 +9,34 @@ def requeteDataBNF(motcle, tousArk):
     Cette fonction prend comme argument la saisie d'un utilisateur,
     adresse à data.bnf.fr une requête get à partir de cette saisie,
     croise les réponses de data.bnf avec les identifiants ark enregistrés dans la base libMoissac,
-    retourne la liste de clés primaires des codices contenant ark.
-    :return type: list
+    retourne un set des clés primaires des codices contenant ark.
+    :return type: set
     """
-    
     
     # On écrit la requête
     r = requests.get(f"https://data.bnf.fr/fr/search?term={motcle}")
-    """
-    # Parser la réponse
-    reponses = []  # Contient une liste d'identifiants ark
-    for ligne in r.text.split("\n"):
-        for ark in ark_oeuvres:
-            if str(f"=https://data.bnf.fr/fr/{ark}/") in ligne:
-                reponses.append(ark)
     
-    # Requête sur les codices concernés
-    # Liste des oeuvres
-    oeuvres = []
-    for ark in reponses:
-        r = Oeuvres.query.filter(Oeuvres.data_bnf == int(ark)).one()
-        oeuvres.append(r)
+    # On transforme la réponse HTML de data.bnf en objet BeautifulSoup afin de pouvoir le parser
+    soup = BeautifulSoup(r.text, "html.parser")
+    reponses = []
     
-    # Liste des codices qui les contiennent
-    codices = []
-    for oeuvre in oeuvres:
-        # Toutes les UC contenant chaque oeuvre
-        r = Contient.query.filter(Contient.oeuvre == oeuvre.id).all()
-        for conteneur in r:
-            r_uc = Unites_codico.query.filter(Unites_codico.id == conteneur.unites_codico).all()
-            for uc in r_uc:
-                r_cod = Codices.query.filter(Codices.id == uc.code_id).all()
-                for codex in r_cod:
-                    codices.append(codex.id)
-    print(codices)
-    return codices
-"""
+    # Parser la réponse : les identifiants ark potentiellement intéressants apparaissent dans les éléments "a"
+    liens = soup.find_all("a")
+    for lien in liens:
+        if lien.get("href")[25:28] == "ark":
+            reponses.append(lien["href"][25:])
+            
+    # Si l'un des ark de la réponse est dans les ark de notre base de données, on retourne l'id du codex concerné
+    idCodicesPertinents = []
+    # On boucle sur les arks de la base de données
+    for typeArk in tousArk:
+        for ark in tousArk[typeArk]:
+            if ark in reponses:
+                for idCodex in tousArk[typeArk][ark]:
+                    idCodicesPertinents.append(idCodex)
+    
+    return set(idCodicesPertinents)
+
 
 def creationDataBNF(motscles, objet=["auteur", "oeuvre"]):
     """
