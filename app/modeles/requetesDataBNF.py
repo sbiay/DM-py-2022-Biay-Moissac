@@ -64,7 +64,7 @@ def creationDataBNF(motscles, objet=["auteur", "oeuvre"]):
                 premiereOeuvre = index + 1
             elif span.string == 'Thèmes':
                 premierTheme = index + 1
-    print(reponses)
+
     # Liste des catégories de tri des réponses par défaut dans data.bnf
     categories = ["Auteurs", "Organisations", "Œuvres", "Thèmes", "Lieux", "Spectacles", "Périodiques"]
     categories_presentes = []

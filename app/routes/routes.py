@@ -109,6 +109,14 @@ def notice_codex(num):
 
 @app.route("/recherche")
 def recherche():
+    """
+    Cette route traite les mots-clés envoyés via le formulaire de recherche simple de la barre de navigation.
+    Elle fonctionne selon un opérateur OU entre les différents mots-clés de la saisie.
+    Afin de bénéficier des multiples formes de titres d'oeuvre et de noms d'auteurs décrits sur data.bnf.fr,
+    cette recherche croise les identifiants ark d'auteurs et d'oeuvres contenus dans la base locale
+    avec les ark répondant aux mêmes mots-clés interrogés sur data.bnf.fr.
+    """
+    
     # On récupère la chaîne de requête passée dans l'URL
     motscles = request.args.get("keyword", None)
     
@@ -122,15 +130,22 @@ def recherche():
     
     # On initie la liste des résultats
     scoresCodices = []
-
+    # Chaque item de la liste sera un dictionnaire selon le modèle suivant :
+    """
+    {'codex_id': 1,
+     'label': 'Paris, BnF, Latin 2989',
+     'score': 4}
+    """
     # On charge les codices de la base
     codices = Codices.query.all()
     
     # On trie les codices alphanumériquement par lieu de conservation (localité, puis nom d'institution) puis par cote
+    # afin que, à score égal, ils soient affichés dans l'ordre alphanumérique
     listeLabelCodices = [labelCodex(codex.id)["label"] for codex in codices]
     triLabels = sorted(listeLabelCodices)
     
-    # On boucle sur les labels de codices triés pour ensuite traiter chaque codex dans l'ordre alphanumérique
+    # On boucle sur les labels de codices triés
+    # pour ensuite ajouter à la liste scoresCodices chaque codex dans l'ordre alphanumérique
     for label in triLabels:
         for codex in codices:
             if label == labelCodex(codex.id)["label"]:
@@ -147,8 +162,7 @@ def recherche():
     
     # On boucle sur chaque mot-clé
     for mot in motscles:
-        # On cherche chaque mot-clé dans une liste de champs pertinents des notices de codices
-        # On boucle sur dictionnaire de scoresCodices
+        # On boucle sur chaque codex via de scoresCodices
         for item in scoresCodices:
             # Pour charger les données d'un codex on les récupère grâce à la fonction codexJson()
             donneesCodex = codexJson(item["codex_id"])
@@ -159,14 +173,17 @@ def recherche():
                 # Si une ou plusieurs occurrences sont trouvées, le score augmente de 1
                 item["score"] += 1
     
-        # On cherche chaque mot-clé sur Data-BNF
+        # On cherche chaque mot-clé sur Data-BNF au moyen de la fonction requeteDataBNF()
+        # qui retourne un set d'id de codices
         resultatsDataBNF = requeteDataBNF(mot, tousArk)
-    
-    # Les résultats sont un dictionnaire dont les codices sont les clés et les valeurs, un score : à chaque
-    # match pour un codex, le score augmente de 1.
-    
+        for id in resultatsDataBNF:
+            # On boucle sur les dictionnaires de scoresCodices pour chercher une correspondance
+            for codex in scoresCodices:
+                if codex["codex_id"] == id:
+                    codex["score"] += 1
+        
     # On définit un booléen pour indiquer le succès ou non de la recherche
-    bredouille = True
+    bredouille = True # Ou plutôt "broucouille" dans le Bouchonnois
     for codex in scoresCodices:
         if codex["score"] != 0:
             bredouille = False
