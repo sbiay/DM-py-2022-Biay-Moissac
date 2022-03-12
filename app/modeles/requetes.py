@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 
-def requeteDataBNF(motcle, tousArk):
+def rechercheArk(motcle, tousArk):
     """
     Cette fonction prend comme argument la saisie d'un utilisateur,
     adresse à data.bnf.fr une requête get à partir de cette saisie,

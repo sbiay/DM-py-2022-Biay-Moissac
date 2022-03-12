@@ -7,7 +7,7 @@ from ..appliMoissac import app, login
 from ..modeles.classes import Codices, Lieux, Unites_codico, Oeuvres, Personnes, Provenances
 from ..modeles.utilisateurs import User
 from ..modeles.traitements import codexJson, personneLabel, codexLabel, tousAuteursJson, tousArkDict, toutesOeuvresJson
-from ..modeles.requetes import requeteDataBNF
+from ..modeles.requetes import rechercheArk
 from ..comutTest import test
 
 
@@ -174,7 +174,7 @@ def recherche():
     
         # On cherche chaque mot-clé sur Data-BNF au moyen de la fonction requeteDataBNF()
         # qui retourne un set d'id de codices
-        resultatsDataBNF = requeteDataBNF(mot, tousArk)
+        resultatsDataBNF = rechercheArk(mot, tousArk)
         for id in resultatsDataBNF:
             # On boucle sur les dictionnaires de scoresCodices pour chercher une correspondance
             for codex in scoresCodices:
