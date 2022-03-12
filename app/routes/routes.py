@@ -6,9 +6,8 @@ from bs4 import BeautifulSoup
 from ..appliMoissac import app, login
 from ..modeles.classes import Codices, Lieux, Unites_codico, Oeuvres, Personnes, Provenances
 from ..modeles.utilisateurs import User
-from ..modeles.jointures import codexJson, labelCodex, tous_auteurs, tous_ark, toutes_oeuvres
-from ..modeles.traitements import labelPersonne
-from ..modeles.requetesDataBNF import requeteDataBNF
+from ..modeles.traitements import codexJson, labelPersonne, labelCodex, tous_auteurs, tous_ark, toutes_oeuvres
+from ..modeles.requetes import requeteDataBNF
 from ..comutTest import test
 
 

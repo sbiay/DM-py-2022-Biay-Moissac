@@ -1,8 +1,5 @@
-import requests, json
+import requests
 from bs4 import BeautifulSoup
-from ..appliMoissac import db
-from ..modeles.classes import Codices, Unites_codico, Oeuvres
-from ..modeles.jointures import codexJson
 
 def requeteDataBNF(motcle, tousArk):
     """
