@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 from ..appliMoissac import app, login
 from ..modeles.classes import Codices, Lieux, Unites_codico, Oeuvres, Personnes, Provenances
 from ..modeles.utilisateurs import User
-from ..modeles.traitements import codexJson, labelPersonne, labelCodex, tous_auteurs, tous_ark, toutes_oeuvres
+from ..modeles.traitements import codexJson, personneLabel, codexLabel, tousAuteursJson, tousArkDict, toutesOeuvresJson
 from ..modeles.requetes import requeteDataBNF
 from ..comutTest import test
 
@@ -56,9 +56,9 @@ def deconnexion():
 @app.route("/pages/<quel_index>")
 def index(quel_index=["auteurs", "codices", "oeuvres"]):
     # Charger les oeuvres sous la forme d'une liste
-    oeuvres = json.loads(toutes_oeuvres())
+    oeuvres = json.loads(toutesOeuvresJson())
     # Pour obtenir une liste des noms d'auteurs ordonnée alphabétiquement
-    auteurs = json.loads(tous_auteurs())
+    auteurs = json.loads(tousAuteursJson())
     codices = "Voici la liste des codices"
 
     if quel_index == "auteurs":
@@ -140,24 +140,24 @@ def recherche():
     
     # On trie les codices alphanumériquement par lieu de conservation (localité, puis nom d'institution) puis par cote
     # afin que, à score égal, ils soient affichés dans l'ordre alphanumérique
-    listeLabelCodices = [labelCodex(codex.id)["label"] for codex in codices]
+    listeLabelCodices = [codexLabel(codex.id)["label"] for codex in codices]
     triLabels = sorted(listeLabelCodices)
     
     # On boucle sur les labels de codices triés
     # pour ensuite ajouter à la liste scoresCodices chaque codex dans l'ordre alphanumérique
     for label in triLabels:
         for codex in codices:
-            if label == labelCodex(codex.id)["label"]:
+            if label == codexLabel(codex.id)["label"]:
                 # Pour chaque codex, on écrit un dictionnaire
                 dicoCodex = {
                     "codex_id": codex.id,
-                    "label": labelCodex(codex.id)["label"],
+                    "label": codexLabel(codex.id)["label"],
                     "score": 0
                 }
                 scoresCodices.append(dicoCodex)
 
     # On charge les arks de la base de donnée
-    tousArk = tous_ark()
+    tousArk = tousArkDict()
     
     # On boucle sur chaque mot-clé
     for mot in motscles:
