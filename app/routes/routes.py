@@ -115,14 +115,14 @@ def recherche():
     cette recherche croise les identifiants ark d'auteurs et d'oeuvres contenus dans la base locale
     avec les ark répondant aux mêmes mots-clés interrogés sur data.bnf.fr.
     """
-    # DEFINIR UNE METHODE POUR TRANSMETTRE LE PARAMETRE ET/OU
-    
-    # On définit la nature de la recherche
-    rechercheIntersection = True
     
     # On récupère la chaîne de requête passée dans l'URL
     motscles = request.args.get("keyword", None)
-    
+    # Si la conjonction ET est présente dans la requête, on définit la recherche comme exclusive
+    rechercheIntersection = False
+    if " ET " in motscles:
+        rechercheIntersection = True
+
     # On élimine les caractères inutiles ou potentiellement dangereux
     caracteresInterdits = """,.!<>\;"&#^'`?%{}[]|()"""
     for caractere in caracteresInterdits:
