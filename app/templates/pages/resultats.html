@@ -17,22 +17,10 @@
         </tr>
       <tbody id="listeResultats">
         {% for resultat in resultats %}
-            {% if resultat["score"] > 2 %}
             <tr>
                 <td>{{ resultat["label"] }}</td>
                 <td><a href="{{ url_for('notice_codex', num=resultat["codex_id"])}}">Lien vers la notice</a></td>
             </tr>
-            {% elif resultat["score"] == 2 %}
-            <tr>
-                <td>{{ resultat["label"] }}</td>
-                <td><a href="{{ url_for('notice_codex', num=resultat["codex_id"])}}">Lien vers la notice</a></td>
-            </tr>
-            {% elif resultat["score"] == 1 %}
-            <tr>
-                <td>{{ resultat["label"] }}</td>
-                <td><a href="{{ url_for('notice_codex', num=resultat["codex_id"])}}">Lien vers la notice</a></td>
-            </tr>
-            {% endif %}
         {% endfor %}
       </tbody>
     </table>

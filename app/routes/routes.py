@@ -6,14 +6,23 @@ from bs4 import BeautifulSoup
 from ..appliMoissac import app, login
 from ..modeles.classes import Codices, Lieux, Unites_codico, Oeuvres, Personnes, Provenances
 from ..modeles.utilisateurs import User
-from ..modeles.traitements import codexJson, personneLabel, codexLabel, tousAuteursJson, tousArkDict, toutesOeuvresJson
+from ..modeles.traitements import codexJson, codicesListDict, personneLabel, codexLabel, tousAuteursJson, tousArkDict,\
+    toutesOeuvresJson
 from ..modeles.requetes import rechercheArk
 from ..comutTest import test
 
 
 @app.route("/")
 def accueil():
-    return render_template("pages/accueil.html")
+    """
+    La page d'accueil affiche la liste des codices enregistrés dans la base
+    alphanumériquement par lieu de conservation (localité, puis nom d'institution) puis par cote
+    """
+    # On récupère la liste des dictionnaires contenant les id, les labels et les scores initiés à 0 des codices
+    # triés alphanumériquement par labels grâce à la fonction codicesListDict()
+    listeDictCodices = codicesListDict()
+    
+    return render_template("pages/accueil.html", resultats=listeDictCodices)
 
 
 @app.route("/pages/connexion", methods=["POST", "GET"])
@@ -60,13 +69,14 @@ def index(quel_index=["auteurs", "codices", "oeuvres"]):
     # Pour obtenir une liste des noms d'auteurs ordonnée alphabétiquement
     auteurs = json.loads(tousAuteursJson())
     codices = "Voici la liste des codices"
-
+    
     if quel_index == "auteurs":
         return render_template("pages/auteurs.html", auteurs=auteurs, oeuvres=oeuvres)
     elif quel_index == "codices":
         return render_template("pages/codices.html", codices=codices)
     elif quel_index == "oeuvres":
         return render_template("pages/oeuvres.html", oeuvres=oeuvres)
+
 
 @app.route("/pages/inscription", methods=["GET", "POST"])
 def inscription():
@@ -110,19 +120,19 @@ def notice_codex(num):
 def recherche():
     """
     Cette route traite les mots-clés envoyés via le formulaire de recherche simple de la barre de navigation.
-    Elle fonctionne selon un opérateur OU entre les différents mots-clés de la saisie.
+    Elle fonctionne selon un opérateur OU par défaut entre les différents mots-clés de la saisie.
+    L'opérateur ET peut être saisi par l'utilisateur ce qui rend la recherche exclusive et non inclusive.
     Afin de bénéficier des multiples formes de titres d'oeuvre et de noms d'auteurs décrits sur data.bnf.fr,
     cette recherche croise les identifiants ark d'auteurs et d'oeuvres contenus dans la base locale
     avec les ark répondant aux mêmes mots-clés interrogés sur data.bnf.fr.
     """
-    
     # On récupère la chaîne de requête passée dans l'URL
     motscles = request.args.get("keyword", None)
     # Si la conjonction ET est présente dans la requête, on définit la recherche comme exclusive
     rechercheIntersection = False
     if " ET " in motscles:
         rechercheIntersection = True
-
+    
     # On élimine les caractères inutiles ou potentiellement dangereux
     caracteresInterdits = """,.!<>\;"&#^'`?%{}[]|()"""
     for caractere in caracteresInterdits:
@@ -130,36 +140,11 @@ def recherche():
         motscles = motscles.replace(caractere, "").lower()
     # On convertit les mots-clés en liste
     motscles = motscles.split(" ")
-    
-    # On initie la liste des résultats
-    scoresCodices = []
-    # Chaque item de la liste sera un dictionnaire selon le modèle suivant :
-    """
-    {'codex_id': 1,
-     'label': 'Paris, BnF, Latin 2989',
-     'score': 4}
-    """
-    # On charge les codices de la base
-    codices = Codices.query.all()
-    
-    # On trie les codices alphanumériquement par lieu de conservation (localité, puis nom d'institution) puis par cote
-    # afin que, à score égal, ils soient affichés dans l'ordre alphanumérique
-    listeLabelCodices = [codexLabel(codex.id)["label"] for codex in codices]
-    triLabels = sorted(listeLabelCodices)
-    
-    # On boucle sur les labels de codices triés
-    # pour ensuite ajouter à la liste scoresCodices chaque codex dans l'ordre alphanumérique
-    for label in triLabels:
-        for codex in codices:
-            if label == codexLabel(codex.id)["label"]:
-                # Pour chaque codex, on écrit un dictionnaire
-                dicoCodex = {
-                    "codex_id": codex.id,
-                    "label": codexLabel(codex.id)["label"],
-                    "score": 0
-                }
-                scoresCodices.append(dicoCodex)
 
+    # On récupère la liste des dictionnaires contenant les id, les labels et les scores initiés à 0 des codices
+    # triés alphanumériquement par labels grâce à la fonction codicesListDict()
+    listeDictCodices = codicesListDict()
+    
     # On charge les arks de la base de donnée
     tousArk = tousArkDict()
     
@@ -170,15 +155,15 @@ def recherche():
         resultatsDataBNF = rechercheArk(mot, tousArk)
         
         # On boucle sur chaque codex via de scoresCodices
-        for codex in scoresCodices:
+        for codex in listeDictCodices:
             # On initie un booléen qui détermine si le codex courant est pertinent vis-à-vis du mot-clé courant
             pertinent = False
-
+            
             # Pour charger les données d'un codex on les récupère grâce à la fonction codexJson()
             donneesCodex = codexJson(codex["codex_id"])
             # On passe tous les mots en bas de casse
             donneesCodex = donneesCodex.lower()
-        
+            
             # On cherche une occurrence du mot-clé courant dans les données
             if mot in donneesCodex:
                 # Si une ou plusieurs occurrences sont trouvées, la pertinence est vraie
@@ -194,8 +179,8 @@ def recherche():
                 codex["score"] += 1
     
     # On définit un booléen pour indiquer le succès ou non de la recherche
-    bredouille = True # Ou plutôt "broucouille", comme on dit dans le Bouchonnois
-    for codex in scoresCodices:
+    bredouille = True  # Ou plutôt "broucouille", comme on dit dans le Bouchonnois
+    for codex in listeDictCodices:
         # Si l'on recherche une intersection entre les mots-clés,
         # seuls les codices ayant un score égal au nombre de mots-clés sont des résultats positifs,
         # sinon, leur score est annulé
@@ -205,5 +190,4 @@ def recherche():
         if codex["score"] != 0:
             bredouille = False
     
-    
-    return render_template("pages/resultats.html", resultats=scoresCodices, bredouille=bredouille)
+    return render_template("pages/resultats.html", resultats=listeDictCodices, bredouille=bredouille)

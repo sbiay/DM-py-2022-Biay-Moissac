@@ -5,4 +5,10 @@
 {% block corps %}
     <h1>La librairie de Moissac</h1>
     <p>Bienvenue sur le site !</p>
+    <h2>Les manuscrits</h2>
+    <ul>
+    {% for resultat in resultats %}
+        <li>{{ resultat["label"] }} (<a href="{{ url_for('notice_codex', num=resultat["codex_id"])}}">notice</a>).</li>
+    {% endfor %}
+    </ul>
 {% endblock %}

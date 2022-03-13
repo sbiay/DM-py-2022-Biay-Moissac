@@ -587,3 +587,41 @@ def tousAuteursJson():
         json.dump(personnes, f)
     
     return json.dumps(personnes)
+
+def codicesListDict():
+    """
+    Cette fonction charge l'ensemble des codices de la base
+    trie les codices alphanumériquement par lieu de conservation (localité, puis nom d'institution) puis par cote
+    et retourne, dans cet ordre, une liste de dictionnaires contenant l'id du codex, son label et un score initié à 0.
+    :return type: list
+    
+    Chaque item de la liste sera un dictionnaire selon le modèle suivant :
+    {'codex_id': 1,
+     'label': 'Paris, BnF, Latin 2989',
+     'score': 4}
+    """
+    # On initie la liste
+    listDictCodices = []
+
+    # On charge les codices de la base
+    codices = Codices.query.all()
+    
+    # On trie les codices alphanumériquement par lieu de conservation (localité, puis nom d'institution) puis par cote
+    # afin que, à score égal, ils soient affichés dans l'ordre alphanumérique
+    listeLabelCodices = [codexLabel(codex.id)["label"] for codex in codices]
+    triLabels = sorted(listeLabelCodices)
+    
+    # On boucle sur les labels de codices triés
+    # pour ensuite ajouter à la liste scoresCodices chaque codex dans l'ordre alphanumérique
+    for label in triLabels:
+        for codex in codices:
+            if label == codexLabel(codex.id)["label"]:
+                # Pour chaque codex, on écrit un dictionnaire
+                dicoCodex = {
+                    "codex_id": codex.id,
+                    "label": codexLabel(codex.id)["label"],
+                    "score": 0
+                }
+                listDictCodices.append(dicoCodex)
+    
+    return listDictCodices
