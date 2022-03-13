@@ -115,6 +115,8 @@ def recherche():
     cette recherche croise les identifiants ark d'auteurs et d'oeuvres contenus dans la base locale
     avec les ark répondant aux mêmes mots-clés interrogés sur data.bnf.fr.
     """
+    # DEFINIR UNE METHODE POUR TRANSMETTRE LE PARAMETRE ET/OU
+    
     # On définit la nature de la recherche
     rechercheIntersection = True
     
@@ -163,43 +165,45 @@ def recherche():
     
     # On boucle sur chaque mot-clé
     for mot in motscles:
+        # On cherche chaque mot-clé sur Data-BNF au moyen de la fonction requeteDataBNF()
+        # qui retourne un set d'id de codices
+        resultatsDataBNF = rechercheArk(mot, tousArk)
+        
         # On boucle sur chaque codex via de scoresCodices
-        for item in scoresCodices:
+        for codex in scoresCodices:
             # On initie un booléen qui détermine si le codex courant est pertinent vis-à-vis du mot-clé courant
             pertinent = False
 
             # Pour charger les données d'un codex on les récupère grâce à la fonction codexJson()
-            donneesCodex = codexJson(item["codex_id"])
+            donneesCodex = codexJson(codex["codex_id"])
+            # On passe tous les mots en bas de casse
             donneesCodex = donneesCodex.lower()
         
             # On cherche une occurrence du mot-clé courant dans les données
             if mot in donneesCodex:
                 # Si une ou plusieurs occurrences sont trouvées, la pertinence est vraie
                 pertinent = True
-                
+            # A défaut, on cherche les résulats parmis ceux retournés par la requête sur Data-BNF
             else:
-                # Sinon, on cherche chaque mot-clé sur Data-BNF au moyen de la fonction requeteDataBNF()
-                # qui retourne un set d'id de codices
-                resultatsDataBNF = rechercheArk(mot, tousArk)
                 for id in resultatsDataBNF:
-                    # On boucle sur les dictionnaires de scoresCodices pour chercher une correspondance
-                    for codex in scoresCodices:
-                        if codex["codex_id"] == id:
-                            pertinent = True
-                            print(str(pertinent) + " pour " + item["label"])
+                    # Si l'id courant parmi les résulats de la requête DataBNF correspond à l'id du codex en cours de
+                    # traitement, la pertinence est établie
+                    if codex["codex_id"] == id:
+                        pertinent = True
             if pertinent:
-                item["score"] += 1
+                codex["score"] += 1
+    
     # On définit un booléen pour indiquer le succès ou non de la recherche
-    bredouille = True # Ou plutôt "broucouille" dans le Bouchonnois
+    bredouille = True # Ou plutôt "broucouille", comme on dit dans le Bouchonnois
     for codex in scoresCodices:
+        # Si l'on recherche une intersection entre les mots-clés,
+        # seuls les codices ayant un score égal au nombre de mots-clés sont des résultats positifs,
+        # sinon, leur score est annulé
+        if rechercheIntersection:
+            if codex["score"] < len(motscles):
+                codex["score"] = 0
         if codex["score"] != 0:
             bredouille = False
-            # Si on recherche une intersection entre les mots-clés,
-            # seuls les codices ayant un score égal au nombre de mots-clés sont des résultats positifs,
-            # sinon, leur score est annulé
-            if rechercheIntersection:
-                if codex["score"] < len(motscles):
-                    codex["score"] = 0
     
     
     return render_template("pages/resultats.html", resultats=scoresCodices, bredouille=bredouille)
