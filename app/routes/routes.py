@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 from ..appliMoissac import app, login
 from ..modeles.classes import Codices, Lieux, Unites_codico, Oeuvres, Personnes, Provenances
 from ..modeles.utilisateurs import User
-from ..modeles.traitements import codexJson, codicesListDict, personneLabel, codexLabel, tousAuteursJson, tousArkDict,\
+from ..modeles.traitements import codexJson, codicesListDict, personneLabel, codexLabel, tousAuteursJson, tousArkDict, \
     toutesOeuvresJson
 from ..modeles.requetes import rechercheArk
 from ..comutTest import test
@@ -140,7 +140,7 @@ def recherche():
         motscles = motscles.replace(caractere, "").lower()
     # On convertit les mots-clés en liste
     motscles = motscles.split(" ")
-
+    
     # On récupère la liste des dictionnaires contenant les id, les labels et les scores initiés à 0 des codices
     # triés alphanumériquement par labels grâce à la fonction codicesListDict()
     listeDictCodices = codicesListDict()
@@ -191,3 +191,15 @@ def recherche():
             bredouille = False
     
     return render_template("pages/resultats.html", resultats=listeDictCodices, bredouille=bredouille)
+
+
+@app.route("/recherche-avancee")
+def rechercheAvancee():
+    # On récupère la chaîne de requête passée dans l'URL
+    saisieAuteur = request.args.get("auteur", None)
+    saisieOeuvre = request.args.get("oeuvre", None)
+    saisieOeuvre = request.args.get("lieu", None)
+    checkProvenance = request.args.get("provenances", None)
+    print(checkProvenance)
+    
+    return render_template("pages/recherche-avancee.html")
