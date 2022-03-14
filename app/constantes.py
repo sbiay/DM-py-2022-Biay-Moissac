@@ -3,7 +3,7 @@ from .comutTest import test
 
 SECRET_KEY = "lessanglotslongsdesviolonsdelautomne"
 
-ROWS_PER_PAGE = 15
+ROWS_PER_PAGE = 10
 
 if not test:
     if SECRET_KEY == "lessanglotslongsdesviolonsdelautomne":

@@ -64,24 +64,24 @@ def deconnexion():
 
 
 @app.route("/pages/<quel_index>")
-def index(quel_index=["auteurs", "codices", "oeuvres"]):
+def index(quel_index=["auteurs", "oeuvres"]):
     # On définit de la variable "page"
     page = request.args.get('page', 1, type=int)
+    
     # On charge les oeuvres sous la forme d'un objet paginé
     classOeuvres = Oeuvres.query.order_by(Oeuvres.titre).paginate(page=page, per_page=ROWS_PER_PAGE)
+    # On charge les métadonnées et données liées aux oeuvres sous la forme d'une liste
+    donneesOeuvres = json.loads(toutesOeuvresJson())
 
-    # Charger les oeuvres sous la forme d'une liste
-    oeuvres = json.loads(toutesOeuvresJson())
-    # Pour obtenir une liste des noms d'auteurs ordonnée alphabétiquement
-    auteurs = json.loads(tousAuteursJson())
-    codices = "Voici la liste des codices"
+    # On charge les auteurs sous la forme d'un objet paginé
+    classAuteurs = Personnes.query.order_by(Personnes.nom).paginate(page=page, per_page=ROWS_PER_PAGE)
+    # On charge les métadonnées et données liées aux auteurs sous la forme d'une liste
+    donneesAuteurs = json.loads(tousAuteursJson())
     
     if quel_index == "auteurs":
-        return render_template("pages/auteurs.html", auteurs=auteurs, oeuvres=oeuvres)
-    elif quel_index == "codices":
-        return render_template("pages/codices.html", codices=codices)
+        return render_template("pages/auteurs.html", auteurs=donneesAuteurs, oeuvres=donneesOeuvres, classAuteurs=classAuteurs)
     elif quel_index == "oeuvres":
-        return render_template("pages/oeuvres.html", oeuvres=oeuvres, classOeuvres=classOeuvres)
+        return render_template("pages/oeuvres.html", oeuvres=donneesOeuvres, classOeuvres=classOeuvres)
 
 
 @app.route("/pages/inscription", methods=["GET", "POST"])
