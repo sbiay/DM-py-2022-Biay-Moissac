@@ -4,16 +4,26 @@ from flask_login import login_user, current_user, logout_user
 from bs4 import BeautifulSoup
 
 from ..appliMoissac import app, login
+from ..constantes import ROWS_PER_PAGE
 from ..modeles.classes import Codices, Lieux, Unites_codico, Oeuvres, Personnes, Provenances
 from ..modeles.utilisateurs import User
-from ..modeles.jointures import labelCodex, toutes_oeuvres, tous_auteurs, codexJson
-from ..modeles.traitements import labelPersonne
+from ..modeles.traitements import codexJson, codicesListDict, personneLabel, codexLabel, tousAuteursJson, tousArkDict, \
+    toutesOeuvresJson
+from ..modeles.requetes import rechercheArk
 from ..comutTest import test
 
 
 @app.route("/")
 def accueil():
-    return render_template("pages/accueil.html")
+    """
+    La page d'accueil affiche la liste des codices enregistrés dans la base
+    alphanumériquement par lieu de conservation (localité, puis nom d'institution) puis par cote
+    """
+    # On récupère la liste des dictionnaires contenant les id, les labels et les scores initiés à 0 des codices
+    # triés alphanumériquement par labels grâce à la fonction codicesListDict()
+    listeDictCodices = codicesListDict()
+    
+    return render_template("pages/accueil.html", resultats=listeDictCodices)
 
 
 @app.route("/pages/connexion", methods=["POST", "GET"])
@@ -53,27 +63,32 @@ def deconnexion():
     return render_template("pages/accueil.html")
 
 
-@app.route("/pages/<quel_index>")
-def index(quel_index=["auteurs", "codices", "oeuvres"]):
-    oeuvres = json.loads(toutes_oeuvres())
+@app.route("/pages/auteurs")
+def indexAuteurs():
+    # On charge les métadonnées et données liées aux oeuvres sous la forme d'une liste
+    donneesOeuvres = json.loads(toutesOeuvresJson())
+    # On définit de la variable "page"
+    page = request.args.get('page', 1, type=int)
+    # On charge les auteurs sous la forme d'un objet paginé
+    classAuteurs = Personnes.query.order_by(Personnes.nom).paginate(page=page, per_page=ROWS_PER_PAGE)
+    # On charge les métadonnées et données liées aux auteurs sous la forme d'une liste
+    donneesAuteurs = json.loads(tousAuteursJson())
     
-    # Pour obtenir une liste des noms d'auteurs ordonnée alphabétiquement
-    personnes = Personnes.query.order_by(Personnes.nom).all()
-    # La liste auteurs contiendra une liste de tuples formés de l'identifiant et du nom long d'un auteur
-    auteurs = []
-    for personne in personnes:
-        print(personne.nom + " - aut: " + str(personne.oeuvres_aut) + " - attr: " + str(personne.oeuvres_attr))
-        if personne.oeuvres_aut or personne.oeuvres_attr:
-            auteurs.append((personne.id, labelPersonne(personne.id, forme="long")))
-    print(auteurs)
-    codices = "Voici la liste des codices"
+    return render_template("pages/auteurs.html", auteurs=donneesAuteurs, oeuvres=donneesOeuvres,
+                               classAuteurs=classAuteurs)
+
+@app.route("/pages/oeuvres")
+def indexOeuvres():
+    # On définit de la variable "page"
+    page = request.args.get('page', 1, type=int)
+
+    # On charge les métadonnées et données liées aux oeuvres sous la forme d'une liste
+    donneesOeuvres = json.loads(toutesOeuvresJson())
     
-    if quel_index == "auteurs":
-        return render_template("pages/auteurs.html", auteurs=auteurs, oeuvres=oeuvres)
-    elif quel_index == "codices":
-        return render_template("pages/codices.html", codices=codices)
-    elif quel_index == "oeuvres":
-        return render_template("pages/oeuvres.html", oeuvres=oeuvres)
+    # On charge les oeuvres sous la forme d'un objet paginé
+    classOeuvres = Oeuvres.query.order_by(Oeuvres.titre).paginate(page=page, per_page=ROWS_PER_PAGE)
+
+    return render_template("pages/oeuvres.html", oeuvres=donneesOeuvres, classOeuvres=classOeuvres)
 
 
 @app.route("/pages/inscription", methods=["GET", "POST"])
@@ -103,7 +118,6 @@ def notice_codex(num):
     
     # Réassignation de la variable codex par l'objet Json retourné par la fonction codexJson()
     codex = json.loads(codexJson(num))
-    print(codex["origine"])
     
     if not test:
         return render_template("pages/codices.html",
@@ -117,17 +131,89 @@ def notice_codex(num):
 
 @app.route("/recherche")
 def recherche():
+    """
+    Cette route traite les mots-clés envoyés via le formulaire de recherche simple de la barre de navigation.
+    Elle fonctionne selon un opérateur OU par défaut entre les différents mots-clés de la saisie.
+    L'opérateur ET peut être saisi par l'utilisateur ce qui rend la recherche exclusive et non inclusive.
+    Afin de bénéficier des multiples formes de titres d'oeuvre et de noms d'auteurs décrits sur data.bnf.fr,
+    cette recherche croise les identifiants ark d'auteurs et d'oeuvres contenus dans la base locale
+    avec les ark répondant aux mêmes mots-clés interrogés sur data.bnf.fr.
+    """
+    # On récupère la chaîne de requête passée dans l'URL
     motscles = request.args.get("keyword", None)
+    # Si la conjonction ET est présente dans la requête, on définit la recherche comme exclusive
+    rechercheIntersection = False
+    if " ET " in motscles:
+        rechercheIntersection = True
     
-    # Eliminer les caractères inutiles
-    caracteresInutiles = ",.!"
-    for caractere in caracteresInutiles:
-        motscles = motscles.replace(caractere, "")
-    # Eliminer les caractères potentiellements dangereux
-    caracteresInterdits = """<>\;"&#^'`?%{}[]|()"""
+    # On élimine les caractères inutiles ou potentiellement dangereux
+    caracteresInterdits = """,.!<>\;"&#^'`?%{}[]|()"""
     for caractere in caracteresInterdits:
-        motscles = motscles.replace(caractere, "")
-    # Convertir les mots-clés en liste
+        # On passe également les mots en bas de casse
+        motscles = motscles.replace(caractere, "").lower()
+    # On convertit les mots-clés en liste
     motscles = motscles.split(" ")
-    print(motscles)
-    return render_template("pages/resultats.html")
+    
+    # On récupère la liste des dictionnaires contenant les id, les labels et les scores initiés à 0 des codices
+    # triés alphanumériquement par labels grâce à la fonction codicesListDict()
+    listeDictCodices = codicesListDict()
+    
+    # On charge les arks de la base de donnée
+    tousArk = tousArkDict()
+    
+    # On boucle sur chaque mot-clé
+    for mot in motscles:
+        # On cherche chaque mot-clé sur Data-BNF au moyen de la fonction requeteDataBNF()
+        # qui retourne un set d'id de codices
+        resultatsDataBNF = rechercheArk(mot, tousArk)
+        
+        # On boucle sur chaque codex via de scoresCodices
+        for codex in listeDictCodices:
+            # On initie un booléen qui détermine si le codex courant est pertinent vis-à-vis du mot-clé courant
+            pertinent = False
+            
+            # Pour charger les données d'un codex on les récupère grâce à la fonction codexJson()
+            donneesCodex = codexJson(codex["codex_id"])
+            # On passe tous les mots en bas de casse
+            donneesCodex = donneesCodex.lower()
+            
+            # On cherche une occurrence du mot-clé courant dans les données
+            if mot in donneesCodex:
+                # Si une ou plusieurs occurrences sont trouvées, la pertinence est vraie
+                pertinent = True
+            # A défaut, on cherche les résulats parmis ceux retournés par la requête sur Data-BNF
+            else:
+                for id in resultatsDataBNF:
+                    # Si l'id courant parmi les résulats de la requête DataBNF correspond à l'id du codex en cours de
+                    # traitement, la pertinence est établie
+                    if codex["codex_id"] == id:
+                        pertinent = True
+            if pertinent:
+                codex["score"] += 1
+    
+    # On définit un booléen pour indiquer le succès ou non de la recherche
+    bredouille = True  # Ou plutôt "broucouille", comme on dit dans le Bouchonnois
+    for codex in listeDictCodices:
+        # Si l'on recherche une intersection entre les mots-clés,
+        # seuls les codices ayant un score égal au nombre de mots-clés sont des résultats positifs,
+        # sinon, leur score est annulé
+        if rechercheIntersection:
+            if codex["score"] < len(motscles):
+                codex["score"] = 0
+        if codex["score"] != 0:
+            bredouille = False
+            
+    
+    return render_template("pages/resultats.html", resultats=listeDictCodices, bredouille=bredouille)
+
+
+@app.route("/recherche-avancee")
+def rechercheAvancee():
+    # On récupère la chaîne de requête passée dans l'URL
+    saisieAuteur = request.args.get("auteur", None)
+    saisieOeuvre = request.args.get("oeuvre", None)
+    saisieOeuvre = request.args.get("lieu", None)
+    checkProvenance = request.args.get("provenances", None)
+    print(checkProvenance)
+    
+    return render_template("pages/recherche-avancee.html")

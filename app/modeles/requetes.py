@@ -1,62 +1,38 @@
 import requests
 from bs4 import BeautifulSoup
-from ..appliMoissac import db
-from ..modeles.classes import Codices, Unites_codico, Oeuvres
 
-def rechercheSimple(motscles):
-    """
-    :param motscles: saisie du champ recherche nettoyée
-    :type motscles: list
-    """
-    # Charger les identifiants ark pertinents pour la recherche sur les auteurs et sur les oeuvres
-    # J'ai pour cela besoin de tous les ark intéressants de ma base
-
-def requeteOeuvres(motscles):
+def rechercheArk(motcle, tousArk):
     """
     Cette fonction prend comme argument la saisie d'un utilisateur,
     adresse à data.bnf.fr une requête get à partir de cette saisie,
-    croise les réponses de data.bnf avec les identifiants ark des oeuvres enregistrées dans la base libMoissac,
-    retourne la liste de clés primaires des codices contenant ces oeuvres.
+    croise les réponses de data.bnf avec les identifiants ark enregistrés dans la base libMoissac,
+    retourne un set des clés primaires des codices contenant ark.
+    :return type: set
     """
     
+    # On écrit la requête
+    r = requests.get(f"https://data.bnf.fr/fr/search?term={motcle}")
     
-    # Charger les identifiants ark pertinents pour la recherche sur les auteurs
-    oeuvres = Oeuvres.query.all()
-    ark_oeuvres = []
-    for oeuvre in oeuvres:
-        if oeuvre.data_bnf:
-            ark_oeuvres.append(oeuvre.data_bnf)
+    # On transforme la réponse HTML de data.bnf en objet BeautifulSoup afin de pouvoir le parser
+    soup = BeautifulSoup(r.text, "html.parser")
+    reponses = []
     
-    # Ecrire la requête
-    r = requests.get(f"https://data.bnf.fr/fr/search?term={motscles}")
-
-    # Parser la réponse
-    reponses = []  # Contient une liste d'identifiants ark
-    for ligne in r.text.split("\n"):
-        for ark in ark_oeuvres:
-            if str(f"=https://data.bnf.fr/fr/{ark}/") in ligne:
-                reponses.append(ark)
+    # Parser la réponse : les identifiants ark potentiellement intéressants apparaissent dans les éléments "a"
+    liens = soup.find_all("a")
+    for lien in liens:
+        if lien.get("href")[25:28] == "ark":
+            reponses.append(lien["href"][25:])
+            
+    # Si l'un des ark de la réponse est dans les ark de notre base de données, on retourne l'id du codex concerné
+    idCodicesPertinents = []
+    # On boucle sur les arks de la base de données
+    for typeArk in tousArk:
+        for ark in tousArk[typeArk]:
+            if ark in reponses:
+                for idCodex in tousArk[typeArk][ark]:
+                    idCodicesPertinents.append(idCodex)
     
-    # Requête sur les codices concernés
-    # Liste des oeuvres
-    oeuvres = []
-    for ark in reponses:
-        r = Oeuvres.query.filter(Oeuvres.data_bnf == int(ark)).one()
-        oeuvres.append(r)
-    
-    # Liste des codices qui les contiennent
-    codices = []
-    for oeuvre in oeuvres:
-        # Toutes les UC contenant chaque oeuvre
-        r = Contient.query.filter(Contient.oeuvre == oeuvre.id).all()
-        for conteneur in r:
-            r_uc = Unites_codico.query.filter(Unites_codico.id == conteneur.unites_codico).all()
-            for uc in r_uc:
-                r_cod = Codices.query.filter(Codices.id == uc.code_id).all()
-                for codex in r_cod:
-                    codices.append(codex.id)
-    print(codices)
-    return codices
+    return set(idCodicesPertinents)
 
 
 def creationDataBNF(motscles, objet=["auteur", "oeuvre"]):
@@ -85,7 +61,7 @@ def creationDataBNF(motscles, objet=["auteur", "oeuvre"]):
                 premiereOeuvre = index + 1
             elif span.string == 'Thèmes':
                 premierTheme = index + 1
-    print(reponses)
+
     # Liste des catégories de tri des réponses par défaut dans data.bnf
     categories = ["Auteurs", "Organisations", "Œuvres", "Thèmes", "Lieux", "Spectacles", "Périodiques"]
     categories_presentes = []

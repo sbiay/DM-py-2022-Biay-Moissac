@@ -28,7 +28,7 @@ body {
 
 /* div située sous le bandeau supérieur */
 .row {
-    background-color: #d5c6b8;
+    background-color: #333537;
 }
 
 #lateral {
@@ -39,7 +39,7 @@ body {
 
 main {
     color: #dad6d1;
-    background-color: #303132;
+    background-color: #333537;
 }
 
 /* Liens hypertextes */

@@ -21,16 +21,27 @@
               <a class="nav-link active" href="{{ url_for('accueil') }}">Accueil</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="{{ url_for('index', quel_index='auteurs')}}">Auteurs</a>
+              <a class="nav-link active" aria-current="page" href="{{ url_for('indexAuteurs')}}">Auteurs</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="{{ url_for('index', quel_index='oeuvres')}}">Œuvres</a>
+              <a class="nav-link active" aria-current="page" href="{{ url_for('indexOeuvres')}}">Œuvres</a>
             </li>
           </ul>
           <form class="d-flex" method="GET" action="{{url_for("recherche")}}">
-            <input class="form-control me-2" type="search" placeholder="Texte ici" aria-label="Search" name="keyword">
+            <input class="form-control me-2" type="search" title="La conjonction ET permet de rendre la recherche exclusive" placeholder="Texte ici" aria-label="Search" name="keyword">
             <button class="btn btn-outline-success" type="submit" role="button">C'est parti !</button>
           </form>
+            <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style="--bs-scroll-height: 100px;">
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="{{ url_for('rechercheAvancee')}}">Recherche avancée</a>
+              </li>
+                <li class="nav-item">
+                <a class="nav-link active" aria-current="page" method="GET" href="{{ url_for('connexion')}}">Se connecter</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="{{ url_for('deconnexion')}}">Se déconnecter</a>
+              </li>
+            </ul>
         </div>
       </div>
     </nav>
