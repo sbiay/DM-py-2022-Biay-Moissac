@@ -16,13 +16,13 @@
 
             <!-- Auteur ou attribution -->
             {% if oeuvre["auteur"] and oeuvre["attr"] %}
-                <a href="{{ url_for('index', quel_index="auteurs", _anchor="auteur" + oeuvre["auteur_id"]|string + "°") }}">{{ oeuvre["auteur"] }}</a>
+                <a href="{{ url_for('index', quel_index="auteurs", page=oeuvre["auteur_pageIndex"]|string) }}">{{ oeuvre["auteur"] }}</a>
                 <br>
-                <a href="{{ url_for('index', quel_index="auteurs", _anchor="auteur" + oeuvre["attr_id"]|string + "°") }}">{{ oeuvre["attr"] }} (attribué à)</a>
+                <a href="{{ url_for('index', quel_index="auteurs", page=oeuvre["attr_pageIndex"]|string) }}">{{ oeuvre["attr"] }} (attribué à)</a>
             {% elif oeuvre["auteur"] and not oeuvre["attr"] %}
-                <a href="{{ url_for('index', quel_index="auteurs", _anchor="auteur" + oeuvre["auteur_id"]|string + "°") }}">{{ oeuvre["auteur"] }}</a>
+                <a href="{{ url_for('index', quel_index="auteurs", page=oeuvre["auteur_pageIndex"]|string) }}">{{ oeuvre["auteur"] }}</a>
             {% elif oeuvre["attr"] and not oeuvre["auteur"] %}
-                <a href="{{ url_for('index', quel_index="auteurs", _anchor="auteur" + oeuvre["attr_id"]|string + "°") }}">{{ oeuvre["attr"] }} (attribué à)</a>
+                <a href="{{ url_for('index', quel_index="auteurs", page=oeuvre["attr_pageIndex"]|string) }}">{{ oeuvre["attr"] }} (attribué à)</a>
             {% endif %}
 
             <!-- Ni auteur ni attribution -->

@@ -191,6 +191,7 @@ def oeuvreDict(objetOeuvre):
      "auteur_id": 1,
      "auteur": "Jean Cassien (saint)",
      "auteur_ark": 12044269,
+     "auteur_pageIndex": 1,
      "attr": null
     }
     :param objetOeuvre: un objet de la classe Oeuvres
@@ -211,6 +212,7 @@ def oeuvreDict(objetOeuvre):
         # On utilise la fonction labelPersonne() pour renseigner la forme courte du nom (sans dates)
         dico["auteur"] = personneLabel(objetOeuvre.lien_auteur.id, "court")
         dico["auteur_ark"] = objetOeuvre.lien_auteur.data_bnf
+        dico["auteur_pageIndex"] = pageIndex(objetOeuvre.lien_auteur.id, "auteurs")
     # Sinon, un seul champ est renseigné
     else:
         dico["auteur"] = None
@@ -219,6 +221,7 @@ def oeuvreDict(objetOeuvre):
         dico["attr_id"] = objetOeuvre.lien_attr.id
         dico["attr"] = personneLabel(objetOeuvre.lien_attr.id, "court")
         dico["attr_ark"] = objetOeuvre.lien_attr.data_bnf
+        dico["attr_pageIndex"] = pageIndex(objetOeuvre.lien_attr.id, "auteurs")
     else:
         dico["attr"] = None
     return dico
@@ -583,11 +586,12 @@ def tousAuteursJson():
             # On applique la fonction dicoOeuvre() à nos objets
             donneesOeuvre_recup = oeuvreDict(oeuvre)
             # Les données relatives aux auteurs et aux attributions du dictionnaire "donneesOeuvre_recup"
-            # n'étant pas à retenir, car déjà renseignés comme clés primaires du dictionnaire dicoPersonnes,
-            # on assigne un nouveau dictionnaire, "donneesOeuvre_nouv", pour y transférer seulament les clés pertinentes
+            # n'étant pas à retenir, car déjà renseignées comme clés primaires du dictionnaire dicoPersonnes,
+            # on crée un nouveau dictionnaire, "donneesOeuvre_nouv", pour y transférer seulement les clés pertinentes
             donneesOeuvre_nouv = {
                 "oeuvre_id": donneesOeuvre_recup["oeuvre_id"],
-                "titre": donneesOeuvre_recup["titre"]
+                "titre": donneesOeuvre_recup["titre"],
+                "oeuvre_pageIndex": pageIndex(donneesOeuvre_recup["oeuvre_id"], "oeuvres"),
             }
             # On créé une nouvelle donnée si l'oeuvre possède un auteur
             if donneesOeuvre_recup["auteur"]:

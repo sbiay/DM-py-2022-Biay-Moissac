@@ -12,13 +12,10 @@
             <!--On boucle sur les auteurs correspondant à ces items-->
             {% for auteur in auteurs %}
                 {% if item.id == auteur["personne_id"] %}
-
                 <h2 id="{{ "auteur" + auteur["personne_id"]|string + "°" }}">{{ auteur["label"] }}</h2>
-
                     {% for oeuvre in auteur["oeuvres"] %}
-
                         <!-- Pour les titres des oeuvres -->
-                        <a href="{{ url_for('index', quel_index="oeuvres", _anchor="oeuvre" + oeuvre["oeuvre_id"]|string + "°") }}">
+                        <a href="{{ url_for('index', quel_index="oeuvres", page=oeuvre["oeuvre_pageIndex"]|string) }}">
                             <i>{{ oeuvre["titre"] }}</i></a>
                         {% if oeuvre["relation"] == "a pour attribution" %}
                             <span> (attribué à)</span>
