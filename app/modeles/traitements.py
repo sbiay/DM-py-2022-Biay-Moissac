@@ -588,6 +588,7 @@ def tousAuteursJson():
     
     return json.dumps(personnes)
 
+
 def codicesListDict():
     """
     Cette fonction charge l'ensemble des codices de la base
@@ -602,7 +603,7 @@ def codicesListDict():
     """
     # On initie la liste
     listDictCodices = []
-
+    
     # On charge les codices de la base
     codices = Codices.query.all()
     

@@ -4,6 +4,7 @@ from flask_login import login_user, current_user, logout_user
 from bs4 import BeautifulSoup
 
 from ..appliMoissac import app, login
+from ..constantes import ROWS_PER_PAGE
 from ..modeles.classes import Codices, Lieux, Unites_codico, Oeuvres, Personnes, Provenances
 from ..modeles.utilisateurs import User
 from ..modeles.traitements import codexJson, codicesListDict, personneLabel, codexLabel, tousAuteursJson, tousArkDict, \
@@ -64,6 +65,11 @@ def deconnexion():
 
 @app.route("/pages/<quel_index>")
 def index(quel_index=["auteurs", "codices", "oeuvres"]):
+    # On définit de la variable "page"
+    page = request.args.get('page', 1, type=int)
+    # On charge les oeuvres sous la forme d'un objet paginé
+    classOeuvres = Oeuvres.query.order_by(Oeuvres.titre).paginate(page=page, per_page=ROWS_PER_PAGE)
+
     # Charger les oeuvres sous la forme d'une liste
     oeuvres = json.loads(toutesOeuvresJson())
     # Pour obtenir une liste des noms d'auteurs ordonnée alphabétiquement
@@ -75,7 +81,7 @@ def index(quel_index=["auteurs", "codices", "oeuvres"]):
     elif quel_index == "codices":
         return render_template("pages/codices.html", codices=codices)
     elif quel_index == "oeuvres":
-        return render_template("pages/oeuvres.html", oeuvres=oeuvres)
+        return render_template("pages/oeuvres.html", oeuvres=oeuvres, classOeuvres=classOeuvres)
 
 
 @app.route("/pages/inscription", methods=["GET", "POST"])
@@ -189,6 +195,7 @@ def recherche():
                 codex["score"] = 0
         if codex["score"] != 0:
             bredouille = False
+            
     
     return render_template("pages/resultats.html", resultats=listeDictCodices, bredouille=bredouille)
 

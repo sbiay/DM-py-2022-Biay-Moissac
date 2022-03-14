@@ -7,32 +7,64 @@
 {% block corps %}
     <h1>Les œuvres</h1>
     <br>
-    {% for oeuvre in oeuvres %}
-        <h2 id="oeuvre{{ oeuvre["oeuvre_id"] }}°">{{ oeuvre["titre"] }}</h2>
+    <!--On boucle sur les items de la classe paginée-->
+    {% for item in classOeuvres.items %}
+        <!--On boucle sur les oeuvres correspondant à ces items-->
+        {% for oeuvre in oeuvres %}
+            {% if item.id == oeuvre["oeuvre_id"] %}
+            <h2 id="oeuvre{{ oeuvre["oeuvre_id"] }}°">{{ oeuvre["titre"] }}</h2>
 
-        <!-- Auteur ou attribution -->
-        {% if oeuvre["auteur"] and oeuvre["attr"] %}
-            <a href="{{ url_for('index', quel_index="auteurs", _anchor="auteur" + oeuvre["auteur_id"]|string + "°") }}">{{ oeuvre["auteur"] }}</a>
-            <br>
-            <a href="{{ url_for('index', quel_index="auteurs", _anchor="auteur" + oeuvre["attr_id"]|string + "°") }}">{{ oeuvre["attr"] }} (attribué à)</a>
-        {% elif oeuvre["auteur"] and not oeuvre["attr"] %}
-            <a href="{{ url_for('index', quel_index="auteurs", _anchor="auteur" + oeuvre["auteur_id"]|string + "°") }}">{{ oeuvre["auteur"] }}</a>
-        {% elif oeuvre["attr"] and not oeuvre["auteur"] %}
-            <a href="{{ url_for('index', quel_index="auteurs", _anchor="auteur" + oeuvre["attr_id"]|string + "°") }}">{{ oeuvre["attr"] }} (attribué à)</a>
-        {% endif %}
+            <!-- Auteur ou attribution -->
+            {% if oeuvre["auteur"] and oeuvre["attr"] %}
+                <a href="{{ url_for('index', quel_index="auteurs", _anchor="auteur" + oeuvre["auteur_id"]|string + "°") }}">{{ oeuvre["auteur"] }}</a>
+                <br>
+                <a href="{{ url_for('index', quel_index="auteurs", _anchor="auteur" + oeuvre["attr_id"]|string + "°") }}">{{ oeuvre["attr"] }} (attribué à)</a>
+            {% elif oeuvre["auteur"] and not oeuvre["attr"] %}
+                <a href="{{ url_for('index', quel_index="auteurs", _anchor="auteur" + oeuvre["auteur_id"]|string + "°") }}">{{ oeuvre["auteur"] }}</a>
+            {% elif oeuvre["attr"] and not oeuvre["auteur"] %}
+                <a href="{{ url_for('index', quel_index="auteurs", _anchor="auteur" + oeuvre["attr_id"]|string + "°") }}">{{ oeuvre["attr"] }} (attribué à)</a>
+            {% endif %}
 
-        <!-- Ni auteur ni attribution -->
-        {% if not oeuvre["auteur"] and not oeuvre["attr"] %}
-        Anonyme.
-        {% endif %}
-        <ul>
-        <!-- Manuscrits contenant l'oeuvre -->
-        {% for codex in oeuvre["contenue_dans"] %}
-            <li><a href="{{ url_for('notice_codex', num=codex["codex_id"])}}">{{ codex["label"] }}</a></li>
+            <!-- Ni auteur ni attribution -->
+            {% if not oeuvre["auteur"] and not oeuvre["attr"] %}
+            Anonyme.
+            {% endif %}
+            <ul>
+            <!-- Manuscrits contenant l'oeuvre -->
+            {% for codex in oeuvre["contenue_dans"] %}
+                <li><a href="{{ url_for('notice_codex', num=codex["codex_id"])}}">{{ codex["label"] }}</a></li>
+            {% endfor %}
+            </ul>
+            {% endif %}
         {% endfor %}
-        </ul>
-
 
     {% endfor %}
+
+    <br>
+
+    <nav aria-label="research-pagination">
+      <ul class="pagination">
+        {% for page in classOeuvres.iter_pages() %}
+            {% if page %}
+
+              {% if page != classOeuvres.page %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for("index", quel_index="oeuvres", page=page) }}">{{page}}</a>
+                </li>
+              {% else %}
+                <li class="page-item active disabled">
+                  <a class="page-link">{{page}} <span class="sr-only">(actuelle)</span></a>
+                </li>
+              {% endif %}
+
+            {% else %}
+                <li class="page-item disabled">
+                  <a class="page-link">...</a>
+                </li>
+            {% endif %}
+
+        {%- endfor %}
+      </ul>
+    </nav>
 
 {% endblock %}
