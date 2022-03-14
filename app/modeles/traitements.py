@@ -1,6 +1,7 @@
 import json
 from operator import attrgetter
 from .classes import Codices, Lieux, Oeuvres, Personnes, Provenances, Unites_codico
+from ..constantes import ROWS_PER_PAGE
 
 
 # Les scripts suivants mettent en forme des chaînes de caractères pour l'affichage d'un enregistrement particulier
@@ -145,6 +146,39 @@ def personneLabel(idPersonne, forme=["court", "long"]):
 
 # Les scripts suivants mettent sous la forme de dictionnaires ou d'objet Json
 # les données d'un enregistrement ou d'un objet particulier
+def pageIndex(id, quel_index=["oeuvres", "auteurs"]):
+    """
+    Cette fonction prend comme argument l'identifiant d'une oeuvre ou d'un auteur de la base de données
+    et le numéro de la page d'index où l'objet est affiché dans l'index.
+    :param id: identifiant d'un objet de la classe Oeuvres ou Personnes
+    :type id: int
+    :returns: numéro de la page d'index où l'objet est affiché dans l'index
+    :return type: int
+    """
+    if quel_index == "oeuvres":
+        classOeuvres = Oeuvres.query.order_by(Oeuvres.titre).paginate(per_page=ROWS_PER_PAGE)
+        for page in classOeuvres.iter_pages():
+            classOeuvres = Oeuvres.query.order_by(Oeuvres.titre).paginate(page=page, per_page=ROWS_PER_PAGE)
+            for data in vars(classOeuvres).items():
+                # On sélectionne la propriété items
+                if data[0] == "items":
+                    for items in data[1]:
+                        # On cherche la correspondance entre le paramètre id et les id
+                        if id == items.id:
+                            return page
+    elif quel_index == "auteurs":
+        classPersonnes = Personnes.query.order_by(Personnes.nom).paginate(per_page=ROWS_PER_PAGE)
+        for page in classPersonnes.iter_pages():
+            classPersonnes = Personnes.query.order_by(Personnes.nom).paginate(page=page, per_page=ROWS_PER_PAGE)
+            for data in vars(classPersonnes).items():
+                # On sélectionne la propriété items
+                if data[0] == "items":
+                    for items in data[1]:
+                        # On cherche la correspondance entre le paramètre id et les id
+                        if id == items.id:
+                            return page
+                        
+                        
 def oeuvreDict(objetOeuvre):
     """
     Cette fonction prend comme argument un objet de la classe Oeuvres
