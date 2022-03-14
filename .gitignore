@@ -19,3 +19,5 @@ user.sql
 app/comutTest.py
 *.db-journal
 aide-gitpush.txt
+*.sql
+*.graphml
