@@ -45,37 +45,37 @@
                             {% if oeuvres["auteur"] and oeuvres["attr"] %}
                                 <li>
                                     <!--Nom d'auteur-->
-                                    <a href="{{ url_for('index', quel_index="auteurs", _anchor="auteur" + oeuvres["auteur_id"]|string + "°") }}">
+                                    <a href="{{ url_for('noticePersonne', id=oeuvres["auteur_id"]) }}">
                                         {{oeuvres["auteur"]}}</a>,
                                     <!-- Titre -->
-                                    <a href="{{ url_for('index', quel_index="oeuvres", _anchor="oeuvre" + oeuvres["oeuvre_id"]|string + "°") }}">
+                                    <a href="{{ url_for('noticeOeuvre', id=oeuvres["oeuvre_id"]) }}">
                                         <i>{{oeuvres["titre"]}}</i></a>
                                     <!-- Attribution --> (attribué à
-                                    <a href="{{ url_for('index', quel_index="auteurs", _anchor="auteur" + oeuvres["attr_id"]|string + "°") }}">
+                                    <a href="{{ url_for('noticePersonne', id=oeuvres["auteur_id"]) }}">
                                         {{ oeuvres["attr"] }}</a>).
                                 </li>
                             {% elif oeuvres["auteur"] and not oeuvres["attr"] %}
                                 <li>
                                     <!--Nom d'auteur-->
-                                    <a href="{{ url_for('index', quel_index="auteurs", _anchor="auteur" + oeuvres["auteur_id"]|string + "°") }}">
+                                    <a href="{{ url_for('noticePersonne', id=oeuvres["auteur_id"]) }}">
                                         {{oeuvres["auteur"]}}</a>,
                                     <!-- Titre -->
-                                    <a href="{{ url_for('index', quel_index="oeuvres", _anchor="oeuvre" + oeuvres["oeuvre_id"]|string + "°") }}">
+                                    <a href="{{ url_for('noticeOeuvre', id=oeuvres["oeuvre_id"]) }}">
                                         <i>{{oeuvres["titre"]}}</i></a>.
                                 </li>
                             {% elif not oeuvres["auteur"] and oeuvres["attr"] %}
                                 <li>
                                     <!-- Titre -->
-                                    <a href="{{ url_for('index', quel_index="oeuvres", _anchor="oeuvre" + oeuvres["oeuvre_id"]|string + "°") }}">
+                                    <a href="{{ url_for('noticeOeuvre', id=oeuvres["oeuvre_id"]) }}">
                                         <i>{{oeuvres["titre"]}}</i></a>
                                     <!-- Attribution --> (attribué à
-                                    <a href="{{ url_for('index', quel_index="auteurs", _anchor="auteur" + oeuvres["attr_id"]|string + "°") }}">
+                                    <a href="{{ url_for('noticePersonne', id=oeuvres["auteur_id"]) }}">
                                         {{ oeuvres["attr"] }}</a>).
                                 </li>
                             {% else %}
                                 <li>
                                     <!-- Titre -->
-                                    <a href="{{ url_for('index', quel_index="oeuvres", _anchor="oeuvre" + oeuvres["oeuvre_id"]|string + "°") }}">
+                                    <a href="{{ url_for('noticeOeuvre', id=oeuvres["oeuvre_id"]) }}">
                                         <i>{{oeuvres["titre"]}}</i></a>.
                                 </li>
                             {% endif %}
@@ -95,37 +95,37 @@
                         {% if oeuvres["auteur"] and oeuvres["attr"] %}
                             <li>
                                 <!--Nom d'auteur-->
-                                <a href="{{ url_for('index', quel_index="auteurs", _anchor="auteur" + oeuvres["auteur_id"]|string + "°") }}">
+                                <a href="{{ url_for('noticePersonne', id=oeuvres["auteur_id"]) }}">
                                     {{oeuvres["auteur"]}}</a>,
                                 <!-- Titre -->
-                                <a href="{{ url_for('index', quel_index="oeuvres", _anchor="oeuvre" + oeuvres["oeuvre_id"]|string + "°") }}">
+                                <a href="{{ url_for('noticeOeuvre', id=oeuvres["oeuvre_id"]) }}">
                                     <i>{{oeuvres["titre"]}}</i></a>
                                 <!-- Attribution --> (attribué à
-                                <a href="{{ url_for('index', quel_index="auteurs", _anchor="auteur" + oeuvres["attr_id"]|string + "°") }}">
+                                <a href="{{ url_for('noticePersonne', id=oeuvres["attr_id"]) }}">
                                     {{ oeuvres["attr"] }}</a>).
                             </li>
                         {% elif oeuvres["auteur"] and not oeuvres["attr"] %}
                             <li>
                                 <!--Nom d'auteur-->
-                                <a href="{{ url_for('index', quel_index="auteurs", _anchor="auteur" + oeuvres["auteur_id"]|string + "°") }}">
+                                <a href="{{ url_for('noticePersonne', id=oeuvres["auteur_id"]) }}">
                                     {{oeuvres["auteur"]}}</a>,
                                 <!-- Titre -->
-                                <a href="{{ url_for('index', quel_index="oeuvres", _anchor="oeuvre" + oeuvres["oeuvre_id"]|string + "°") }}">
+                                <a href="{{ url_for('noticeOeuvre', id=oeuvres["oeuvre_id"]) }}">
                                     <i>{{oeuvres["titre"]}}</i></a>.
                             </li>
                         {% elif not oeuvres["auteur"] and oeuvres["attr"] %}
                             <li>
                                 <!-- Titre -->
-                                <a href="{{ url_for('index', quel_index="oeuvres", _anchor="oeuvre" + oeuvres["oeuvre_id"]|string + "°") }}">
+                                <a href="{{ url_for('noticeOeuvre', id=oeuvres["oeuvre_id"]) }}">
                                     <i>{{oeuvres["titre"]}}</i></a>
                                 <!-- Attribution --> (attribué à
-                                <a href="{{ url_for('index', quel_index="auteurs", _anchor="auteur" + oeuvres["attr_id"]|string + "°") }}">
+                                <a href="{{ url_for('noticePersonne', id=oeuvres["attr_id"]) }}">
                                     {{ oeuvres["attr"] }}</a>).
                             </li>
                         {% else %}
                             <li>
                                 <!-- Titre -->
-                                <a href="{{ url_for('index', quel_index="oeuvres", _anchor="oeuvre" + oeuvres["oeuvre_id"]|string + "°") }}">
+                                <a href="{{ url_for('noticeOeuvre', id=oeuvres["oeuvre_id"]) }}">
                                     <i>{{oeuvres["titre"]}}</i></a>.
                             </li>
                         {% endif %}

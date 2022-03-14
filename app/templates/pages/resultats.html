@@ -16,14 +16,43 @@
                 <th id="col3" scope="col">Lien</th>
             </tr>
             <tbody id="listeResultats">
-            {% for resultat in resultats %}
-                <tr>
-                    <td>{{ resultat["label"] }}</td>
-                    <td><a href="{{ url_for('notice_codex', num=resultat["codex_id"])}}">Lien vers la notice</a></td>
-                </tr>
+            {% for resultat in resultats.items %}
+                {% for item in donnees %}
+                    {% if item["codex_id"] == resultat.id %}
+                    <tr>
+                        <td>{{ item["label"] }}</td>
+                        <td><a href="{{ url_for('notice_codex', num=item["codex_id"])}}">Lien vers la notice</a></td>
+                    </tr>
+                    {% endif %}
+                {% endfor %}
             {% endfor %}
             </tbody>
         </table>
     {% endif %}
 
+    <!-- Boutons de navigation dans la pagination -->
+    <nav aria-label="research-pagination">
+        <ul class="pagination">
+            {% for page in resultats.iter_pages() %}
+                {% if page %}
+
+                    {% if page != resultats.page %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for("recherche", page=page) }}">{{page}}</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item active disabled">
+                            <a class="page-link">{{page}} <span class="sr-only">(actuelle)</span></a>
+                        </li>
+                    {% endif %}
+
+                {% else %}
+                    <li class="page-item disabled">
+                        <a class="page-link">...</a>
+                    </li>
+                {% endif %}
+
+            {%- endfor %}
+        </ul>
+    </nav>
 {% endblock %}

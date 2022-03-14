@@ -217,6 +217,12 @@ def recherche():
                         pertinent = True
             if pertinent:
                 codex["score"] += 1
+
+    # On prépare la pagination des résultats
+    page = request.args.get('page', 1, type=int)
+
+    # On initie une liste d'id des codices résultats
+    idResultats = []
     
     # On définit un booléen pour indiquer le succès ou non de la recherche
     bredouille = True  # Ou plutôt "broucouille", comme on dit dans le Bouchonnois
@@ -229,8 +235,12 @@ def recherche():
                 codex["score"] = 0
         if codex["score"] != 0:
             bredouille = False
+            # On ajoute les objets Codices aux résultats paginés
+            idResultats.append(codex["codex_id"])
+
+    resultats = Codices.query.filter(Codices.id.in_(idResultats)).paginate(page=page, per_page=ROWS_PER_PAGE)
     
-    return render_template("pages/resultats.html", resultats=listeDictCodices, bredouille=bredouille)
+    return render_template("pages/resultats.html", resultats=resultats, donnees=listeDictCodices, bredouille=bredouille)
 
 
 @app.route("/recherche-avancee")

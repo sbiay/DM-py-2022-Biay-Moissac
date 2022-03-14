@@ -16,13 +16,13 @@
 
                 <!-- Auteur ou attribution -->
                 {% if oeuvre["auteur"] and oeuvre["attr"] %}
-                    <a href="{{ url_for("indexAuteurs", id=oeuvre["auteur_id"]) }}">{{ oeuvre["auteur"] }}</a>
+                    <a href="{{ url_for("noticePersonne", id=oeuvre["auteur_id"]) }}">{{ oeuvre["auteur"] }}</a>
                     <br>
-                    <a href="{{ url_for("indexAuteurs", id=oeuvre["attr_id"]) }}">{{ oeuvre["attr"] }} (attribué à)</a>
+                    <a href="{{ url_for("noticePersonne", id=oeuvre["attr_id"]) }}">{{ oeuvre["attr"] }} (attribué à)</a>
                 {% elif oeuvre["auteur"] and not oeuvre["attr"] %}
-                    <a href="{{ url_for("indexAuteurs", id=oeuvre["auteur_id"]) }}">{{ oeuvre["auteur"] }}</a>
+                    <a href="{{ url_for("noticePersonne", id=oeuvre["auteur_id"]) }}">{{ oeuvre["auteur"] }}</a>
                 {% elif oeuvre["attr"] and not oeuvre["auteur"] %}
-                    <a href="{{ url_for("indexAuteurs", id=oeuvre["attr_id"]) }}">{{ oeuvre["attr"] }} (attribué à)</a>
+                    <a href="{{ url_for("noticePersonne", id=oeuvre["attr_id"]) }}">{{ oeuvre["attr"] }} (attribué à)</a>
                 {% endif %}
 
                 <!-- Ni auteur ni attribution -->
