@@ -1,77 +1,77 @@
 <!DOCTYPE html>
 <html lang="fr">
-  <head>
+<head>
     <meta charset="utf-8">
-      {% block headTitle %}
-      {% endblock %}
+    {% block headTitle %}
+    {% endblock %}
     <!-- Feuilles de style -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/moissac1.css') }}">
-  </head>
+</head>
 <body>
 <header>
     <nav class="navbar navbar-expand-lg">
-      <div class="container-fluid">
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarScroll">
-          <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style="--bs-scroll-height: 100px;">
-            <li class="nav-item">
-              <a class="nav-link active" href="{{ url_for('accueil') }}">Accueil</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="{{ url_for('indexAuteurs')}}">Auteurs</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="{{ url_for('indexOeuvres')}}">Œuvres</a>
-            </li>
-          </ul>
-          <form class="d-flex" method="GET" action="{{url_for("recherche")}}">
-            <input class="form-control me-2" type="search" title="La conjonction ET permet de rendre la recherche exclusive" placeholder="Texte ici" aria-label="Search" name="keyword">
-            <button class="btn btn-outline-success" type="submit" role="button">C'est parti !</button>
-          </form>
-            <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style="--bs-scroll-height: 100px;">
-              <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="{{ url_for('rechercheAvancee')}}">Recherche avancée</a>
-              </li>
-                <li class="nav-item">
-                <a class="nav-link active" aria-current="page" method="GET" href="{{ url_for('connexion')}}">Se connecter</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="{{ url_for('deconnexion')}}">Se déconnecter</a>
-              </li>
-            </ul>
+        <div class="container-fluid">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarScroll">
+                <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style="--bs-scroll-height: 100px;">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('accueil') }}">Accueil</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="{{ url_for('indexAuteurs')}}">Auteurs</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="{{ url_for('indexOeuvres')}}">Œuvres</a>
+                    </li>
+                </ul>
+                <form class="d-flex" method="GET" action="{{url_for("recherche")}}">
+                    <input class="form-control me-2" type="search" title="La conjonction ET permet de rendre la recherche exclusive" placeholder="Texte ici" aria-label="Search" name="keyword">
+                    <button class="btn btn-outline-success" type="submit" role="button">C'est parti !</button>
+                </form>
+                <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style="--bs-scroll-height: 100px;">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="{{ url_for('rechercheAvancee')}}">Recherche avancée</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" method="GET" href="{{ url_for('connexion')}}">Se connecter</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="{{ url_for('deconnexion')}}">Se déconnecter</a>
+                    </li>
+                </ul>
+            </div>
         </div>
-      </div>
     </nav>
 </header>
 
 <div class="container-fluid">
     <div class="row"><!-- Contient l'image latérale -->
         <nav id="lateral" class="col-md-2">
-        <img class="humilite" src="{{ url_for('static', filename='img/tests_accueil/btv1b105254751_f336-c.jpg')}}"
-             alt="Latin 2077 : Humilité">
+            <img class="humilite" src="{{ url_for('static', filename='img/tests_accueil/btv1b105254751_f336-c.jpg')}}"
+                 alt="Latin 2077 : Humilité">
         </nav>
-    <main role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4"><!-- Contient la partie principale du gabarit -->
-        <div style="position: absolute; inset: 0px; overflow: hidden; pointer-events: none; visibility: hidden; z-index: -1;" class="chartjs-size-monitor"><div class="chartjs-size-monitor-expand" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;"><div style="position:absolute;width:1000000px;height:1000000px;left:0;top:0"></div></div><div class="chartjs-size-monitor-shrink" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;"><div style="position:absolute;width:200%;height:200%;left:0; top:0"></div></div></div>
-        <div class="container">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-          {% if messages %}
-          <div class="row">
-              <div class="col">
-                {% for category, message in messages %}
-                  <div class="alert alert-{{category}}" role="alert">{{ message }}</div>
-                {% endfor %}
-              </div>
-          </div>
-          {% endif %}
-        {% endwith %}
+        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4"><!-- Contient la partie principale du gabarit -->
+            <div style="position: absolute; inset: 0px; overflow: hidden; pointer-events: none; visibility: hidden; z-index: -1;" class="chartjs-size-monitor"><div class="chartjs-size-monitor-expand" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;"><div style="position:absolute;width:1000000px;height:1000000px;left:0;top:0"></div></div><div class="chartjs-size-monitor-shrink" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;"><div style="position:absolute;width:200%;height:200%;left:0; top:0"></div></div></div>
+            <div class="container">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="row">
+                            <div class="col">
+                                {% for category, message in messages %}
+                                    <div class="alert alert-{{category}}" role="alert">{{ message }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endwith %}
 
-        {% block corps %}
-        {% endblock %}
-        </div>
-    </main>
+                {% block corps %}
+                {% endblock %}
+            </div>
+        </main>
     </div>
 </div>
 </body>

@@ -7,8 +7,8 @@ from ..appliMoissac import app, login
 from ..constantes import ROWS_PER_PAGE
 from ..modeles.classes import Codices, Lieux, Unites_codico, Oeuvres, Personnes, Provenances
 from ..modeles.utilisateurs import User
-from ..modeles.traitements import codexJson, codicesListDict, personneLabel, codexLabel, tousAuteursJson, tousArkDict, \
-    toutesOeuvresJson
+from ..modeles.traitements import codexJson, codicesListDict, conservationDict, personneLabel, codexLabel, \
+    tousAuteursJson, tousArkDict, toutesOeuvresJson, oeuvreDict
 from ..modeles.requetes import rechercheArk
 from ..comutTest import test
 
@@ -65,30 +65,57 @@ def deconnexion():
 
 @app.route("/pages/auteurs")
 def indexAuteurs():
-    # On charge les métadonnées et données liées aux oeuvres sous la forme d'une liste
-    donneesOeuvres = json.loads(toutesOeuvresJson())
     # On définit de la variable "page"
     page = request.args.get('page', 1, type=int)
+    
     # On charge les auteurs sous la forme d'un objet paginé
     classAuteurs = Personnes.query.order_by(Personnes.nom).paginate(page=page, per_page=ROWS_PER_PAGE)
     # On charge les métadonnées et données liées aux auteurs sous la forme d'une liste
     donneesAuteurs = json.loads(tousAuteursJson())
     
-    return render_template("pages/auteurs.html", auteurs=donneesAuteurs, oeuvres=donneesOeuvres,
-                               classAuteurs=classAuteurs)
+    return render_template("pages/auteurs.html", auteurs=donneesAuteurs, classAuteurs=classAuteurs)
+
 
 @app.route("/pages/oeuvres")
 def indexOeuvres():
     # On définit de la variable "page"
     page = request.args.get('page', 1, type=int)
-
+    
     # On charge les métadonnées et données liées aux oeuvres sous la forme d'une liste
     donneesOeuvres = json.loads(toutesOeuvresJson())
     
     # On charge les oeuvres sous la forme d'un objet paginé
     classOeuvres = Oeuvres.query.order_by(Oeuvres.titre).paginate(page=page, per_page=ROWS_PER_PAGE)
-
+    
     return render_template("pages/oeuvres.html", oeuvres=donneesOeuvres, classOeuvres=classOeuvres)
+
+
+@app.route("/pages/auteur/<int:id>")
+def noticePersonne(id):
+    """Cette route prend pour argument l'identifiant d'un auteur et retourne le template de sa notice"""
+    # On charge les données de tous les auteurs
+    toutesPersonnes = json.loads(tousAuteursJson())
+    
+    # On récupère les données de l'auteur concerné
+    for item in toutesPersonnes:
+        if item["personne_id"] == id:
+            dictPersonne = item
+    
+    return render_template("pages/auteur.html", dictPersonne=dictPersonne, titre=dictPersonne["label"])
+
+
+@app.route("/pages/oeuvre/<int:id>")
+def noticeOeuvre(id):
+    """Cette route prend pour argument l'identifiant d'une oeuvre et retourne le template de sa notice"""
+    # On charge les données de toutes les oeuvres
+    toutesOeuvres = json.loads(toutesOeuvresJson())
+    
+    # On récupère les données de l'oeuvre concernée
+    for item in toutesOeuvres:
+        if item["oeuvre_id"] == id:
+            dictOeuvre = item
+    
+    return render_template("pages/oeuvre.html", dictOeuvre=dictOeuvre, titre=dictOeuvre["titre"])
 
 
 @app.route("/pages/inscription", methods=["GET", "POST"])
@@ -202,7 +229,6 @@ def recherche():
                 codex["score"] = 0
         if codex["score"] != 0:
             bredouille = False
-            
     
     return render_template("pages/resultats.html", resultats=listeDictCodices, bredouille=bredouille)
 

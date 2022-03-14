@@ -6,56 +6,56 @@
 
 {% block corps %}
     <h1>Les auteurs</h1>
-        <br>
-        <!--On boucle sur les items de la classe paginée-->
-        {% for item in classAuteurs.items %}
-            <!--On boucle sur les auteurs correspondant à ces items-->
-            {% for auteur in auteurs %}
-                {% if item.id == auteur["personne_id"] %}
-                <h2 id="{{ "auteur" + auteur["personne_id"]|string + "°" }}">{{ auteur["label"] }}</h2>
-                    {% for oeuvre in auteur["oeuvres"] %}
-                        <!-- Pour les titres des oeuvres -->
-                        <a href="{{ url_for("indexOeuvres", page=oeuvre["oeuvre_pageIndex"]|string) }}">
-                            <i>{{ oeuvre["titre"] }}</i></a>
-                        {% if oeuvre["relation"] == "a pour attribution" %}
-                            <span> (attribué à)</span>
-                        {% endif %}
-                        <!-- Pour les codices qui les contiennent-->
-                        {% for codex in oeuvre["contenue_dans"] %}
-                            <ul>
-                                <li><a href="{{ url_for('notice_codex', num=codex["codex_id"])}}">{{codex["label"]}}</a></li>
-                            </ul>
-                        {% endfor %}
+    <br>
+    <!--On boucle sur les items de la classe paginée-->
+    {% for item in classAuteurs.items %}
+        <!--On boucle sur les auteurs correspondant à ces items-->
+        {% for auteur in auteurs %}
+            {% if item.id == auteur["personne_id"] %}
+                <h2>{{ auteur["label"] }}</h2>
+                {% for oeuvre in auteur["oeuvres"] %}
+                    <!-- Pour les titres des oeuvres -->
+                    <a href="{{ url_for(" noticeOeuvre", id=oeuvre["oeuvre_id"]) }}">
+                        <i>{{ oeuvre["titre"] }}</i></a>
+                    {% if oeuvre["relation"] == "a pour attribution" %}
+                        <span> (attribué à)</span>
+                    {% endif %}
+                    <!-- Pour les codices qui les contiennent-->
+                    {% for codex in oeuvre["contenue_dans"] %}
+                        <ul>
+                            <li><a href="{{ url_for('notice_codex', num=codex[" codex_id"])}}">{{codex["label"]}}</a></li>
+                        </ul>
                     {% endfor %}
-                {% endif %}
-            {% endfor %}
+                {% endfor %}
+            {% endif %}
         {% endfor %}
+    {% endfor %}
 
     <br>
     <!-- Boutons de navigation dans la pagination -->
     <nav aria-label="research-pagination">
-      <ul class="pagination">
-        {% for page in classAuteurs.iter_pages() %}
-            {% if page %}
+        <ul class="pagination">
+            {% for page in classAuteurs.iter_pages() %}
+                {% if page %}
 
-              {% if page != classAuteurs.page %}
-                <li class="page-item">
-                    <a class="page-link" href="{{ url_for("indexAuteurs", page=page) }}">{{page}}</a>
-                </li>
-              {% else %}
-                <li class="page-item active disabled">
-                  <a class="page-link">{{page}} <span class="sr-only">(actuelle)</span></a>
-                </li>
-              {% endif %}
+                    {% if page != classAuteurs.page %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for(" indexAuteurs", page=page) }}">{{page}}</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item active disabled">
+                            <a class="page-link">{{page}} <span class="sr-only">(actuelle)</span></a>
+                        </li>
+                    {% endif %}
 
-            {% else %}
-                <li class="page-item disabled">
-                  <a class="page-link">...</a>
-                </li>
-            {% endif %}
+                {% else %}
+                    <li class="page-item disabled">
+                        <a class="page-link">...</a>
+                    </li>
+                {% endif %}
 
-        {%- endfor %}
-      </ul>
+            {%- endfor %}
+        </ul>
     </nav>
 
 {% endblock %}

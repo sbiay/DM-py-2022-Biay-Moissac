@@ -1,7 +1,6 @@
 import json
 from operator import attrgetter
 from .classes import Codices, Lieux, Oeuvres, Personnes, Provenances, Unites_codico
-from ..constantes import ROWS_PER_PAGE
 
 
 # Les scripts suivants mettent en forme des chaînes de caractères pour l'affichage d'un enregistrement particulier
@@ -146,40 +145,7 @@ def personneLabel(idPersonne, forme=["court", "long"]):
 
 # Les scripts suivants mettent sous la forme de dictionnaires ou d'objet Json
 # les données d'un enregistrement ou d'un objet particulier
-def pageIndex(id, quel_index=["oeuvres", "auteurs"]):
-    """
-    Cette fonction prend comme argument l'identifiant d'une oeuvre ou d'un auteur de la base de données
-    et le numéro de la page d'index où l'objet est affiché dans l'index.
-    :param id: identifiant d'un objet de la classe Oeuvres ou Personnes
-    :type id: int
-    :returns: numéro de la page d'index où l'objet est affiché dans l'index
-    :return type: int
-    """
-    if quel_index == "oeuvres":
-        classOeuvres = Oeuvres.query.order_by(Oeuvres.titre).paginate(per_page=ROWS_PER_PAGE)
-        for page in classOeuvres.iter_pages():
-            classOeuvres = Oeuvres.query.order_by(Oeuvres.titre).paginate(page=page, per_page=ROWS_PER_PAGE)
-            for data in vars(classOeuvres).items():
-                # On sélectionne la propriété items
-                if data[0] == "items":
-                    for items in data[1]:
-                        # On cherche la correspondance entre le paramètre id et les id
-                        if id == items.id:
-                            return page
-    elif quel_index == "auteurs":
-        classPersonnes = Personnes.query.order_by(Personnes.nom).paginate(per_page=ROWS_PER_PAGE)
-        for page in classPersonnes.iter_pages():
-            classPersonnes = Personnes.query.order_by(Personnes.nom).paginate(page=page, per_page=ROWS_PER_PAGE)
-            for data in vars(classPersonnes).items():
-                # On sélectionne la propriété items
-                if data[0] == "items":
-                    for items in data[1]:
-                        # On cherche la correspondance entre le paramètre id et les id
-                        if id == items.id:
-                            return page
-                        
-                        
-def oeuvreDict(objetOeuvre):
+def oeuvreDict(id):
     """
     Cette fonction prend comme argument un objet de la classe Oeuvres
     et retourne un dictionnaire de forme suivante :
@@ -191,7 +157,6 @@ def oeuvreDict(objetOeuvre):
      "auteur_id": 1,
      "auteur": "Jean Cassien (saint)",
      "auteur_ark": 12044269,
-     "auteur_pageIndex": 1,
      "attr": null
     }
     :param objetOeuvre: un objet de la classe Oeuvres
@@ -200,6 +165,7 @@ def oeuvreDict(objetOeuvre):
     :return type: dict
     """
     # Les métadonnées seront décrites dans le dictionnaire "dico"
+    objetOeuvre = Oeuvres.query.get(id)
     dico = {
         "oeuvre_id": objetOeuvre.id,
         "titre": objetOeuvre.titre,
@@ -212,7 +178,6 @@ def oeuvreDict(objetOeuvre):
         # On utilise la fonction labelPersonne() pour renseigner la forme courte du nom (sans dates)
         dico["auteur"] = personneLabel(objetOeuvre.lien_auteur.id, "court")
         dico["auteur_ark"] = objetOeuvre.lien_auteur.data_bnf
-        dico["auteur_pageIndex"] = pageIndex(objetOeuvre.lien_auteur.id, "auteurs")
     # Sinon, un seul champ est renseigné
     else:
         dico["auteur"] = None
@@ -221,7 +186,6 @@ def oeuvreDict(objetOeuvre):
         dico["attr_id"] = objetOeuvre.lien_attr.id
         dico["attr"] = personneLabel(objetOeuvre.lien_attr.id, "court")
         dico["attr_ark"] = objetOeuvre.lien_attr.data_bnf
-        dico["attr_pageIndex"] = pageIndex(objetOeuvre.lien_attr.id, "auteurs")
     else:
         dico["attr"] = None
     return dico
@@ -332,7 +296,7 @@ def codexJson(codex_id):
         # Pour chaque oeuvre contenue dans l'objet UC courant, on ajoutera un dictionnaire décrivant ses métadonnées
         # en faisant appel à la fonction dicoOeuvre
         for objetOeuvre in objetUC.contenu:
-            dicoUCcourante = oeuvreDict(objetOeuvre)
+            dicoUCcourante = oeuvreDict(objetOeuvre.id)
             dicoUC["oeuvres"].append(dicoUCcourante)
         
         # On ajoute le dictionnaire décrivant le contenu de l'unité codicologique courante au dictionnaire description
@@ -491,12 +455,12 @@ def toutesOeuvresJson():
     """
     # On initie une liste vide, puis on assigne l'ensemble des objets de la classe Oeuvres à classOeuvres
     oeuvres = []
-    classOeuvres = Oeuvres.query.order_by(Oeuvres.titre).all()
+    toutesOeuvres = Oeuvres.query.order_by(Oeuvres.titre).all()
     
     # On boucle sur chaque objet
-    for objetOeuvre in classOeuvres:
+    for objetOeuvre in toutesOeuvres:
         # On décrit les métadonnées d'une oeuvre grâce à la fonction dicoOeuvre()
-        oeuvre = oeuvreDict(objetOeuvre)
+        oeuvre = oeuvreDict(objetOeuvre.id)
         
         # Pour renseigner les codices contenant l'oeuvre
         oeuvre["contenue_dans"] = []
@@ -584,14 +548,13 @@ def tousAuteursJson():
         # sur le modèle de la fonction toutes_oeuvres()
         for oeuvre in oeuvres:
             # On applique la fonction dicoOeuvre() à nos objets
-            donneesOeuvre_recup = oeuvreDict(oeuvre)
+            donneesOeuvre_recup = oeuvreDict(oeuvre.id)
             # Les données relatives aux auteurs et aux attributions du dictionnaire "donneesOeuvre_recup"
             # n'étant pas à retenir, car déjà renseignées comme clés primaires du dictionnaire dicoPersonnes,
             # on crée un nouveau dictionnaire, "donneesOeuvre_nouv", pour y transférer seulement les clés pertinentes
             donneesOeuvre_nouv = {
                 "oeuvre_id": donneesOeuvre_recup["oeuvre_id"],
                 "titre": donneesOeuvre_recup["titre"],
-                "oeuvre_pageIndex": pageIndex(donneesOeuvre_recup["oeuvre_id"], "oeuvres"),
             }
             # On créé une nouvelle donnée si l'oeuvre possède un auteur
             if donneesOeuvre_recup["auteur"]:
