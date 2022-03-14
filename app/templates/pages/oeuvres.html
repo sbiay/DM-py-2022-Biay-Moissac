@@ -16,13 +16,13 @@
 
             <!-- Auteur ou attribution -->
             {% if oeuvre["auteur"] and oeuvre["attr"] %}
-                <a href="{{ url_for('index', quel_index="auteurs", page=oeuvre["auteur_pageIndex"]|string) }}">{{ oeuvre["auteur"] }}</a>
+                <a href="{{ url_for("indexAuteurs", page=oeuvre["auteur_pageIndex"]|string) }}">{{ oeuvre["auteur"] }}</a>
                 <br>
-                <a href="{{ url_for('index', quel_index="auteurs", page=oeuvre["attr_pageIndex"]|string) }}">{{ oeuvre["attr"] }} (attribué à)</a>
+                <a href="{{ url_for("indexAuteurs", page=oeuvre["attr_pageIndex"]|string) }}">{{ oeuvre["attr"] }} (attribué à)</a>
             {% elif oeuvre["auteur"] and not oeuvre["attr"] %}
-                <a href="{{ url_for('index', quel_index="auteurs", page=oeuvre["auteur_pageIndex"]|string) }}">{{ oeuvre["auteur"] }}</a>
+                <a href="{{ url_for("indexAuteurs", page=oeuvre["auteur_pageIndex"]|string) }}">{{ oeuvre["auteur"] }}</a>
             {% elif oeuvre["attr"] and not oeuvre["auteur"] %}
-                <a href="{{ url_for('index', quel_index="auteurs", page=oeuvre["attr_pageIndex"]|string) }}">{{ oeuvre["attr"] }} (attribué à)</a>
+                <a href="{{ url_for("indexAuteurs", page=oeuvre["attr_pageIndex"]|string) }}">{{ oeuvre["attr"] }} (attribué à)</a>
             {% endif %}
 
             <!-- Ni auteur ni attribution -->
@@ -49,7 +49,7 @@
 
               {% if page != classOeuvres.page %}
                 <li class="page-item">
-                    <a class="page-link" href="{{ url_for("index", quel_index="oeuvres", page=page) }}">{{page}}</a>
+                    <a class="page-link" href="{{ url_for("indexOeuvres", page=page) }}">{{page}}</a>
                 </li>
               {% else %}
                 <li class="page-item active disabled">

@@ -63,27 +63,32 @@ def deconnexion():
     return render_template("pages/accueil.html")
 
 
-@app.route("/pages/<quel_index>")
-def index(quel_index=["auteurs", "oeuvres"]):
-    # On définit de la variable "page"
-    page = request.args.get('page', 1, type=int)
-
-    # On charge les oeuvres sous la forme d'un objet paginé
-    classOeuvres = Oeuvres.query.order_by(Oeuvres.titre).paginate(page=page, per_page=ROWS_PER_PAGE)
-    
+@app.route("/pages/auteurs")
+def indexAuteurs():
     # On charge les métadonnées et données liées aux oeuvres sous la forme d'une liste
     donneesOeuvres = json.loads(toutesOeuvresJson())
-
+    # On définit de la variable "page"
+    page = request.args.get('page', 1, type=int)
     # On charge les auteurs sous la forme d'un objet paginé
     classAuteurs = Personnes.query.order_by(Personnes.nom).paginate(page=page, per_page=ROWS_PER_PAGE)
     # On charge les métadonnées et données liées aux auteurs sous la forme d'une liste
     donneesAuteurs = json.loads(tousAuteursJson())
     
-    if quel_index == "auteurs":
-        return render_template("pages/auteurs.html", auteurs=donneesAuteurs, oeuvres=donneesOeuvres,
+    return render_template("pages/auteurs.html", auteurs=donneesAuteurs, oeuvres=donneesOeuvres,
                                classAuteurs=classAuteurs)
-    elif quel_index == "oeuvres":
-        return render_template("pages/oeuvres.html", oeuvres=donneesOeuvres, classOeuvres=classOeuvres)
+
+@app.route("/pages/oeuvres")
+def indexOeuvres():
+    # On définit de la variable "page"
+    page = request.args.get('page', 1, type=int)
+
+    # On charge les métadonnées et données liées aux oeuvres sous la forme d'une liste
+    donneesOeuvres = json.loads(toutesOeuvresJson())
+    
+    # On charge les oeuvres sous la forme d'un objet paginé
+    classOeuvres = Oeuvres.query.order_by(Oeuvres.titre).paginate(page=page, per_page=ROWS_PER_PAGE)
+
+    return render_template("pages/oeuvres.html", oeuvres=donneesOeuvres, classOeuvres=classOeuvres)
 
 
 @app.route("/pages/inscription", methods=["GET", "POST"])

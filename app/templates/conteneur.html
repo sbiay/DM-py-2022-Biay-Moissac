@@ -21,10 +21,10 @@
               <a class="nav-link active" href="{{ url_for('accueil') }}">Accueil</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="{{ url_for('index', quel_index='auteurs')}}">Auteurs</a>
+              <a class="nav-link active" aria-current="page" href="{{ url_for('indexAuteurs')}}">Auteurs</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="{{ url_for('index', quel_index='oeuvres')}}">Œuvres</a>
+              <a class="nav-link active" aria-current="page" href="{{ url_for('indexOeuvres')}}">Œuvres</a>
             </li>
           </ul>
           <form class="d-flex" method="GET" action="{{url_for("recherche")}}">

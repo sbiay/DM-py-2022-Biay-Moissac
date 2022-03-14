@@ -15,7 +15,7 @@
                 <h2 id="{{ "auteur" + auteur["personne_id"]|string + "°" }}">{{ auteur["label"] }}</h2>
                     {% for oeuvre in auteur["oeuvres"] %}
                         <!-- Pour les titres des oeuvres -->
-                        <a href="{{ url_for('index', quel_index="oeuvres", page=oeuvre["oeuvre_pageIndex"]|string) }}">
+                        <a href="{{ url_for("indexOeuvres", page=oeuvre["oeuvre_pageIndex"]|string) }}">
                             <i>{{ oeuvre["titre"] }}</i></a>
                         {% if oeuvre["relation"] == "a pour attribution" %}
                             <span> (attribué à)</span>
@@ -40,7 +40,7 @@
 
               {% if page != classAuteurs.page %}
                 <li class="page-item">
-                    <a class="page-link" href="{{ url_for("index", quel_index="auteurs", page=page) }}">{{page}}</a>
+                    <a class="page-link" href="{{ url_for("indexAuteurs", page=page) }}">{{page}}</a>
                 </li>
               {% else %}
                 <li class="page-item active disabled">
