@@ -185,15 +185,13 @@ def recherche(typeRecherche=["simple", "avancee"]):
         dictMotsCles = {
             "motsClesCote": request.args.get("cote", None),
             "motsClesAuteur": request.args.get("auteur", None),
-            "motsClesOeuvre": request.args.get("oeuvre", None),
-            "motsClesLieu": request.args.get("lieu", None)
+            "motsClesOeuvre": request.args.get("oeuvre", None)
         }
         # On initie un dictionnaire pour récupérer les saisies à traiter
         dictMotsClesNets = {}
         # On initie des booléens pour savoir quel champs ont été remplis
         rechAuteur = False
         rechCote = False
-        rechLieu = False
         rechOeuvre = False
         # On effectue le traitement des mots-clés sur chaque champ saisi
         if dictMotsCles["motsClesCote"]:
@@ -208,10 +206,6 @@ def recherche(typeRecherche=["simple", "avancee"]):
             dictMotsClesNets["motsClesOeuvre"] = traitntMotsCles(dictMotsCles["motsClesOeuvre"], True)
             vide = False
             rechOeuvre = True
-        if dictMotsCles["motsClesLieu"]:
-            dictMotsClesNets["motsClesLieu"] = traitntMotsCles(dictMotsCles["motsClesLieu"], True)
-            vide = False
-            rechLieu = True
         
     # On récupère les listes de dictionnaires contenant les id, les labels et les scores initiés à 0 des codices
     # triés alphanumériquement par labels grâce à la fonction codicesListDict()
