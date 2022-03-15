@@ -659,3 +659,36 @@ def codicesListDict():
                 listDictCodices.append(dicoCodex)
     
     return listDictCodices
+
+
+def auteursListDict():
+    """
+    Cette fonction charge l'ensemble des auteurs de la base
+    les trie alphabétiquement par nom
+    et retourne, dans cet ordre, une liste de dictionnaires contenant son id du codex, son nom et un score initié
+    à 0.
+    :return type: list
+
+    Chaque item de la liste sera un dictionnaire selon le modèle suivant :
+    {'auteur_id': 1,
+     'nom': 'Jean Cassien (saint, v. 360-v. 432)',
+     'score': 0}
+    """
+    # On initie la liste
+    listDictAuteurs = []
+    
+    # On charge les codices de la base
+    personnes = Personnes.query.order_by(Personnes.nom).all()
+    
+    # On boucle sur les labels de codices triés
+    # pour ensuite ajouter à la liste scoresCodices chaque codex dans l'ordre alphanumérique
+    for personne in personnes:
+        # Pour chaque codex, on écrit un dictionnaire
+        dicoPersonne = {
+            "personne_id": personne.id,
+            "nom": personneLabel(personne.id, "long"),
+            "score": 0
+        }
+        listDictAuteurs.append(dicoPersonne)
+
+    return listDictAuteurs

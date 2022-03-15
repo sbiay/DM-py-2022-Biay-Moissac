@@ -7,7 +7,8 @@ from ..appliMoissac import app, login
 from ..constantes import ROWS_PER_PAGE
 from ..modeles.classes import Codices, Lieux, Unites_codico, Oeuvres, Personnes, Provenances
 from ..modeles.utilisateurs import User
-from ..modeles.traitements import codexJson, codicesListDict, conservationDict, personneLabel, codexLabel, \
+from ..modeles.traitements import auteursListDict, codexJson, codicesListDict, conservationDict, personneLabel, \
+    codexLabel, \
     tousAuteursJson, tousArkDict, toutesOeuvresJson, traitntMotsCles, oeuvreDict
 from ..modeles.requetes import rechercheArk
 from ..comutTest import test
@@ -169,7 +170,9 @@ def recherche(typeRecherche=["simple", "avancee"]):
     # Si la recherche est vide, les variables suivantes sont inchangées
     motscles = []
     rechercheIntersection = False
-    
+    # On initie un booléen pour savoir si la recherche avancée est vide
+    vide = True
+   
     if typeRecherche == "simple":
         # On récupère la chaîne de requête passée dans l'URL
         motscles = request.args.get("keyword", None)
@@ -189,8 +192,8 @@ def recherche(typeRecherche=["simple", "avancee"]):
         # On effectue le traitement des mots-clés sur chaque champ saisi
         for champ in dictMotsCles:
             dictMotsClesNets[champ] = traitntMotsCles(dictMotsCles[champ])
-            
-        print(dictMotsClesNets)
+            if dictMotsClesNets[champ][0]:
+                vide = False
 
     # On récupère la liste des dictionnaires contenant les id, les labels et les scores initiés à 0 des codices
     # triés alphanumériquement par labels grâce à la fonction codicesListDict()
@@ -255,16 +258,47 @@ def recherche(typeRecherche=["simple", "avancee"]):
     
         resultats = Codices.query.filter(Codices.id.in_(idResultats)).paginate(page=page, per_page=ROWS_PER_PAGE)
         
-        return render_template("pages/resultats.html", resultats=resultats, donnees=listeDictCodices, bredouille=bredouille)
+        return render_template("pages/resultats.html", type="simple", resultats=resultats, donnees=listeDictCodices,
+                               bredouille=bredouille)
     
-    else:
+    # Si la recherche est de type avancé
+    elif typeRecherche == "avancee" and not vide:
+        # On charge une liste de dictionnaires d'auteurs pour recevoir les scores de la recherche
+        listeDictAuteurs = auteursListDict()
         # On boucle sur chaque champ de la saisie traitée
         for champ in dictMotsClesNets:
             # On pose comme condition l'existence de mot-clé
             if dictMotsClesNets[champ][0]:
-                rechercheIntersection = dictMotsClesNets[champ][1]
                 for mot in dictMotsClesNets[champ][0]:
-                    print(mot)
-                arks = tousArkDict()
-                
+                    # Pour une recherche sur les auteurs
+                    if champ == "motsClesAuteur":
+                        tousArks = tousArkDict()
+                        arks = {
+                            "arkPersonnes": tousArks["arkPersonnes"]
+                        }
+                        try:
+                            resultatsDataBNF = rechercheArk(mot, arks)
+                        except requests.exceptions.SSLError:
+                            resultatsDataBNF = {}
+                            
+                        # On boucle sur les auteurs chargés dans
+                        for auteur in listeDictAuteurs:
+                            # On initie un booléen qui détermine si l'auteur courant est pertinent vis-à-vis du mot-clé
+                            pertinent = False
+                            # La recherche d'un auteur porte sur son nom
+                            if mot in auteur["nom"].lower():
+                                pertinent = True
+                            if pertinent:
+                                auteur["score"] += 1
+
+        # On initie un booléen pour déterminer si la recherche sur les auteurs n'a donné aucun résultat
+        boolPasAuteur = True
+        for auteur in listeDictAuteurs:
+            if auteur["score"] != 0:
+                boolPasAuteur = False
+
+        return render_template("pages/resultats.html", type="avancee", resultatsAuteurs=listeDictAuteurs,
+                                   boolPasAuteur=boolPasAuteur)
+        
+    elif typeRecherche == "avancee" and vide:
         return render_template("pages/recherche-avancee.html")

@@ -10,6 +10,9 @@ def rechercheArk(motcle, arks):
     croise les réponses de data.bnf avec les identifiants ark enregistrés dans la base libMoissac,
     retourne un set des clés primaires des codices contenant ark.
     :param motcle: mot-clé traité à partir d'une saisie d'utilisateur
+    :motcle type: str
+    :param arks: dictionnaire où sont renseignés les arks des objets de la base locale, par type de classe
+    :arks type: dict
     :return type: set
     """
     
