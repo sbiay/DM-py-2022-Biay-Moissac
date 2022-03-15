@@ -212,7 +212,7 @@ def recherche(typeRecherche=["simple", "avancee"]):
             dictMotsClesNets["motsClesLieu"] = traitntMotsCles(dictMotsCles["motsClesLieu"], True)
             vide = False
             rechLieu = True
-        print(dictMotsClesNets)
+        
     # On récupère les listes de dictionnaires contenant les id, les labels et les scores initiés à 0 des codices
     # triés alphanumériquement par labels grâce à la fonction codicesListDict()
     listeDictCodices = codicesListDict()
@@ -334,31 +334,70 @@ def recherche(typeRecherche=["simple", "avancee"]):
                             if pertinent:
                                 oeuvre["score"] += 1
         
+        # On initie les listes de dictionnaires pour les résultats positifs
+        auteursPositifs = []
+        oeuvresPositives = []
+        
         # On initie un booléen pour déterminer si la recherche sur les auteurs n'a donné aucun résultat
         boolPasAuteur = True
-        
-        for auteur in listeDictAuteurs:
-            # On récupère le booléen propre à la saisie du champ courant
-            # afin de déterminer si la recherche doit être inclusive ou exclusive
-            rechercheIntersection = dictMotsClesNets["motsClesAuteur"][1]
-            if rechercheIntersection:
-                # Si le score de l'auteur courant est inférieur au nombre de mots-clés, son score est annulé
-                if auteur["score"] < len(dictMotsClesNets["motsClesAuteur"][0]):
-                    auteur["score"] = 0
-            # S'il reste un auteur dont le score n'est pas nul, la recherche est fructueuse
-            if auteur["score"] != 0:
-                boolPasAuteur = False
+        if rechAuteur:
+            for auteur in listeDictAuteurs:
+                # On récupère le booléen propre à la saisie du champ courant
+                # afin de déterminer si la recherche doit être inclusive ou exclusive
+                rechercheIntersection = dictMotsClesNets["motsClesAuteur"][1]
+                if rechercheIntersection:
+                    # Si le score de l'auteur courant est inférieur au nombre de mots-clés, son score est annulé
+                    if auteur["score"] < len(dictMotsClesNets["motsClesAuteur"][0]):
+                        auteur["score"] = 0
+                # S'il reste un auteur dont le score n'est pas nul, la recherche est fructueuse
+                if auteur["score"] != 0:
+                    auteursPositifs.append(auteur)
+                    boolPasAuteur = False
         
         # De même pour les oeuvres
         boolPasOeuvre = True
-        for oeuvre in listeDictOeuvres:
-            if oeuvre["score"] != 0:
-                boolPasOeuvre = False
-                # On ajoute alors des métadonnées sur l'oeuvre
-                oeuvre["donnees"] = oeuvreDict(oeuvre["oeuvre_id"])
+        if rechOeuvre:
+            for oeuvre in listeDictOeuvres:
+                rechercheIntersection = dictMotsClesNets["motsClesOeuvre"][1]
+                if rechercheIntersection:
+                    if oeuvre["score"] < len(dictMotsClesNets["motsClesOeuvre"][0]):
+                        oeuvre["score"] = 0
+                if oeuvre["score"] != 0:
+                    boolPasOeuvre = False
+                    # On ajoute alors des métadonnées sur l'oeuvre
+                    oeuvresPositives.append(oeuvre)
+                    oeuvre["donnees"] = oeuvreDict(oeuvre["oeuvre_id"]) # ATTENTION, on peut simplifier ici
+                
+        # Pour croiser les résultats des différents champs et retourner les codices pertinents
+        # On initie la liste des id des dictionnaires pertients
+        idCodicesPertinents = []
+        codices = Codices.query.all()
+        for codex in codices:
+            donneesCodex = json.loads(codexJson(codex.id))
+            scoreCodex = 0
+            # On boucle sur les id des oeuvres s'il y en a parmi les résultats
+            if oeuvresPositives:
+                for oeuvrePositive in oeuvresPositives:
+                    for UC in donneesCodex["contenu"]:
+                        for oeuvre in UC["oeuvres"]:
+                            if oeuvre["oeuvre_id"] == oeuvrePositive["oeuvre_id"]:
+                                scoreCodex += 1
+            if auteursPositifs:
+                for auteurPositif in auteursPositifs:
+                    for UC in donneesCodex["contenu"]:
+                        for oeuvre in UC["oeuvres"]:
+                            if oeuvre.get("auteur_id") == auteurPositif["personne_id"]\
+                                or oeuvre.get("attr_id") == auteurPositif["personne_id"] :
+                                scoreCodex += 1
+            if len(oeuvresPositives) + len(auteursPositifs) <= scoreCodex and scoreCodex != 0:
+                idCodicesPertinents.append(donneesCodex["codex_id"])
+
+        # Pour les codices pertinents, on récupère leur label à afficher dans une liste
+        listeCodicesPertinents = [codexLabel(id) for id in idCodicesPertinents]
         
         return render_template("pages/resultats.html",
                                type="avancee",
+                               codices=listeCodicesPertinents,
                                rechAuteur=rechAuteur,
                                boolPasAuteur=boolPasAuteur,
                                resultatsAuteurs=listeDictAuteurs,
