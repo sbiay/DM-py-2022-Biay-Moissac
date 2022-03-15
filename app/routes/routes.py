@@ -1,4 +1,4 @@
-import json, requests
+import json, requests, time
 from flask import flash, Flask, redirect, render_template, request, url_for
 from flask_login import login_user, current_user, logout_user
 from bs4 import BeautifulSoup
@@ -8,7 +8,7 @@ from ..constantes import ROWS_PER_PAGE
 from ..modeles.classes import Codices, Lieux, Unites_codico, Oeuvres, Personnes, Provenances
 from ..modeles.utilisateurs import User
 from ..modeles.traitements import codexJson, codicesListDict, conservationDict, personneLabel, codexLabel, \
-    tousAuteursJson, tousArkDict, toutesOeuvresJson, oeuvreDict
+    tousAuteursJson, tousArkDict, toutesOeuvresJson, traitntMotsCles, oeuvreDict
 from ..modeles.requetes import rechercheArk
 from ..comutTest import test
 
@@ -156,8 +156,8 @@ def notice_codex(num):
                                descUCs=codex["contenu"])
 
 
-@app.route("/recherche")
-def recherche():
+@app.route("/recherche/<typeRecherche>")
+def recherche(typeRecherche=["simple", "avancee"]):
     """
     Cette route traite les mots-clés envoyés via le formulaire de recherche simple de la barre de navigation.
     Elle fonctionne selon un opérateur OU par défaut entre les différents mots-clés de la saisie.
@@ -166,90 +166,105 @@ def recherche():
     cette recherche croise les identifiants ark d'auteurs et d'oeuvres contenus dans la base locale
     avec les ark répondant aux mêmes mots-clés interrogés sur data.bnf.fr.
     """
-    # On récupère la chaîne de requête passée dans l'URL
-    motscles = request.args.get("keyword", None)
-    # Si la conjonction ET est présente dans la requête, on définit la recherche comme exclusive
+    # Si la recherche est vide, les variables suivantes sont inchangées
+    motscles = []
     rechercheIntersection = False
-    if " ET " in motscles:
-        rechercheIntersection = True
     
-    # On élimine les caractères inutiles ou potentiellement dangereux
-    caracteresInterdits = """,.!<>\;"&#^'`?%{}[]|()"""
-    for caractere in caracteresInterdits:
-        # On passe également les mots en bas de casse
-        motscles = motscles.replace(caractere, "").lower()
-    # On convertit les mots-clés en liste
-    motscles = motscles.split(" ")
-    
+    if typeRecherche == "simple":
+        # On récupère la chaîne de requête passée dans l'URL
+        motscles = request.args.get("keyword", None)
+
+        motscles, rechercheIntersection = traitntMotsCles(motscles)
+
+    # Si la recherche est de type "avancée"
+    else:
+        dictMotsCles = {
+            "motsClesCote": request.args.get("cote", None),
+            "motsClesAuteur": request.args.get("auteur", None),
+            "motsClesOeuvre": request.args.get("oeuvre", None),
+            "motsClesLieu": request.args.get("lieu", None)
+        }
+        # On initie un dictionnaire pour récupérer les saisies à traiter
+        dictMotsClesNets = {}
+        # On effectue le traitement des mots-clés sur chaque champ saisi
+        for champ in dictMotsCles:
+            dictMotsClesNets[champ] = traitntMotsCles(dictMotsCles[champ])
+            
+        print(dictMotsClesNets)
+
     # On récupère la liste des dictionnaires contenant les id, les labels et les scores initiés à 0 des codices
     # triés alphanumériquement par labels grâce à la fonction codicesListDict()
     listeDictCodices = codicesListDict()
     
-    # On charge les arks de la base de donnée
-    tousArk = tousArkDict()
-    
-    # On boucle sur chaque mot-clé
-    for mot in motscles:
-        # On cherche chaque mot-clé sur Data-BNF au moyen de la fonction requeteDataBNF()
-        # qui retourne un set d'id de codices
-        resultatsDataBNF = rechercheArk(mot, tousArk)
+    if typeRecherche == "simple" and motscles:
+        # On boucle sur chaque mot-clé
+        for mot in motscles:
+            # On charge les arks de la base de donnée
+            arks = tousArkDict()
+            # On cherche chaque mot-clé sur Data-BNF au moyen de la fonction requeteDataBNF()
+            # qui retourne un set d'id de codices
+            try:
+                resultatsDataBNF = rechercheArk(mot, arks)
+            except requests.exceptions.SSLError:
+                resultatsDataBNF = {}
+            
+            # On boucle sur chaque codex via scoresCodices
+            for codex in listeDictCodices:
+                # On initie un booléen qui détermine si le codex courant est pertinent vis-à-vis du mot-clé courant
+                pertinent = False
+                
+                # Pour charger les données d'un codex on les récupère grâce à la fonction codexJson()
+                donneesCodex = codexJson(codex["codex_id"])
+                # On passe tous les mots en bas de casse
+                donneesCodex = donneesCodex.lower()
+                
+                # On cherche une occurrence du mot-clé courant dans les données
+                if mot in donneesCodex:
+                    # Si une ou plusieurs occurrences sont trouvées, la pertinence est vraie
+                    pertinent = True
+                # A défaut, on cherche les résulats parmis ceux retournés par la requête sur Data-BNF
+                else:
+                    for id in resultatsDataBNF:
+                        # Si l'id courant parmi les résulats de la requête DataBNF correspond à l'id du codex en cours de
+                        # traitement, la pertinence est établie
+                        if codex["codex_id"] == id:
+                            pertinent = True
+                if pertinent:
+                    codex["score"] += 1
         
-        # On boucle sur chaque codex via de scoresCodices
+        
+        # On prépare la pagination des résultats
+        page = request.args.get('page', 1, type=int)
+    
+        # On initie une liste d'id des codices résultats
+        idResultats = []
+        
+        # On définit un booléen pour indiquer le succès ou non de la recherche
+        bredouille = True  # Ou plutôt "broucouille", comme on dit dans le Bouchonnois
         for codex in listeDictCodices:
-            # On initie un booléen qui détermine si le codex courant est pertinent vis-à-vis du mot-clé courant
-            pertinent = False
-            
-            # Pour charger les données d'un codex on les récupère grâce à la fonction codexJson()
-            donneesCodex = codexJson(codex["codex_id"])
-            # On passe tous les mots en bas de casse
-            donneesCodex = donneesCodex.lower()
-            
-            # On cherche une occurrence du mot-clé courant dans les données
-            if mot in donneesCodex:
-                # Si une ou plusieurs occurrences sont trouvées, la pertinence est vraie
-                pertinent = True
-            # A défaut, on cherche les résulats parmis ceux retournés par la requête sur Data-BNF
-            else:
-                for id in resultatsDataBNF:
-                    # Si l'id courant parmi les résulats de la requête DataBNF correspond à l'id du codex en cours de
-                    # traitement, la pertinence est établie
-                    if codex["codex_id"] == id:
-                        pertinent = True
-            if pertinent:
-                codex["score"] += 1
-
-    # On prépare la pagination des résultats
-    page = request.args.get('page', 1, type=int)
-
-    # On initie une liste d'id des codices résultats
-    idResultats = []
+            # Si l'on recherche une intersection entre les mots-clés,
+            # seuls les codices ayant un score égal au nombre de mots-clés sont des résultats positifs,
+            # sinon, leur score est annulé
+            if rechercheIntersection:
+                if codex["score"] < len(motscles):
+                    codex["score"] = 0
+            if codex["score"] != 0:
+                bredouille = False
+                # On ajoute les objets Codices aux résultats paginés
+                idResultats.append(codex["codex_id"])
     
-    # On définit un booléen pour indiquer le succès ou non de la recherche
-    bredouille = True  # Ou plutôt "broucouille", comme on dit dans le Bouchonnois
-    for codex in listeDictCodices:
-        # Si l'on recherche une intersection entre les mots-clés,
-        # seuls les codices ayant un score égal au nombre de mots-clés sont des résultats positifs,
-        # sinon, leur score est annulé
-        if rechercheIntersection:
-            if codex["score"] < len(motscles):
-                codex["score"] = 0
-        if codex["score"] != 0:
-            bredouille = False
-            # On ajoute les objets Codices aux résultats paginés
-            idResultats.append(codex["codex_id"])
-
-    resultats = Codices.query.filter(Codices.id.in_(idResultats)).paginate(page=page, per_page=ROWS_PER_PAGE)
+        resultats = Codices.query.filter(Codices.id.in_(idResultats)).paginate(page=page, per_page=ROWS_PER_PAGE)
+        
+        return render_template("pages/resultats.html", resultats=resultats, donnees=listeDictCodices, bredouille=bredouille)
     
-    return render_template("pages/resultats.html", resultats=resultats, donnees=listeDictCodices, bredouille=bredouille)
-
-
-@app.route("/recherche-avancee")
-def rechercheAvancee():
-    # On récupère la chaîne de requête passée dans l'URL
-    saisieAuteur = request.args.get("auteur", None)
-    saisieOeuvre = request.args.get("oeuvre", None)
-    saisieOeuvre = request.args.get("lieu", None)
-    checkProvenance = request.args.get("provenances", None)
-    print(checkProvenance)
-    
-    return render_template("pages/recherche-avancee.html")
+    else:
+        # On boucle sur chaque champ de la saisie traitée
+        for champ in dictMotsClesNets:
+            # On pose comme condition l'existence de mot-clé
+            if dictMotsClesNets[champ][0]:
+                rechercheIntersection = dictMotsClesNets[champ][1]
+                for mot in dictMotsClesNets[champ][0]:
+                    print(mot)
+                arks = tousArkDict()
+                
+        return render_template("pages/recherche-avancee.html")

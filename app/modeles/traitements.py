@@ -4,6 +4,7 @@ from .classes import Codices, Lieux, Oeuvres, Personnes, Provenances, Unites_cod
 
 
 # Les scripts suivants mettent en forme des chaînes de caractères pour l'affichage d'un enregistrement particulier
+# on le traitement d'une requête
 def localisationUClabel(uc_id):
     """
     Cette fonction prend comme argument l'identifiant d'une unité codicologique (un objet de la classe Unites_codico) et,
@@ -141,6 +142,37 @@ def personneLabel(idPersonne, forme=["court", "long"]):
     else:
         print('''Le paramètre forme n'accepte que les valeurs "long" et "court"''')
         return None
+
+
+def traitntMotsCles(motscles):
+    """
+    Cette fonction prend comme argument la saisie d'un utilisateur,
+    détermine si la recherche contient l'opérateur ET,
+    élimine les caractères dangereux,
+    et retourne la liste de ces mots-clés ainsi qu'un booléen.
+    :param motscles: saisie d'un utilisateur
+    :type motscles: str
+    :returns: un tuple composé de la liste de ces mots-clés ainsi qu'un booléen
+    :return type: tuple
+    """
+    if not motscles:
+        return None, False
+    
+    # Si la conjonction ET est présente dans la requête, on définit la recherche comme exclusive
+    rechercheIntersection = False
+    if " ET " in motscles:
+        rechercheIntersection = True
+    # On supprime l'opérateur
+    motscles = motscles.replace(" ET ", " ")
+    # On élimine les caractères inutiles ou potentiellement dangereux
+    caracteresInterdits = """,.!<>\;"&#^'`?%{}[]|()"""
+    for caractere in caracteresInterdits:
+        # On passe également les mots en bas de casse
+        motscles = motscles.replace(caractere, "").lower()
+    # On convertit les mots-clés en liste
+    motscles = motscles.split(" ")
+    
+    return motscles, rechercheIntersection
 
 
 # Les scripts suivants mettent sous la forme de dictionnaires ou d'objet Json

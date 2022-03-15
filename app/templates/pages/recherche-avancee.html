@@ -7,7 +7,7 @@
 {% block corps %}
 
     <h1>Recherche avancée</h1>
-    <form class="form" method="GET" action="{{url_for("rechercheAvancee")}}">
+    <form class="form" method="GET" action="{{url_for("recherche", typeRecherche="avancee")}}">
         <div class="form-group row">
             <label for="rech-cote" class="col-sm-2 col-form-label">Cote</label>
             <div class="col-sm-10">

@@ -1,43 +1,47 @@
-import requests
+import requests, time
 from bs4 import BeautifulSoup
 
 
-def rechercheArk(motcle, tousArk):
+def rechercheArk(motcle, arks):
     """
-    Cette fonction prend comme argument la saisie d'un utilisateur,
+    Cette fonction prend comme argument un mot-clé traité à partir d'une saisie d'utilisateur
+    ainsi qu'une liste d'identifiants ark,
     adresse à data.bnf.fr une requête get à partir de cette saisie,
     croise les réponses de data.bnf avec les identifiants ark enregistrés dans la base libMoissac,
     retourne un set des clés primaires des codices contenant ark.
+    :param motcle: mot-clé traité à partir d'une saisie d'utilisateur
     :return type: set
     """
     
     # On écrit la requête
-    r = requests.get(f"https://data.bnf.fr/fr/search?term={motcle}")
+    r = requests.get(f"https://data.bnf.fr/fr/search?term={motcle}", time.sleep(3))
+    # PEUT ON PASSER COMME ARGUMENT UN TEMPS DE REPONSE
+    
     # Si la requête rencontre un problème, on retourne un set vide
-    if r.status_code != 200:
+    
+    if r.status_code == 200:
+        # On transforme la réponse HTML de data.bnf en objet BeautifulSoup afin de pouvoir le parser
+        soup = BeautifulSoup(r.text, "html.parser")
+        reponses = []
+        
+        # Parser la réponse : les identifiants ark potentiellement intéressants apparaissent dans les éléments "a"
+        liens = soup.find_all("a")
+        for lien in liens:
+            if lien.get("href")[25:28] == "ark":
+                reponses.append(lien["href"][25:])
+        
+        # Si l'un des ark de la réponse est dans les ark de notre base de données, on retourne l'id du codex concerné
+        idCodicesPertinents = []
+        # On boucle sur les arks de la base de données
+        for typeArk in arks:
+            for ark in arks[typeArk]:
+                if ark in reponses:
+                    for idCodex in arks[typeArk][ark]:
+                        idCodicesPertinents.append(idCodex)
+        
+        return set(idCodicesPertinents)
+    else:
         return {}
-    
-    # On transforme la réponse HTML de data.bnf en objet BeautifulSoup afin de pouvoir le parser
-    soup = BeautifulSoup(r.text, "html.parser")
-    reponses = []
-    
-    # Parser la réponse : les identifiants ark potentiellement intéressants apparaissent dans les éléments "a"
-    liens = soup.find_all("a")
-    for lien in liens:
-        if lien.get("href")[25:28] == "ark":
-            reponses.append(lien["href"][25:])
-    
-    # Si l'un des ark de la réponse est dans les ark de notre base de données, on retourne l'id du codex concerné
-    idCodicesPertinents = []
-    # On boucle sur les arks de la base de données
-    for typeArk in tousArk:
-        for ark in tousArk[typeArk]:
-            if ark in reponses:
-                for idCodex in tousArk[typeArk][ark]:
-                    idCodicesPertinents.append(idCodex)
-    
-    return set(idCodicesPertinents)
-
 
 def creationDataBNF(motscles, objet=["auteur", "oeuvre"]):
     """
