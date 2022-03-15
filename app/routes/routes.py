@@ -175,11 +175,13 @@ def recherche(typeRecherche=["simple", "avancee"]):
     if typeRecherche == "simple":
         # On récupère la chaîne de requête passée dans l'URL
         motscles = request.args.get("keyword", None)
-        
-        motscles, rechercheIntersection = traitntMotsCles(motscles)
+        # On récupère les mots-clés traités grâce à la fonction traitntMotsCles
+        # La recherche simple est à priori inclusive (argument False)
+        motscles, rechercheIntersection = traitntMotsCles(motscles, False)
     
     # Si la recherche est de type "avancée"
     else:
+        # On récupère les mots-clés de la recherche pour chaque champ
         dictMotsCles = {
             "motsClesCote": request.args.get("cote", None),
             "motsClesAuteur": request.args.get("auteur", None),
@@ -195,23 +197,23 @@ def recherche(typeRecherche=["simple", "avancee"]):
         rechOeuvre = False
         # On effectue le traitement des mots-clés sur chaque champ saisi
         if dictMotsCles["motsClesCote"]:
-            dictMotsClesNets["motsClesCote"] = traitntMotsCles(dictMotsCles["motsClesCote"])
+            dictMotsClesNets["motsClesCote"] = traitntMotsCles(dictMotsCles["motsClesCote"], True)
             vide = False
             rechCote = True
         if dictMotsCles["motsClesAuteur"]:
-            dictMotsClesNets["motsClesAuteur"] = traitntMotsCles(dictMotsCles["motsClesAuteur"])
+            dictMotsClesNets["motsClesAuteur"] = traitntMotsCles(dictMotsCles["motsClesAuteur"], True)
             vide = False
             rechAuteur = True
         if dictMotsCles["motsClesOeuvre"]:
-            dictMotsClesNets["motsClesOeuvre"] = traitntMotsCles(dictMotsCles["motsClesOeuvre"])
+            dictMotsClesNets["motsClesOeuvre"] = traitntMotsCles(dictMotsCles["motsClesOeuvre"], True)
             vide = False
             rechOeuvre = True
         if dictMotsCles["motsClesLieu"]:
-            dictMotsClesNets["motsClesLieu"] = traitntMotsCles(dictMotsCles["motsClesLieu"])
+            dictMotsClesNets["motsClesLieu"] = traitntMotsCles(dictMotsCles["motsClesLieu"], True)
             vide = False
             rechLieu = True
-    
-    # On récupère la liste des dictionnaires contenant les id, les labels et les scores initiés à 0 des codices
+        print(dictMotsClesNets)
+    # On récupère les listes de dictionnaires contenant les id, les labels et les scores initiés à 0 des codices
     # triés alphanumériquement par labels grâce à la fonction codicesListDict()
     listeDictCodices = codicesListDict()
     
@@ -279,7 +281,7 @@ def recherche(typeRecherche=["simple", "avancee"]):
     
     # Si la recherche est de type avancé
     elif typeRecherche == "avancee" and not vide:
-        # On charge les dictionnaires destinées à recevoir, par type de donnée les scores de la recherche
+        # On charge les dictionnaires destinées à recevoir, par type de donnée, les scores de la recherche
         listeDictAuteurs = auteursListDict()
         listeDictOeuvres = oeuvresListDict()
         
@@ -334,10 +336,19 @@ def recherche(typeRecherche=["simple", "avancee"]):
         
         # On initie un booléen pour déterminer si la recherche sur les auteurs n'a donné aucun résultat
         boolPasAuteur = True
+        
         for auteur in listeDictAuteurs:
+            # On récupère le booléen propre à la saisie du champ courant
+            # afin de déterminer si la recherche doit être inclusive ou exclusive
+            rechercheIntersection = dictMotsClesNets["motsClesAuteur"][1]
+            if rechercheIntersection:
+                # Si le score de l'auteur courant est inférieur au nombre de mots-clés, son score est annulé
+                if auteur["score"] < len(dictMotsClesNets["motsClesAuteur"][0]):
+                    auteur["score"] = 0
+            # S'il reste un auteur dont le score n'est pas nul, la recherche est fructueuse
             if auteur["score"] != 0:
                 boolPasAuteur = False
-        print(rechAuteur)
+        
         # De même pour les oeuvres
         boolPasOeuvre = True
         for oeuvre in listeDictOeuvres:

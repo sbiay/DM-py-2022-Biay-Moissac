@@ -144,7 +144,7 @@ def personneLabel(idPersonne, forme=["court", "long"]):
         return None
 
 
-def traitntMotsCles(motscles):
+def traitntMotsCles(motscles, operateur):
     """
     Cette fonction prend comme argument la saisie d'un utilisateur,
     détermine si la recherche contient l'opérateur ET,
@@ -152,18 +152,20 @@ def traitntMotsCles(motscles):
     et retourne la liste de ces mots-clés ainsi qu'un booléen.
     :param motscles: saisie d'un utilisateur
     :type motscles: str
-    :returns: un tuple composé de la liste de ces mots-clés ainsi qu'un booléen
-    :return type: tuple
+    :returns: une liste composée de la liste de ces mots-clés ainsi qu'un booléen
+    :return type: liste
     """
     if not motscles:
         return None, False
     
     # Si la conjonction ET est présente dans la requête, on définit la recherche comme exclusive
-    rechercheIntersection = False
+    rechercheIntersection = operateur
     if " ET " in motscles:
         rechercheIntersection = True
+    elif " OU " in motscles:
+        rechercheIntersection = False
     # On supprime l'opérateur
-    motscles = motscles.replace(" ET ", " ")
+    motscles = motscles.replace(" ET ", " ").replace(" OU ", " ")
     # On élimine les caractères inutiles ou potentiellement dangereux
     caracteresInterdits = """,.!<>\;"&#^'`?%{}[]|()"""
     for caractere in caracteresInterdits:
@@ -172,7 +174,7 @@ def traitntMotsCles(motscles):
     # On convertit les mots-clés en liste
     motscles = motscles.split(" ")
     
-    return motscles, rechercheIntersection
+    return [motscles, rechercheIntersection]
 
 
 # Les scripts suivants mettent sous la forme de dictionnaires ou d'objet Json
@@ -688,7 +690,7 @@ def auteursListDict():
             "score": 0
         }
         listDictAuteurs.append(dicoPersonne)
-
+    
     return listDictAuteurs
 
 
