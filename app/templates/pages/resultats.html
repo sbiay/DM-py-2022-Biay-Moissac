@@ -57,16 +57,16 @@
                 {%- endfor %}
             </ul>
         </nav>
-
+    <!--Pour les résultats de la recherche avancée-->
     {% else %}
         <h2 title="Cette liste recense les codices répondant à tous les critères de la recherche.">Les codices</h2>
         {% if codices %}
             <ul>
-            {% for codex in codices %}
-                <li>
-                <a href="{{ url_for("notice_codex", num=codex['codex_id']) }}">{{ codex["label"] }}</a>
-                </li>
-            {% endfor %}
+                {% for codex in codices %}
+                    <li>
+                        <a href="{{ url_for("notice_codex", num=codex['codex_id']) }}">{{ codex["label"] }}</a>
+                    </li>
+                {% endfor %}
             </ul>
         {% else %}
             <p>Aucun codex ne répond à l'ensemble des critères saisis.</p>

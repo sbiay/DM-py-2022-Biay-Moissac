@@ -168,17 +168,17 @@ def recherche(typeRecherche=["simple", "avancee"]):
     """
     # Si la recherche est vide, les variables suivantes sont inchangées
     motscles = []
-    rechercheIntersection = False
-    # On initie un booléen pour savoir si la recherche avancée est vide
-    vide = True
+    exclusive = False
+    vide = True # Pour la recherche avancée, si aucun champ n'est complété
     
+    # On récupère la requête de l'utilisateur
     if typeRecherche == "simple":
         # On récupère la chaîne de requête passée dans l'URL
         motscles = request.args.get("keyword", None)
-        # On récupère les mots-clés traités grâce à la fonction traitntMotsCles
-        # La recherche simple est à priori inclusive (argument False)
-        motscles, rechercheIntersection = traitntMotsCles(motscles, False)
-    
+        # On récupère les mots-clés traités grâce à la fonction traitntMotsCles()
+        # La recherche simple est à priori inclusive
+        motscles, exclusive = traitntMotsCles(motscles, exclusive=False)
+
     # Si la recherche est de type "avancée"
     else:
         # On récupère les mots-clés de la recherche pour chaque champ
@@ -187,7 +187,7 @@ def recherche(typeRecherche=["simple", "avancee"]):
             "motsClesAuteur": request.args.get("auteur", None),
             "motsClesOeuvre": request.args.get("oeuvre", None)
         }
-        # On initie un dictionnaire pour récupérer les saisies à traiter
+        # On initie un dictionnaire pour récupérer les saisies après traitement
         dictMotsClesNets = {}
         # On initie des booléens pour savoir quel champs ont été remplis
         rechAuteur = False
@@ -195,7 +195,7 @@ def recherche(typeRecherche=["simple", "avancee"]):
         rechOeuvre = False
         # On effectue le traitement des mots-clés sur chaque champ saisi
         if dictMotsCles["motsClesCote"]:
-            dictMotsClesNets["motsClesCote"] = traitntMotsCles(dictMotsCles["motsClesCote"], True)
+            dictMotsClesNets["motsClesCote"] = traitntMotsCles(dictMotsCles["motsClesCote"], exclusive=True)
             vide = False
             rechCote = True
         if dictMotsCles["motsClesAuteur"]:
@@ -211,6 +211,7 @@ def recherche(typeRecherche=["simple", "avancee"]):
     # triés alphanumériquement par labels grâce à la fonction codicesListDict()
     listeDictCodices = codicesListDict()
     
+    # Si des mots-clés ont été envoyés à la recherche simple
     if typeRecherche == "simple" and motscles:
         # On boucle sur chaque mot-clé
         for mot in motscles:
@@ -223,7 +224,7 @@ def recherche(typeRecherche=["simple", "avancee"]):
             except requests.exceptions.SSLError:
                 resultatsDataBNF = {}
             
-            # On boucle sur chaque codex via scoresCodices
+            # On boucle sur chaque codex via listeDictCodices
             for codex in listeDictCodices:
                 # On initie un booléen qui détermine si le codex courant est pertinent vis-à-vis du mot-clé courant
                 pertinent = False
@@ -260,7 +261,7 @@ def recherche(typeRecherche=["simple", "avancee"]):
             # Si l'on recherche une intersection entre les mots-clés,
             # seuls les codices ayant un score égal au nombre de mots-clés sont des résultats positifs,
             # sinon, leur score est annulé
-            if rechercheIntersection:
+            if exclusive:
                 if codex["score"] < len(motscles):
                     codex["score"] = 0
             if codex["score"] != 0:
@@ -273,11 +274,12 @@ def recherche(typeRecherche=["simple", "avancee"]):
         return render_template("pages/resultats.html", type="simple", resultats=resultats, donnees=listeDictCodices,
                                bredouille=bredouille)
     
-    # Si la recherche est de type avancé
+    # Si la recherche est de type avancé et que des mots-clés ont été inscrits dans au moins un champ
     elif typeRecherche == "avancee" and not vide:
         # On charge les dictionnaires destinées à recevoir, par type de donnée, les scores de la recherche
         listeDictAuteurs = auteursListDict()
         listeDictOeuvres = oeuvresListDict()
+        listeDictCodices = codicesListDict()
         
         # On boucle sur chaque champ de la saisie traitée
         for champ in dictMotsClesNets:
@@ -285,6 +287,19 @@ def recherche(typeRecherche=["simple", "avancee"]):
             if dictMotsClesNets[champ][0]:
                 # On boucle sur chaque mot-clé
                 for mot in dictMotsClesNets[champ][0]:
+                    
+                    # Pour une recherche sur les cotes
+                    if champ == "motsClesCote":
+                        for codex in listeDictCodices:
+                            # On initie un booléen qui détermine si le codex courant est pertinent vis-à-vis du mot-clé
+                            pertinent = False
+                            # La recherche d'un codex porte sur son label,
+                            # on fait pour cela appel à la fonction codexLabel(code_id)
+                            if mot in codexLabel(codex["codex_id"])["label"].lower():
+                                pertinent = True
+                            if pertinent:
+                                codex["score"] += 1
+                                
                     # Pour une recherche sur les auteurs
                     if champ == "motsClesAuteur":
                         tousArks = tousArkDict("personnes")
@@ -336,6 +351,7 @@ def recherche(typeRecherche=["simple", "avancee"]):
                                 oeuvre["score"] += 1
         
         # On initie les listes de dictionnaires pour les résultats positifs
+        cotesPositives = []
         auteursPositifs = []
         oeuvresPositives = []
         
@@ -345,8 +361,8 @@ def recherche(typeRecherche=["simple", "avancee"]):
             for auteur in listeDictAuteurs:
                 # On récupère le booléen propre à la saisie du champ courant
                 # afin de déterminer si la recherche doit être inclusive ou exclusive
-                rechercheIntersection = dictMotsClesNets["motsClesAuteur"][1]
-                if rechercheIntersection:
+                exclusive = dictMotsClesNets["motsClesAuteur"][1]
+                if exclusive:
                     # Si le score de l'auteur courant est inférieur au nombre de mots-clés, son score est annulé
                     if auteur["score"] < len(dictMotsClesNets["motsClesAuteur"][0]):
                         auteur["score"] = 0
@@ -359,16 +375,28 @@ def recherche(typeRecherche=["simple", "avancee"]):
         boolPasOeuvre = True
         if rechOeuvre:
             for oeuvre in listeDictOeuvres:
-                rechercheIntersection = dictMotsClesNets["motsClesOeuvre"][1]
-                if rechercheIntersection:
+                exclusive = dictMotsClesNets["motsClesOeuvre"][1]
+                if exclusive:
                     if oeuvre["score"] < len(dictMotsClesNets["motsClesOeuvre"][0]):
                         oeuvre["score"] = 0
                 if oeuvre["score"] != 0:
                     boolPasOeuvre = False
                     # On ajoute alors des métadonnées sur l'oeuvre
                     oeuvresPositives.append(oeuvre)
-                    oeuvre["donnees"] = oeuvreDict(oeuvre["oeuvre_id"]) # ATTENTION, on peut simplifier ici
-                
+                    oeuvre["donnees"] = oeuvreDict(oeuvre["oeuvre_id"])
+        
+        # De même pour les cotes
+        boolPasCote = True
+        if rechCote:
+            for codex in listeDictCodices:
+                exclusive = dictMotsClesNets["motsClesCote"][1]
+                if exclusive:
+                    if codex["score"] < len(dictMotsClesNets["motsClesCote"][0]):
+                        codex["score"] = 0
+                if codex["score"] != 0:
+                    boolPasCote = False
+                    cotesPositives.append(codex)
+        
         # Pour croiser les résultats des différents champs et retourner les codices pertinents
         # On initie la liste des id des dictionnaires pertients
         idCodicesPertinents = []
@@ -376,26 +404,52 @@ def recherche(typeRecherche=["simple", "avancee"]):
         for codex in codices:
             donneesCodex = json.loads(codexJson(codex.id))
             scoreCodex = 0
-            # On boucle sur les id des oeuvres s'il y en a parmi les résultats
+            # On boucle sur les dict des oeuvres s'il y en a parmi les résultats
             if oeuvresPositives:
                 for oeuvrePositive in oeuvresPositives:
+                    # On initie un booléen pour établir la pertinence de la comparaison
+                    pertinent = False
                     for UC in donneesCodex["contenu"]:
                         for oeuvre in UC["oeuvres"]:
                             if oeuvre["oeuvre_id"] == oeuvrePositive["oeuvre_id"]:
-                                scoreCodex += 1
+                                pertinent = True
+                    if pertinent:
+                        scoreCodex += 1
             if auteursPositifs:
                 for auteurPositif in auteursPositifs:
+                    pertinent = False
                     for UC in donneesCodex["contenu"]:
                         for oeuvre in UC["oeuvres"]:
                             if oeuvre.get("auteur_id") == auteurPositif["personne_id"]\
                                 or oeuvre.get("attr_id") == auteurPositif["personne_id"] :
-                                scoreCodex += 1
-            if len(oeuvresPositives) + len(auteursPositifs) <= scoreCodex and scoreCodex != 0:
+                                pertinent = True
+                    if pertinent:
+                        scoreCodex += 1
+            print(f"Le codex {donneesCodex['codex_id']} a pour score {scoreCodex}")
+            print(f"La somme des auteurs et oeuvres pertinents est de \
+                {len(oeuvresPositives) + len(auteursPositifs)}")
+            if len(oeuvresPositives)\
+                + len(auteursPositifs)\
+                <= scoreCodex and scoreCodex != 0:
                 idCodicesPertinents.append(donneesCodex["codex_id"])
-
-        # Pour les codices pertinents, on récupère leur label à afficher dans une liste
-        listeCodicesPertinents = [codexLabel(id) for id in idCodicesPertinents]
         
+        # Pour croiser ces résultats avec les résultats de la recherche sur les cotes
+        # et récupérer leur label à afficher dans une liste
+        listeCodicesPertinents = []
+        # Si les recherches des autres champs ont de résultats, on les croise avec celui sur les cotes
+        if rechOeuvre or rechAuteur and idCodicesPertinents:
+            if cotesPositives:
+                for cote in cotesPositives:
+                    for id in idCodicesPertinents:
+                        if cote["codex_id"] == id:
+                            listeCodicesPertinents.append(codexLabel(id))
+            else:
+                listeCodicesPertinents = [codexLabel(id) for id in idCodicesPertinents]
+        
+        # S'il n'y a pas de recherche sur les autres champs
+        elif rechCote and not rechAuteur and not rechOeuvre:
+            listeCodicesPertinents = [codexLabel(cote["codex_id"]) for cote in cotesPositives]
+    
         return render_template("pages/resultats.html",
                                type="avancee",
                                codices=listeCodicesPertinents,

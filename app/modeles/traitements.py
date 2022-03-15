@@ -44,7 +44,7 @@ def codexLabel(code_id):
     :type code_id: int
     :returns: dictionnaire dont :
        - la clé "codex_id" prend pour valeur le paramètre code_id (int)
-       - la clé label prend pour valeur une string composée de son lieu de conservation et de sa cote.
+       - la clé "label" prend pour valeur une string composée de son lieu de conservation et de sa cote.
     :rtype: dict
     """
     cote = Codices.query.get(code_id).cote
@@ -144,7 +144,7 @@ def personneLabel(idPersonne, forme=["court", "long"]):
         return None
 
 
-def traitntMotsCles(motscles, operateur):
+def traitntMotsCles(motscles, exclusive):
     """
     Cette fonction prend comme argument la saisie d'un utilisateur,
     détermine si la recherche contient l'opérateur ET,
@@ -152,6 +152,8 @@ def traitntMotsCles(motscles, operateur):
     et retourne la liste de ces mots-clés ainsi qu'un booléen.
     :param motscles: saisie d'un utilisateur
     :type motscles: str
+    :param exclusive: définit le comportement de la recherche par défaut
+    :type exclusive: bool
     :returns: une liste composée de la liste de ces mots-clés ainsi qu'un booléen
     :return type: liste
     """
@@ -159,11 +161,10 @@ def traitntMotsCles(motscles, operateur):
         return None, False
     
     # Si la conjonction ET est présente dans la requête, on définit la recherche comme exclusive
-    rechercheIntersection = operateur
     if " ET " in motscles:
-        rechercheIntersection = True
+        exclusive = True
     elif " OU " in motscles:
-        rechercheIntersection = False
+        exclusive = False
     # On supprime l'opérateur
     motscles = motscles.replace(" ET ", " ").replace(" OU ", " ")
     # On élimine les caractères inutiles ou potentiellement dangereux
@@ -174,7 +175,7 @@ def traitntMotsCles(motscles, operateur):
     # On convertit les mots-clés en liste
     motscles = motscles.split(" ")
     
-    return [motscles, rechercheIntersection]
+    return [motscles, exclusive]
 
 
 # Les scripts suivants mettent sous la forme de dictionnaires ou d'objet Json
