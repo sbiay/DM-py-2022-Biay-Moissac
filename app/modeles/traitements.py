@@ -381,7 +381,7 @@ def codexJson(codex_id):
 
 
 # Les scripts suivants rassemblent l'ensemble des données de la base en vue de leur exploitation
-def tousArkDict():
+def tousArkDict(idSortie=["codices", "oeuvres", "personnes"]):
     """
     Cette fonction charge dans un dictionnaire tous les identifiants arks contenus dans la base
     :return type: dict
@@ -403,34 +403,56 @@ def tousArkDict():
         "arkOeuvres": {},
         "arkPersonnes": {}
     }
-    
-    # On charge d'abord tous les codices
-    codices = Codices.query.all()
-    # On boucle sur chaque id pour récupérer, grâce à la fonction codexJson() les données de chaque codex
-    for codex in codices:
-        donneesCodex = json.loads(codexJson(codex.id))
-        for item in donneesCodex["contenu"]:
-            for oeuvre in item["oeuvres"]:
-                # Si l'oeuvre possède un ark
-                if oeuvre["data.bnf"]:
-                    # Si cet identifiant n'a pas encore été créé dans tousArk, on ajoute l'id du codex dans une liste
-                    if not tousArk["arkOeuvres"].get(oeuvre["data.bnf"]):
-                        tousArk["arkOeuvres"][oeuvre["data.bnf"]] = [codex.id]
-                    else:
-                        if codex.id not in tousArk["arkOeuvres"][oeuvre["data.bnf"]]:
-                            tousArk["arkOeuvres"][oeuvre["data.bnf"]].append(codex.id)
-                if oeuvre.get("auteur_ark"):
-                    if not tousArk["arkPersonnes"].get(oeuvre["auteur_ark"]):
-                        tousArk["arkPersonnes"][oeuvre["auteur_ark"]] = [codex.id]
-                    else:
-                        if codex.id not in tousArk["arkPersonnes"][oeuvre["auteur_ark"]]:
-                            tousArk["arkPersonnes"][oeuvre["auteur_ark"]].append(codex.id)
-                if oeuvre.get("attr_ark"):
-                    if not tousArk["arkPersonnes"].get(oeuvre["attr_ark"]):
-                        tousArk["arkPersonnes"][oeuvre["attr_ark"]] = [codex.id]
-                    else:
-                        if codex.id not in tousArk["arkPersonnes"][oeuvre["attr_ark"]]:
-                            tousArk["arkPersonnes"][oeuvre["attr_ark"]].append(codex.id)
+    if idSortie == "oeuvres":
+        toutesOeuvres = json.loads(toutesOeuvresJson())
+        for oeuvre in toutesOeuvres:
+            if oeuvre["data.bnf"]:
+                # Si cet identifiant n'a pas encore été créé dans tousArk, on ajoute l'id de l'oeuvre dans une liste
+                if not tousArk["arkOeuvres"].get(oeuvre["data.bnf"]):
+                    tousArk["arkOeuvres"][oeuvre["data.bnf"]] = [oeuvre["oeuvre_id"]]
+                else:
+                    if oeuvre["oeuvre_id"] not in tousArk["arkOeuvres"][oeuvre["data.bnf"]]:
+                        tousArk["arkOeuvres"][oeuvre["data.bnf"]].append(oeuvre["oeuvre_id"])
+    elif idSortie == "personnes":
+        toutesPersonnes = json.loads(tousAuteursJson())
+        for personne in toutesPersonnes:
+            if personne["personne_ark"]:
+                if not tousArk["arkPersonnes"].get(personne["personne_ark"]):
+                    tousArk["arkPersonnes"][personne["personne_ark"]] = [personne["personne_id"]]
+                else:
+                    if personne["personne_id"] not in tousArk["arkPersonnes"][personne["personne_ark"]]:
+                        tousArk["arkPersonnes"][personne["personne_ark"]].append(personne["personne_id"])
+    # Si l'on cherche les ark des par codices
+    else:
+        # On charge d'abord tous les codices
+        codices = Codices.query.all()
+        # On boucle sur chaque id pour récupérer, grâce à la fonction codexJson() les données de chaque codex
+        for codex in codices:
+            donneesCodex = json.loads(codexJson(codex.id))
+            for item in donneesCodex["contenu"]:
+                for oeuvre in item["oeuvres"]:
+                    # On définit le type d'identifiant à inscrire dans les valeurs de sortie
+                    # Si l'oeuvre possède un ark
+                    if oeuvre["data.bnf"]:
+                        # Si cet identifiant n'a pas encore été créé dans tousArk, on ajoute l'id du codex dans une liste
+                        if not tousArk["arkOeuvres"].get(oeuvre["data.bnf"]):
+                            tousArk["arkOeuvres"][oeuvre["data.bnf"]] = [codex.id]
+                        else:
+                            if codex.id not in tousArk["arkOeuvres"][oeuvre["data.bnf"]]:
+                                tousArk["arkOeuvres"][oeuvre["data.bnf"]].append(codex.id)
+                    if oeuvre.get("auteur_ark"):
+                        if not tousArk["arkPersonnes"].get(oeuvre["auteur_ark"]):
+                            tousArk["arkPersonnes"][oeuvre["auteur_ark"]] = [codex.id]
+                        else:
+                            if codex.id not in tousArk["arkPersonnes"][oeuvre["auteur_ark"]]:
+                                tousArk["arkPersonnes"][oeuvre["auteur_ark"]].append(codex.id)
+                    if oeuvre.get("attr_ark"):
+                        if not tousArk["arkPersonnes"].get(oeuvre["attr_ark"]):
+                            tousArk["arkPersonnes"][oeuvre["attr_ark"]] = [codex.id]
+                        else:
+                            if codex.id not in tousArk["arkPersonnes"][oeuvre["attr_ark"]]:
+                                tousArk["arkPersonnes"][oeuvre["attr_ark"]].append(codex.id)
+        
     return tousArk
 
 

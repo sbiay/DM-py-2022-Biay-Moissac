@@ -2,7 +2,7 @@ import requests, time
 from bs4 import BeautifulSoup
 
 
-def rechercheArk(motcle, arks):
+def rechercheArk(motcle, arks, reponse=["codices", "oeuvres", "personnes"]):
     """
     Cette fonction prend comme argument un mot-clé traité à partir d'une saisie d'utilisateur
     ainsi qu'une liste d'identifiants ark,
@@ -18,10 +18,8 @@ def rechercheArk(motcle, arks):
     
     # On écrit la requête
     r = requests.get(f"https://data.bnf.fr/fr/search?term={motcle}", time.sleep(3))
-    # PEUT ON PASSER COMME ARGUMENT UN TEMPS DE REPONSE
     
     # Si la requête rencontre un problème, on retourne un set vide
-    
     if r.status_code == 200:
         # On transforme la réponse HTML de data.bnf en objet BeautifulSoup afin de pouvoir le parser
         soup = BeautifulSoup(r.text, "html.parser")
@@ -43,6 +41,7 @@ def rechercheArk(motcle, arks):
                         idCodicesPertinents.append(idCodex)
         
         return set(idCodicesPertinents)
+    
     else:
         return {}
 

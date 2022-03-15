@@ -219,7 +219,7 @@ def recherche(typeRecherche=["simple", "avancee"]):
             # On cherche chaque mot-clé sur Data-BNF au moyen de la fonction requeteDataBNF()
             # qui retourne un set d'id de codices
             try:
-                resultatsDataBNF = rechercheArk(mot, arks)
+                resultatsDataBNF = rechercheArk(mot, arks, "codices")
             except requests.exceptions.SSLError:
                 resultatsDataBNF = {}
             
@@ -283,6 +283,7 @@ def recherche(typeRecherche=["simple", "avancee"]):
         for champ in dictMotsClesNets:
             # On pose comme condition l'existence de mot-clé
             if dictMotsClesNets[champ][0]:
+                # On boucle sur chaque mot-clé
                 for mot in dictMotsClesNets[champ][0]:
                     # Pour une recherche sur les auteurs
                     if champ == "motsClesAuteur":
@@ -291,7 +292,7 @@ def recherche(typeRecherche=["simple", "avancee"]):
                             "arkPersonnes": tousArks["arkPersonnes"]
                         }
                         try:
-                            resultatsDataBNF = rechercheArk(mot, arks)
+                            resultatsDataBNF = rechercheArk(mot, arks, "personnes")
                         except requests.exceptions.SSLError:
                             resultatsDataBNF = {}
                         
@@ -313,7 +314,7 @@ def recherche(typeRecherche=["simple", "avancee"]):
                             "arkOeuvres": tousArks["arkOeuvres"]
                         }
                         try:
-                            resultatsDataBNF = rechercheArk(mot, arks)
+                            resultatsDataBNF = rechercheArk(mot, arks, "oeuvres")
                         except requests.exceptions.SSLError:
                             resultatsDataBNF = {}
                         
