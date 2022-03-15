@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 
+
 def rechercheArk(motcle, tousArk):
     """
     Cette fonction prend comme argument la saisie d'un utilisateur,
@@ -12,6 +13,9 @@ def rechercheArk(motcle, tousArk):
     
     # On écrit la requête
     r = requests.get(f"https://data.bnf.fr/fr/search?term={motcle}")
+    # Si la requête rencontre un problème, on retourne un set vide
+    if r.status_code != 200:
+        return {}
     
     # On transforme la réponse HTML de data.bnf en objet BeautifulSoup afin de pouvoir le parser
     soup = BeautifulSoup(r.text, "html.parser")
@@ -22,7 +26,7 @@ def rechercheArk(motcle, tousArk):
     for lien in liens:
         if lien.get("href")[25:28] == "ark":
             reponses.append(lien["href"][25:])
-            
+    
     # Si l'un des ark de la réponse est dans les ark de notre base de données, on retourne l'id du codex concerné
     idCodicesPertinents = []
     # On boucle sur les arks de la base de données
@@ -61,7 +65,7 @@ def creationDataBNF(motscles, objet=["auteur", "oeuvre"]):
                 premiereOeuvre = index + 1
             elif span.string == 'Thèmes':
                 premierTheme = index + 1
-
+    
     # Liste des catégories de tri des réponses par défaut dans data.bnf
     categories = ["Auteurs", "Organisations", "Œuvres", "Thèmes", "Lieux", "Spectacles", "Périodiques"]
     categories_presentes = []
