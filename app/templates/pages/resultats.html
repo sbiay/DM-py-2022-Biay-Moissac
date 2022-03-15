@@ -8,7 +8,7 @@
     <h1>Résultats</h1>
 
     {% if bredouille %}
-    <p>La recherche n'a donné aucun résultat.</p>
+        <p>La recherche n'a donné aucun résultat.</p>
     {% endif %}
 
     {% if type == "simple" %}
@@ -61,17 +61,41 @@
         </nav>
 
     {% else %}
-        {% if resultatsAuteurs and not boolPasAuteur %}
+        {% if rechAuteur and not boolPasAuteur %}
             <h2>Les auteurs</h2>
             <ul>
-            {% for auteur in resultatsAuteurs %}
-                {% if auteur["score"] != 0 %}
-                <li><a href="{{ url_for("noticePersonne", id=auteur["personne_id"]) }}">{{ auteur["nom"] }}</a></li>
-            {% endif %}
-            {% endfor %}
+                {% for auteur in resultatsAuteurs %}
+                    {% if auteur["score"] != 0 %}
+                        <li><a href="{{ url_for("noticePersonne", id=auteur["personne_id"]) }}">{{ auteur["nom"] }}</a></li>
+                    {% endif %}
+                {% endfor %}
             </ul>
-        {% elif resultatsAuteurs and boolPasAuteur %}
+        {% elif rechAuteur and boolPasAuteur %}
+            <h2>Les auteurs</h2>
             <p>La recherche sur les auteurs n'a donné aucun résultat.</p>
+        {% endif %}
+        {% if rechOeuvre and not boolPasOeuvre %}
+            <h2>Les oeuvres</h2>
+            <ul>
+                {% for oeuvre in resultatsOeuvres %}
+                    {% if oeuvre["score"] != 0 %}
+                        <li>
+                            <a href="{{ url_for("noticeOeuvre", id=oeuvre["oeuvre_id"]) }}">{{ oeuvre["titre"] }}</a>
+                            <!--On ajoute le nom de l'auteur et éventuelles attributions -->
+                            {% if oeuvre["donnees"]["auteur"] %}
+                                <span>, {{ oeuvre["donnees"]["auteur"] }}</span>
+                            {% endif %}
+                            {% if oeuvre["donnees"]["attr"] %}
+                                <span>, {{ oeuvre["donnees"]["attr"] }} (attribué à)</span>
+                            {% endif %}
+                            <span>.</span>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        {% elif rechOeuvre and boolPasOeuvre %}
+            <h2>Les oeuvres</h2>
+            <p>La recherche sur les oeuvres n'a donné aucun résultat.</p>
         {% endif %}
     {% endif %}
 

@@ -8,8 +8,7 @@ from ..constantes import ROWS_PER_PAGE
 from ..modeles.classes import Codices, Lieux, Unites_codico, Oeuvres, Personnes, Provenances
 from ..modeles.utilisateurs import User
 from ..modeles.traitements import auteursListDict, codexJson, codicesListDict, conservationDict, personneLabel, \
-    codexLabel, \
-    tousAuteursJson, tousArkDict, toutesOeuvresJson, traitntMotsCles, oeuvreDict
+    codexLabel, tousAuteursJson, tousArkDict, toutesOeuvresJson, traitntMotsCles, oeuvreDict, oeuvresListDict
 from ..modeles.requetes import rechercheArk
 from ..comutTest import test
 
@@ -172,13 +171,13 @@ def recherche(typeRecherche=["simple", "avancee"]):
     rechercheIntersection = False
     # On initie un booléen pour savoir si la recherche avancée est vide
     vide = True
-   
+    
     if typeRecherche == "simple":
         # On récupère la chaîne de requête passée dans l'URL
         motscles = request.args.get("keyword", None)
-
+        
         motscles, rechercheIntersection = traitntMotsCles(motscles)
-
+    
     # Si la recherche est de type "avancée"
     else:
         dictMotsCles = {
@@ -189,12 +188,29 @@ def recherche(typeRecherche=["simple", "avancee"]):
         }
         # On initie un dictionnaire pour récupérer les saisies à traiter
         dictMotsClesNets = {}
+        # On initie des booléens pour savoir quel champs ont été remplis
+        rechAuteur = False
+        rechCote = False
+        rechLieu = False
+        rechOeuvre = False
         # On effectue le traitement des mots-clés sur chaque champ saisi
-        for champ in dictMotsCles:
-            dictMotsClesNets[champ] = traitntMotsCles(dictMotsCles[champ])
-            if dictMotsClesNets[champ][0]:
-                vide = False
-
+        if dictMotsCles["motsClesCote"]:
+            dictMotsClesNets["motsClesCote"] = traitntMotsCles(dictMotsCles["motsClesCote"])
+            vide = False
+            rechCote = True
+        if dictMotsCles["motsClesAuteur"]:
+            dictMotsClesNets["motsClesAuteur"] = traitntMotsCles(dictMotsCles["motsClesAuteur"])
+            vide = False
+            rechAuteur = True
+        if dictMotsCles["motsClesOeuvre"]:
+            dictMotsClesNets["motsClesOeuvre"] = traitntMotsCles(dictMotsCles["motsClesOeuvre"])
+            vide = False
+            rechOeuvre = True
+        if dictMotsCles["motsClesLieu"]:
+            dictMotsClesNets["motsClesLieu"] = traitntMotsCles(dictMotsCles["motsClesLieu"])
+            vide = False
+            rechLieu = True
+    
     # On récupère la liste des dictionnaires contenant les id, les labels et les scores initiés à 0 des codices
     # triés alphanumériquement par labels grâce à la fonction codicesListDict()
     listeDictCodices = codicesListDict()
@@ -238,7 +254,7 @@ def recherche(typeRecherche=["simple", "avancee"]):
         
         # On prépare la pagination des résultats
         page = request.args.get('page', 1, type=int)
-    
+        
         # On initie une liste d'id des codices résultats
         idResultats = []
         
@@ -255,7 +271,7 @@ def recherche(typeRecherche=["simple", "avancee"]):
                 bredouille = False
                 # On ajoute les objets Codices aux résultats paginés
                 idResultats.append(codex["codex_id"])
-    
+        
         resultats = Codices.query.filter(Codices.id.in_(idResultats)).paginate(page=page, per_page=ROWS_PER_PAGE)
         
         return render_template("pages/resultats.html", type="simple", resultats=resultats, donnees=listeDictCodices,
@@ -263,8 +279,10 @@ def recherche(typeRecherche=["simple", "avancee"]):
     
     # Si la recherche est de type avancé
     elif typeRecherche == "avancee" and not vide:
-        # On charge une liste de dictionnaires d'auteurs pour recevoir les scores de la recherche
+        # On charge les dictionnaires destinées à recevoir, par type de donnée les scores de la recherche
         listeDictAuteurs = auteursListDict()
+        listeDictOeuvres = oeuvresListDict()
+        
         # On boucle sur chaque champ de la saisie traitée
         for champ in dictMotsClesNets:
             # On pose comme condition l'existence de mot-clé
@@ -280,8 +298,9 @@ def recherche(typeRecherche=["simple", "avancee"]):
                             resultatsDataBNF = rechercheArk(mot, arks)
                         except requests.exceptions.SSLError:
                             resultatsDataBNF = {}
-                            
-                        # On boucle sur les auteurs chargés dans
+                        
+                        # Pour la recherche sur les données locales
+                        # on boucle sur les auteurs chargés dans listeDictAuteurs
                         for auteur in listeDictAuteurs:
                             # On initie un booléen qui détermine si l'auteur courant est pertinent vis-à-vis du mot-clé
                             pertinent = False
@@ -290,15 +309,52 @@ def recherche(typeRecherche=["simple", "avancee"]):
                                 pertinent = True
                             if pertinent:
                                 auteur["score"] += 1
-
+                    
+                    # Pour une recherche sur les oeuvres
+                    elif champ == "motsClesOeuvre":
+                        tousArks = tousArkDict()
+                        arks = {
+                            "arkOeuvres": tousArks["arkOeuvres"]
+                        }
+                        try:
+                            resultatsDataBNF = rechercheArk(mot, arks)
+                        except requests.exceptions.SSLError:
+                            resultatsDataBNF = {}
+                        
+                        # Pour la recherche sur les données locales
+                        # on boucle sur les oeuvres chargées dans listeDictOeuvres
+                        for oeuvre in listeDictOeuvres:
+                            # On initie un booléen qui détermine si l'oeuvre courant est pertinente vis-à-vis du mot-clé
+                            pertinent = False
+                            # La recherche d'une oeuvre porte sur son titre
+                            if mot in oeuvre["titre"].lower():
+                                pertinent = True
+                            if pertinent:
+                                oeuvre["score"] += 1
+        
         # On initie un booléen pour déterminer si la recherche sur les auteurs n'a donné aucun résultat
         boolPasAuteur = True
         for auteur in listeDictAuteurs:
             if auteur["score"] != 0:
                 boolPasAuteur = False
-
-        return render_template("pages/resultats.html", type="avancee", resultatsAuteurs=listeDictAuteurs,
-                                   boolPasAuteur=boolPasAuteur)
+        print(rechAuteur)
+        # De même pour les oeuvres
+        boolPasOeuvre = True
+        for oeuvre in listeDictOeuvres:
+            if oeuvre["score"] != 0:
+                boolPasOeuvre = False
+                # On ajoute alors des métadonnées sur l'oeuvre
+                oeuvre["donnees"] = oeuvreDict(oeuvre["oeuvre_id"])
         
+        return render_template("pages/resultats.html",
+                               type="avancee",
+                               rechAuteur=rechAuteur,
+                               boolPasAuteur=boolPasAuteur,
+                               resultatsAuteurs=listeDictAuteurs,
+                               rechOeuvre=rechOeuvre,
+                               boolPasOeuvre=boolPasOeuvre,
+                               resultatsOeuvres=listeDictOeuvres
+                               )
+    
     elif typeRecherche == "avancee" and vide:
         return render_template("pages/recherche-avancee.html")

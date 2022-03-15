@@ -665,8 +665,7 @@ def auteursListDict():
     """
     Cette fonction charge l'ensemble des auteurs de la base
     les trie alphabétiquement par nom
-    et retourne, dans cet ordre, une liste de dictionnaires contenant son id du codex, son nom et un score initié
-    à 0.
+    et retourne, dans cet ordre, une liste de dictionnaires contenant son id, son nom et un score initié à 0.
     :return type: list
 
     Chaque item de la liste sera un dictionnaire selon le modèle suivant :
@@ -677,13 +676,12 @@ def auteursListDict():
     # On initie la liste
     listDictAuteurs = []
     
-    # On charge les codices de la base
+    # On charge les personnes de la base
     personnes = Personnes.query.order_by(Personnes.nom).all()
     
-    # On boucle sur les labels de codices triés
-    # pour ensuite ajouter à la liste scoresCodices chaque codex dans l'ordre alphanumérique
+    # On boucle sur les personnes
     for personne in personnes:
-        # Pour chaque codex, on écrit un dictionnaire
+        # Pour chaque personne, on écrit un dictionnaire
         dicoPersonne = {
             "personne_id": personne.id,
             "nom": personneLabel(personne.id, "long"),
@@ -692,3 +690,34 @@ def auteursListDict():
         listDictAuteurs.append(dicoPersonne)
 
     return listDictAuteurs
+
+
+def oeuvresListDict():
+    """
+    Cette fonction charge l'ensemble des oeuvres de la base
+    les trie alphabétiquement par titre
+    et retourne, dans cet ordre, une liste de dictionnaires contenant son id, son titre et un score initié à 0.
+    :return type: list
+
+    Chaque item de la liste sera un dictionnaire selon le modèle suivant :
+    {'oeuvre_id': 1,
+     'titre': 'De fide et symbolo',
+     'score': 0}
+    """
+    # On initie la liste
+    listDictOeuvres = []
+    
+    # On charge les oeuvres de la base
+    oeuvres = Oeuvres.query.order_by(Oeuvres.titre).all()
+    
+    # On boucle sur les oeuvres
+    for oeuvre in oeuvres:
+        # Pour chaque oeuvre, on écrit un dictionnaire
+        dicoOeuvre = {
+            "oeuvre_id": oeuvre.id,
+            "titre": oeuvre.titre,
+            "score": 0
+        }
+        listDictOeuvres.append(dicoOeuvre)
+    
+    return listDictOeuvres
