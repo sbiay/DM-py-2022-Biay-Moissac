@@ -6,11 +6,10 @@
 
 {% block corps %}
     <h1>Résultats</h1>
-
     {% if bredouille %}
         <p>La recherche n'a donné aucun résultat.</p>
     {% endif %}
-
+    <!--Pour la recherche simple -->
     {% if type == "simple" %}
         <table class="table table-striped table-hover">
             <thead>
@@ -53,11 +52,11 @@
                             <a class="page-link">...</a>
                         </li>
                     {% endif %}
-
                 {%- endfor %}
             </ul>
         </nav>
-    <!--Pour les résultats de la recherche avancée-->
+
+        <!--Pour les résultats de la recherche avancée-->
     {% else %}
         <h2 title="Cette liste recense les codices répondant à tous les critères de la recherche.">Les codices</h2>
         {% if codices %}
@@ -71,39 +70,35 @@
         {% else %}
             <p>Aucun codex ne répond à l'ensemble des critères saisis.</p>
         {% endif %}
-        {% if rechAuteur and not boolPasAuteur %}
+        {% if rechAuteur and resultatsAuteurs %}
             <h2 title='Cette liste recense les auteurs répondant seulement à la saisie du champ "auteur".'>Les auteurs</h2>
             <ul>
                 {% for auteur in resultatsAuteurs %}
-                    {% if auteur["score"] != 0 %}
-                        <li><a href="{{ url_for("noticePersonne", id=auteur["personne_id"]) }}">{{ auteur["nom"] }}</a></li>
-                    {% endif %}
+                    <li><a href="{{ url_for("noticePersonne", id=auteur["personne_id"]) }}">{{ auteur["nom"] }}</a></li>
                 {% endfor %}
             </ul>
-        {% elif rechAuteur and boolPasAuteur %}
+        {% elif rechAuteur and not resultatsAuteurs %}
             <h2>Les auteurs</h2>
             <p>La recherche sur les auteurs n'a donné aucun résultat.</p>
         {% endif %}
-        {% if rechOeuvre and not boolPasOeuvre %}
+        {% if rechOeuvre and resultatsOeuvres %}
             <h2 title='Cette liste recense les oeuvres répondant seulement à la saisie du champ "oeuvre".'>Les oeuvres</h2>
             <ul>
                 {% for oeuvre in resultatsOeuvres %}
-                    {% if oeuvre["score"] != 0 %}
-                        <li>
-                            <a href="{{ url_for("noticeOeuvre", id=oeuvre["oeuvre_id"]) }}">{{ oeuvre["titre"] }}</a>
-                            <!--On ajoute le nom de l'auteur et les éventuelles attributions -->
-                            {% if oeuvre["donnees"]["auteur"] %}
-                                <span>, {{ oeuvre["donnees"]["auteur"] }}</span>
-                            {% endif %}
-                            {% if oeuvre["donnees"]["attr"] %}
-                                <span>, {{ oeuvre["donnees"]["attr"] }} (attribué à)</span>
-                            {% endif %}
-                            <span>.</span>
-                        </li>
-                    {% endif %}
+                    <li>
+                        <a href="{{ url_for("noticeOeuvre", id=oeuvre["oeuvre_id"]) }}">{{ oeuvre["titre"] }}</a>
+                        <!--On ajoute le nom de l'auteur et les éventuelles attributions -->
+                        {% if oeuvre["donnees"]["auteur"] %}
+                            <span>, {{ oeuvre["donnees"]["auteur"] }}</span>
+                        {% endif %}
+                        {% if oeuvre["donnees"]["attr"] %}
+                            <span>, {{ oeuvre["donnees"]["attr"] }} (attribué à)</span>
+                        {% endif %}
+                        <span>.</span>
+                    </li>
                 {% endfor %}
             </ul>
-        {% elif rechOeuvre and boolPasOeuvre %}
+        {% elif rechOeuvre and not resultatsOeuvres %}
             <h2>Les oeuvres</h2>
             <p>La recherche sur les oeuvres n'a donné aucun résultat.</p>
         {% endif %}

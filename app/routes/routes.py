@@ -380,7 +380,6 @@ def recherche(typeRecherche=["simple", "avancee"]):
                     boolPasAuteur = False
         
         # De même pour les oeuvres
-        boolPasOeuvre = True
         if rechOeuvre:
             for oeuvre in listeDictOeuvres:
                 exclusive = dictMotsClesNets["motsClesOeuvre"][1]
@@ -388,13 +387,11 @@ def recherche(typeRecherche=["simple", "avancee"]):
                     if oeuvre["score"] < len(dictMotsClesNets["motsClesOeuvre"][0]):
                         oeuvre["score"] = 0
                 if oeuvre["score"] != 0:
-                    boolPasOeuvre = False
                     # On ajoute alors des métadonnées sur l'oeuvre
                     oeuvresPositives.append(oeuvre)
                     oeuvre["donnees"] = oeuvreDict(oeuvre["oeuvre_id"])
         
         # De même pour les cotes
-        boolPasCote = True
         if rechCote:
             for codex in listeDictCodices:
                 exclusive = dictMotsClesNets["motsClesCote"][1]
@@ -402,11 +399,10 @@ def recherche(typeRecherche=["simple", "avancee"]):
                     if codex["score"] < len(dictMotsClesNets["motsClesCote"][0]):
                         codex["score"] = 0
                 if codex["score"] != 0:
-                    boolPasCote = False
                     cotesPositives.append(codex)
         
         # Pour croiser les résultats des différents champs et retourner les codices pertinents
-        # On initie la liste des id des dictionnaires pertients
+        # On initie la liste des id des dictionnaires pertinents
         idCodicesPertinents = []
         codices = Codices.query.all()
         for codex in codices:
@@ -462,11 +458,9 @@ def recherche(typeRecherche=["simple", "avancee"]):
                                type="avancee",
                                codices=listeCodicesPertinents,
                                rechAuteur=rechAuteur,
-                               boolPasAuteur=boolPasAuteur,
-                               resultatsAuteurs=listeDictAuteurs,
+                               resultatsAuteurs=auteursPositifs,
                                rechOeuvre=rechOeuvre,
-                               boolPasOeuvre=boolPasOeuvre,
-                               resultatsOeuvres=listeDictOeuvres
+                               resultatsOeuvres=oeuvresPositives
                                )
     
     elif typeRecherche == "avancee" and vide:
