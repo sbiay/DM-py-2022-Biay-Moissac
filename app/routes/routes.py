@@ -215,11 +215,11 @@ def recherche(typeRecherche=["simple", "avancee"]):
         # On boucle sur chaque mot-clé
         for mot in motscles:
             # On charge les arks de la base de donnée
-            arks = tousArkDict()
+            arks = tousArkDict("codices")
             # On cherche chaque mot-clé sur Data-BNF au moyen de la fonction requeteDataBNF()
             # qui retourne un set d'id de codices
             try:
-                resultatsDataBNF = rechercheArk(mot, arks, "codices")
+                resultatsDataBNF = rechercheArk(mot, arks)
             except requests.exceptions.SSLError:
                 resultatsDataBNF = {}
             
@@ -287,12 +287,12 @@ def recherche(typeRecherche=["simple", "avancee"]):
                 for mot in dictMotsClesNets[champ][0]:
                     # Pour une recherche sur les auteurs
                     if champ == "motsClesAuteur":
-                        tousArks = tousArkDict()
+                        tousArks = tousArkDict("personnes")
                         arks = {
                             "arkPersonnes": tousArks["arkPersonnes"]
                         }
                         try:
-                            resultatsDataBNF = rechercheArk(mot, arks, "personnes")
+                            resultatsDataBNF = rechercheArk(mot, arks)
                         except requests.exceptions.SSLError:
                             resultatsDataBNF = {}
                         
@@ -304,17 +304,20 @@ def recherche(typeRecherche=["simple", "avancee"]):
                             # La recherche d'un auteur porte sur son nom
                             if mot in auteur["nom"].lower():
                                 pertinent = True
+                            else:
+                                if auteur["personne_id"] in resultatsDataBNF:
+                                    pertinent = True
                             if pertinent:
                                 auteur["score"] += 1
                     
                     # Pour une recherche sur les oeuvres
                     elif champ == "motsClesOeuvre":
-                        tousArks = tousArkDict()
+                        tousArks = tousArkDict("oeuvres")
                         arks = {
                             "arkOeuvres": tousArks["arkOeuvres"]
                         }
                         try:
-                            resultatsDataBNF = rechercheArk(mot, arks, "oeuvres")
+                            resultatsDataBNF = rechercheArk(mot, arks)
                         except requests.exceptions.SSLError:
                             resultatsDataBNF = {}
                         
@@ -326,6 +329,9 @@ def recherche(typeRecherche=["simple", "avancee"]):
                             # La recherche d'une oeuvre porte sur son titre
                             if mot in oeuvre["titre"].lower():
                                 pertinent = True
+                            else:
+                                if oeuvre["oeuvre_id"] in resultatsDataBNF:
+                                    pertinent = True
                             if pertinent:
                                 oeuvre["score"] += 1
         

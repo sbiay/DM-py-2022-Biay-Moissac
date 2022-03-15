@@ -25,6 +25,6 @@
     {% endfor %}
     {% if dictOeuvre["data.bnf"] %}
         <h2>Liens</h2>
-        <p><a href="https://data.bnf.fr/{{ dictOeuvre['personne_ark'] }}">Lien vers la notice Data-BNF</a>.</p>
+        <p><a href="https://data.bnf.fr/{{ dictOeuvre['data.bnf'] }}">Lien vers la notice Data-BNF</a>.</p>
     {% endif %}
 {% endblock %}
