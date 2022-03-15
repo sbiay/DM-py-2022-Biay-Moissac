@@ -91,7 +91,7 @@
                     {% if oeuvre["score"] != 0 %}
                         <li>
                             <a href="{{ url_for("noticeOeuvre", id=oeuvre["oeuvre_id"]) }}">{{ oeuvre["titre"] }}</a>
-                            <!--On ajoute le nom de l'auteur et éventuelles attributions -->
+                            <!--On ajoute le nom de l'auteur et les éventuelles attributions -->
                             {% if oeuvre["donnees"]["auteur"] %}
                                 <span>, {{ oeuvre["donnees"]["auteur"] }}</span>
                             {% endif %}

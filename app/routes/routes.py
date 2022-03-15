@@ -159,12 +159,20 @@ def notice_codex(num):
 @app.route("/recherche/<typeRecherche>")
 def recherche(typeRecherche=["simple", "avancee"]):
     """
-    Cette route traite les mots-clés envoyés via le formulaire de recherche simple de la barre de navigation.
-    Elle fonctionne selon un opérateur OU par défaut entre les différents mots-clés de la saisie.
-    L'opérateur ET peut être saisi par l'utilisateur ce qui rend la recherche exclusive et non inclusive.
+    Cette route traite à la fois de la recherche simple et de la recherche avancée.
+    La recherche simple (via le formulaire de la barre de navigation) fonctionne selon un opérateur OU par défaut
+    entre les différents mots-clés de la saisie. L'opérateur ET peut être saisi par l'utilisateur,
+    ce qui rend la recherche exclusive et non inclusive.
     Afin de bénéficier des multiples formes de titres d'oeuvre et de noms d'auteurs décrits sur data.bnf.fr,
     cette recherche croise les identifiants ark d'auteurs et d'oeuvres contenus dans la base locale
     avec les ark répondant aux mêmes mots-clés interrogés sur data.bnf.fr.
+    
+    La recherche avancée calcule ses résultats de deux manières :
+        1. Elle n'affiche que les codices dont la pertinence correspond à tous les mots saisis dans tous les champs ;
+        2. Elle affiche tous les auteurs et les oeuvres pertinentes de la base
+        par rapport à la saisie dans leur champ respectif (même s'ils ne sont pas attestés dans un codex commun).
+    La recherche avancée traite les mots-clés de manière exclusive par défaut ; mais si l'opérateur "OU" est saisi
+    (une seule fois dans le champ), la recherche incluera tous les auteurs ou oeuvres pertinents pour chaque mot-clé.
     """
     # Si la recherche est vide, les variables suivantes sont inchangées
     motscles = []
