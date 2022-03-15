@@ -144,7 +144,7 @@ def personneLabel(idPersonne, forme=["court", "long"]):
         return None
 
 
-def traitntMotsCles(motscles, exclusive):
+def saisieTraitee(motscles, exclusive):
     """
     Cette fonction prend comme argument la saisie d'un utilisateur,
     détermine si la recherche contient l'opérateur ET,

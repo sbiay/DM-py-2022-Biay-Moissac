@@ -8,7 +8,7 @@ from ..constantes import ROWS_PER_PAGE
 from ..modeles.classes import Codices, Lieux, Unites_codico, Oeuvres, Personnes, Provenances
 from ..modeles.utilisateurs import User
 from ..modeles.traitements import auteursListDict, codexJson, codicesListDict, conservationDict, personneLabel, \
-    codexLabel, tousAuteursJson, tousArkDict, toutesOeuvresJson, traitntMotsCles, oeuvreDict, oeuvresListDict
+    codexLabel, tousAuteursJson, tousArkDict, toutesOeuvresJson, saisieTraitee, oeuvreDict, oeuvresListDict
 from ..modeles.requetes import rechercheArk
 from ..comutTest import test
 
@@ -179,39 +179,39 @@ def recherche(typeRecherche=["simple", "avancee"]):
     exclusive = False
     vide = True # Pour la recherche avancée, si aucun champ n'est complété
     
-    # On récupère la requête de l'utilisateur
+    # Pour la recherche simple
     if typeRecherche == "simple":
         # On récupère la chaîne de requête passée dans l'URL
         motscles = request.args.get("keyword", None)
-        # On récupère les mots-clés traités grâce à la fonction traitntMotsCles()
+        # On récupère les mots-clés traités grâce à la fonction saisieTraitee()
         # La recherche simple est à priori inclusive
-        motscles, exclusive = traitntMotsCles(motscles, exclusive=False)
+        motscles, exclusive = saisieTraitee(motscles, exclusive=False)
 
     # Si la recherche est de type "avancée"
     else:
         # On récupère les mots-clés de la recherche pour chaque champ
-        dictMotsCles = {
-            "motsClesCote": request.args.get("cote", None),
-            "motsClesAuteur": request.args.get("auteur", None),
-            "motsClesOeuvre": request.args.get("oeuvre", None)
+        motscles = {
+            "cote": request.args.get("cote", None),
+            "auteur": request.args.get("auteur", None),
+            "oeuvre": request.args.get("oeuvre", None)
         }
         # On initie un dictionnaire pour récupérer les saisies après traitement
-        dictMotsClesNets = {}
+        motsclesNets = {}
         # On initie des booléens pour savoir quel champs ont été remplis
-        rechAuteur = False
+        rechAuteur = False # TODO on peut factoriser en rempalçant par motscles["auteur"]
         rechCote = False
         rechOeuvre = False
         # On effectue le traitement des mots-clés sur chaque champ saisi
-        if dictMotsCles["motsClesCote"]:
-            dictMotsClesNets["motsClesCote"] = traitntMotsCles(dictMotsCles["motsClesCote"], exclusive=True)
+        if motscles["cote"]:
+            motsclesNets["cote"] = saisieTraitee(motscles["cote"], exclusive=True)
             vide = False
             rechCote = True
-        if dictMotsCles["motsClesAuteur"]:
-            dictMotsClesNets["motsClesAuteur"] = traitntMotsCles(dictMotsCles["motsClesAuteur"], True)
+        if motscles["auteur"]:
+            motsclesNets["auteur"] = saisieTraitee(motscles["auteur"], True)
             vide = False
             rechAuteur = True
-        if dictMotsCles["motsClesOeuvre"]:
-            dictMotsClesNets["motsClesOeuvre"] = traitntMotsCles(dictMotsCles["motsClesOeuvre"], True)
+        if motscles["oeuvre"]:
+            motsclesNets["oeuvre"] = saisieTraitee(motscles["oeuvre"], True)
             vide = False
             rechOeuvre = True
         
@@ -290,14 +290,14 @@ def recherche(typeRecherche=["simple", "avancee"]):
         listeDictCodices = codicesListDict()
         
         # On boucle sur chaque champ de la saisie traitée
-        for champ in dictMotsClesNets:
+        for champ in motsclesNets:
             # On pose comme condition l'existence de mot-clé
-            if dictMotsClesNets[champ][0]:
+            if motsclesNets[champ][0]:
                 # On boucle sur chaque mot-clé
-                for mot in dictMotsClesNets[champ][0]:
+                for mot in motsclesNets[champ][0]:
                     
                     # Pour une recherche sur les cotes
-                    if champ == "motsClesCote":
+                    if champ == "cote":
                         for codex in listeDictCodices:
                             # On initie un booléen qui détermine si le codex courant est pertinent vis-à-vis du mot-clé
                             pertinent = False
@@ -309,7 +309,7 @@ def recherche(typeRecherche=["simple", "avancee"]):
                                 codex["score"] += 1
                                 
                     # Pour une recherche sur les auteurs
-                    if champ == "motsClesAuteur":
+                    if champ == "auteur":
                         tousArks = tousArkDict("personnes")
                         arks = {
                             "arkPersonnes": tousArks["arkPersonnes"]
@@ -334,7 +334,7 @@ def recherche(typeRecherche=["simple", "avancee"]):
                                 auteur["score"] += 1
                     
                     # Pour une recherche sur les oeuvres
-                    elif champ == "motsClesOeuvre":
+                    elif champ == "oeuvre":
                         tousArks = tousArkDict("oeuvres")
                         arks = {
                             "arkOeuvres": tousArks["arkOeuvres"]
@@ -364,15 +364,14 @@ def recherche(typeRecherche=["simple", "avancee"]):
         oeuvresPositives = []
         
         # On initie un booléen pour déterminer si la recherche sur les auteurs n'a donné aucun résultat
-        boolPasAuteur = True
-        if rechAuteur:
+        if motscles["auteur"]:
             for auteur in listeDictAuteurs:
                 # On récupère le booléen propre à la saisie du champ courant
                 # afin de déterminer si la recherche doit être inclusive ou exclusive
-                exclusive = dictMotsClesNets["motsClesAuteur"][1]
+                exclusive = motsclesNets["auteur"][1]
                 if exclusive:
                     # Si le score de l'auteur courant est inférieur au nombre de mots-clés, son score est annulé
-                    if auteur["score"] < len(dictMotsClesNets["motsClesAuteur"][0]):
+                    if auteur["score"] < len(motsclesNets["auteur"][0]):
                         auteur["score"] = 0
                 # S'il reste un auteur dont le score n'est pas nul, la recherche est fructueuse
                 if auteur["score"] != 0:
@@ -380,11 +379,11 @@ def recherche(typeRecherche=["simple", "avancee"]):
                     boolPasAuteur = False
         
         # De même pour les oeuvres
-        if rechOeuvre:
+        if motscles["oeuvre"]:
             for oeuvre in listeDictOeuvres:
-                exclusive = dictMotsClesNets["motsClesOeuvre"][1]
+                exclusive = motsclesNets["oeuvre"][1]
                 if exclusive:
-                    if oeuvre["score"] < len(dictMotsClesNets["motsClesOeuvre"][0]):
+                    if oeuvre["score"] < len(motsclesNets["oeuvre"][0]):
                         oeuvre["score"] = 0
                 if oeuvre["score"] != 0:
                     # On ajoute alors des métadonnées sur l'oeuvre
@@ -392,11 +391,11 @@ def recherche(typeRecherche=["simple", "avancee"]):
                     oeuvre["donnees"] = oeuvreDict(oeuvre["oeuvre_id"])
         
         # De même pour les cotes
-        if rechCote:
+        if motscles["cote"]:
             for codex in listeDictCodices:
-                exclusive = dictMotsClesNets["motsClesCote"][1]
+                exclusive = motsclesNets["cote"][1]
                 if exclusive:
-                    if codex["score"] < len(dictMotsClesNets["motsClesCote"][0]):
+                    if codex["score"] < len(motsclesNets["cote"][0]):
                         codex["score"] = 0
                 if codex["score"] != 0:
                     cotesPositives.append(codex)
