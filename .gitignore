@@ -19,3 +19,4 @@ user.sql
 app/comutTest.py
 *.db-journal
 aide-gitpush.txt
+./app/db/libMoissac.db
