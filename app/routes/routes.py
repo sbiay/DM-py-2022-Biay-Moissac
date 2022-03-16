@@ -19,11 +19,38 @@ def accueil():
     La page d'accueil affiche la liste des codices enregistrés dans la base
     alphanumériquement par lieu de conservation (localité, puis nom d'institution) puis par cote
     """
-    # On récupère la liste des dictionnaires contenant les id, les labels et les scores initiés à 0 des codices
-    # triés alphanumériquement par labels grâce à la fonction codicesListDict()
+    # Pour pouvoir trier les codices alphanumériquement par labels et cote,
+    # on récupère la liste des dictionnaires ordonnés contenant les id et les labels
+    # grâce à la fonction codicesListDict()
     listeDictCodices = codicesListDict()
+    # On crée une liste ordonnée des codices
+    idOrdonnés = [codex["codex_id"] for codex in listeDictCodices]
+
+    # On initie la pagination
+    page = request.args.get('page', 1, type=int)
+    codicesPagines = Codices.query.filter(Codices.id.in_(idOrdonnés)).paginate(page=page, per_page=ROWS_PER_PAGE)
     
-    return render_template("pages/accueil.html", resultats=listeDictCodices)
+    return render_template("pages/accueil.html", resultats=listeDictCodices, codicesPagines=codicesPagines)
+
+
+@app.route("/pages/inscription", methods=["GET", "POST"])
+def inscription():
+    if request.method == "POST":
+        print("Formulaire envoyé !")
+        statut, donnees = User.creer(
+            login=request.form.get("login", None),
+            email=request.form.get("email", None),
+            nom=request.form.get("nom", None),
+            motdepasse=request.form.get("motdepasse", None)
+        )
+        if statut is True:
+            flash("Enregistrement effectué. Identifiez-vous maintenant", "success")
+            return render_template("pages/connexion.html")
+        else:
+            flash("Les erreurs suivantes ont été rencontrées : " + ",".join(donnees), "error")
+            return render_template("pages/inscription.html")
+    else:
+        return render_template("pages/inscription.html")
 
 
 @app.route("/pages/connexion", methods=["POST", "GET"])
@@ -90,54 +117,6 @@ def indexOeuvres():
     return render_template("pages/oeuvres.html", oeuvres=donneesOeuvres, classOeuvres=classOeuvres)
 
 
-@app.route("/pages/auteur/<int:id>")
-def noticePersonne(id):
-    """Cette route prend pour argument l'identifiant d'un auteur et retourne le template de sa notice"""
-    # On charge les données de tous les auteurs
-    toutesPersonnes = json.loads(tousAuteursJson())
-    
-    # On récupère les données de l'auteur concerné
-    for item in toutesPersonnes:
-        if item["personne_id"] == id:
-            dictPersonne = item
-    
-    return render_template("pages/auteur.html", dictPersonne=dictPersonne, titre=dictPersonne["label"])
-
-
-@app.route("/pages/oeuvre/<int:id>")
-def noticeOeuvre(id):
-    """Cette route prend pour argument l'identifiant d'une oeuvre et retourne le template de sa notice"""
-    # On charge les données de toutes les oeuvres
-    toutesOeuvres = json.loads(toutesOeuvresJson())
-    
-    # On récupère les données de l'oeuvre concernée
-    for item in toutesOeuvres:
-        if item["oeuvre_id"] == id:
-            dictOeuvre = item
-    
-    return render_template("pages/oeuvre.html", dictOeuvre=dictOeuvre, titre=dictOeuvre["titre"])
-
-
-@app.route("/pages/inscription", methods=["GET", "POST"])
-def inscription():
-    if request.method == "POST":
-        print("Formulaire envoyé !")
-        statut, donnees = User.creer(
-            login=request.form.get("login", None),
-            email=request.form.get("email", None),
-            nom=request.form.get("nom", None),
-            motdepasse=request.form.get("motdepasse", None)
-        )
-        if statut is True:
-            flash("Enregistrement effectué. Identifiez-vous maintenant", "success")
-            return render_template("pages/connexion.html")
-        else:
-            flash("Les erreurs suivantes ont été rencontrées : " + ",".join(donnees), "error")
-            return render_template("pages/inscription.html")
-    else:
-        return render_template("pages/inscription.html")
-
-
 @app.route("/pages/codices/<int:num>")
 def notice_codex(num):
     # Test d'existence de l'identifiant cherché
@@ -154,6 +133,40 @@ def notice_codex(num):
                                provenances=codex["provenances"],
                                origine=codex["origine"],
                                descUCs=codex["contenu"])
+
+
+@app.route("/pages/auteur/<int:id>")
+def noticePersonne(id):
+    """Cette route prend pour argument l'identifiant d'un auteur et retourne le template de sa notice"""
+    # Test d'existence de l'identifiant cherché
+    personne = Personnes.query.get_or_404(id)
+    
+    # On charge les données de tous les auteurs
+    toutesPersonnes = json.loads(tousAuteursJson())
+    
+    # On récupère les données de l'auteur concerné
+    for item in toutesPersonnes:
+        if item["personne_id"] == id:
+            dictPersonne = item
+    
+    return render_template("pages/auteur.html", dictPersonne=dictPersonne, titre=dictPersonne["label"])
+
+
+@app.route("/pages/oeuvre/<int:id>")
+def noticeOeuvre(id):
+    """Cette route prend pour argument l'identifiant d'une oeuvre et retourne le template de sa notice"""
+    # Test d'existence de l'identifiant cherché
+    oeuvre = Oeuvres.query.get_or_404(id)
+    
+    # On charge les données de toutes les oeuvres
+    toutesOeuvres = json.loads(toutesOeuvresJson())
+    
+    # On récupère les données de l'oeuvre concernée
+    for item in toutesOeuvres:
+        if item["oeuvre_id"] == id:
+            dictOeuvre = item
+    
+    return render_template("pages/oeuvre.html", dictOeuvre=dictOeuvre, titre=dictOeuvre["titre"])
 
 
 @app.route("/recherche/<typeRecherche>")
@@ -177,7 +190,7 @@ def recherche(typeRecherche=["simple", "avancee"]):
     # Si la recherche est vide, les variables suivantes sont inchangées
     motscles = []
     exclusive = False
-    vide = True # Pour la recherche avancée, si aucun champ n'est complété
+    vide = True  # Pour la recherche avancée, si aucun champ n'est complété
     
     # Pour la recherche simple
     if typeRecherche == "simple":
@@ -186,7 +199,7 @@ def recherche(typeRecherche=["simple", "avancee"]):
         # On récupère les mots-clés traités grâce à la fonction saisieTraitee()
         # La recherche simple est à priori inclusive
         motscles, exclusive = saisieTraitee(motscles, exclusive=False)
-
+    
     # Si la recherche est de type "avancée"
     else:
         # On récupère les mots-clés de la recherche pour chaque champ
@@ -207,7 +220,7 @@ def recherche(typeRecherche=["simple", "avancee"]):
         if motscles["oeuvre"]:
             motsclesNets["oeuvre"] = saisieTraitee(motscles["oeuvre"], True)
             vide = False
-        
+    
     # On récupère les listes de dictionnaires contenant les id, les labels et les scores initiés à 0 des codices
     # triés alphanumériquement par labels grâce à la fonction codicesListDict()
     listeDictCodices = codicesListDict()
@@ -264,7 +277,6 @@ def recherche(typeRecherche=["simple", "avancee"]):
                 if pertinent:
                     codex["score"] += 1
         
-        
         # On prépare la pagination des résultats
         page = request.args.get('page', 1, type=int)
         # On initie une liste d'id des codices résultats
@@ -317,7 +329,7 @@ def recherche(typeRecherche=["simple", "avancee"]):
                                 pertinent = True
                             if pertinent:
                                 codex["score"] += 1
-                                
+                    
                     # Pour une recherche sur les personnes
                     if champ == "auteur":
                         # Pour la recherche sur les données locales
@@ -439,8 +451,8 @@ def recherche(typeRecherche=["simple", "avancee"]):
                     pertinent = False
                     for UC in donneesCodex["contenu"]:
                         for oeuvre in UC["oeuvres"]:
-                            if oeuvre.get("auteur_id") == auteurPositif["personne_id"]\
-                                or oeuvre.get("attr_id") == auteurPositif["personne_id"] :
+                            if oeuvre.get("auteur_id") == auteurPositif["personne_id"] \
+                                or oeuvre.get("attr_id") == auteurPositif["personne_id"]:
                                 pertinent = True
                     if pertinent:
                         scoreCodex += 1
@@ -452,8 +464,8 @@ def recherche(typeRecherche=["simple", "avancee"]):
             """
             # Pour qu'un codex soit pertinent, il faut qu'il contienne chaque oeuvre et chaque auteur pertinent
             # son score doit donc être égal au nombre de résultats pertinents et que ce score ne soit pas égal à 0
-            if len(oeuvresPositives)\
-                + len(auteursPositifs)\
+            if len(oeuvresPositives) \
+                + len(auteursPositifs) \
                 == scoreCodex and scoreCodex != 0:
                 idCodicesPertinents.append(donneesCodex["codex_id"])
         
@@ -473,7 +485,7 @@ def recherche(typeRecherche=["simple", "avancee"]):
         # S'il n'y a pas de recherche sur les autres champs
         elif motscles["cote"] and not motscles["auteur"] and not motscles["oeuvre"]:
             listeCodicesPertinents = [codexLabel(cote["codex_id"]) for cote in cotesPositives]
-    
+        
         return render_template("pages/resultats.html",
                                type="avancee",
                                codices=listeCodicesPertinents,
@@ -485,3 +497,8 @@ def recherche(typeRecherche=["simple", "avancee"]):
     
     elif typeRecherche == "avancee" and vide:
         return render_template("pages/recherche-avancee.html")
+
+@app.route("/creer/<typeCreation>", methods=["GET", "POST"])
+def creer(typeCreation=["codex"]):
+    if request.method == "GET":
+        return render_template("pages/creer.html", titre="codex")
