@@ -8,30 +8,40 @@
 
     <h1>Création : {{ titre }}</h1>
     <br>
-    <form class="form" method="POST" action="{{url_for("inscription", name="")}}">
+    <form class="form" method="POST" action="{{url_for("creer", typeCreation="codex")}}">
         <div class="form-group row">
             <label for="register-cote" class="col-sm-2 col-form-label">Cote</label>
             <div class="col-sm-10">
-                <input type="text" class="form-control" id="register-cote" name="cote" placeholder="Texte ici">
+                <input type="text" class="form-control" id="register-cote" name="cote" placeholder="ex. Latin 2077">
             </div>
         </div>
         <div class="form-group row">
-            <label for="register-login" class="col-sm-2 col-form-label">Login</label>
+            <label for="register-id-technique" class="col-sm-2 col-form-label">Identifiant technique</label>
             <div class="col-sm-10">
-                <input type="text" class="form-control" id="register-login" name="login" placeholder="Nom d'utilisateur pour se connecter">
+                <input type="text" class="form-control" id="register-id-technique" name="id_technique" placeholder="ex. ark:/12148/cc599714">
             </div>
         </div>
         <div class="form-group row">
-            <label for="register-email" class="col-sm-2 col-form-label">Courriel</label>
+            <label for="register-descript-materielle" class="col-sm-2 col-form-label">Description matérielle</label>
             <div class="col-sm-10">
-                <input type="text" class="form-control" id="register-email" name="email" placeholder="Votre adresse de messagerie">
+                <input type="textarea" class="form-control" id="register-descript-materielle" name="descript_materielle" placeholder="Description matérielle de la reliure">
             </div>
         </div>
         <div class="form-group row">
-            <label for="register-password" class="col-sm-2 col-form-label">Password</label>
+            <label for="register-histoire" class="col-sm-2 col-form-label">Histoire</label>
             <div class="col-sm-10">
-                <input type="password" class="form-control" id="register-password" placeholder="Mot de passe" name="motdepasse">
+                <input type="textarea" class="form-control" id="register-histoire" placeholder="Histoire du codex et de sa conservation" name="histoire">
             </div>
+        </div>
+        <div class="form-group row">
+            <label for="register-conservation" class="col-sm-2 col-form-label {% if 'conservation_id' in erreurs %}is-invalid{% endif %}">Lieu de conservation</label>
+            <select name="conservation_id" class="col-sm-5" id="register-conservation">
+		    	{% for lieu in lieuxConservation %}
+                    <option value="{{lieu.id}}">
+			    		{{ lieu.localite + ", " + lieu.label }}
+			    	</option>
+		    	{% endfor %}
+		    </select>
         </div>
         <div>
             <button type="submit" class="btn btn-primary">Créer</button>

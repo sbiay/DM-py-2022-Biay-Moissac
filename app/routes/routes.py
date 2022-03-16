@@ -25,7 +25,7 @@ def accueil():
     listeDictCodices = codicesListDict()
     # On crée une liste ordonnée des codices
     idOrdonnés = [codex["codex_id"] for codex in listeDictCodices]
-
+    
     # On initie la pagination
     page = request.args.get('page', 1, type=int)
     codicesPagines = Codices.query.filter(Codices.id.in_(idOrdonnés)).paginate(page=page, per_page=ROWS_PER_PAGE)
@@ -476,7 +476,32 @@ def recherche(typeRecherche=["simple", "avancee"]):
     elif typeRecherche == "avancee" and vide:
         return render_template("pages/recherche-avancee.html")
 
+
 @app.route("/creer/<typeCreation>", methods=["GET", "POST"])
 def creer(typeCreation=["codex"]):
     if request.method == "GET":
-        return render_template("pages/creer.html", titre="codex")
+        lieuxConservation = Lieux.query.filter(Lieux.conserve).order_by(Lieux.localite).all()
+        
+        return render_template(
+            "pages/creer.html",
+            titre="codex",
+            lieuxConservation=lieuxConservation
+        )
+    elif request.method == "POST":
+        # On contrôle la saisie des données
+        """
+        if not request.form.get("placeNom", "").strip():
+            erreurs.append("placeNom")
+        """
+        # On récupère les valeurs
+        # TODO en fait on doit les passer à la fonction de création d'un codex
+        cote = request.form["cote"]
+        conservation_id = request.form["conservation_id"]
+        print(conservation_id)
+
+        lieuxConservation = Lieux.query.filter(Lieux.conserve).order_by(Lieux.localite).all()
+        return render_template(
+            "pages/creer.html",
+            titre="codex",
+            lieuxConservation=lieuxConservation
+        )
