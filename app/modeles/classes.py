@@ -15,15 +15,50 @@ class Provenances(db.Model):
 
 
 class Codices(db.Model):
-    id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
+    id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True, autoincrement=True)
     cote = db.Column(db.String)
-    id_technique = db.Column(db.String(19))
-    descript_materielle = db.Column(db.Text)
-    histoire = db.Column(db.Text)
+    id_technique = db.Column(db.String(19), nullable=True)
+    descript_materielle = db.Column(db.Text, nullable=True)
+    histoire = db.Column(db.Text, nullable=True)
     conservation_id = db.Column(db.Integer, db.ForeignKey("lieux.id"))
     lieu_conservation = db.relationship("Lieux", back_populates="conserve")
     unites_codico = db.relationship("Unites_codico", back_populates="codex")
-
+    
+    @staticmethod
+    def creer(cote, id_technique, descript_materielle, histoire, conservation_id, unites_codico):
+        """
+        Création d'un codex dans la base de données.
+        """
+        # On vérifie la qualité des données
+        erreurs = []
+        if not cote:
+            erreurs.append("Une cote doit être renseignée.")
+        if not conservation_id:
+            erreurs.append("Un lieu de conservation doit être renseigné.")
+            
+        # Si on a au moins une erreur
+        if len(erreurs) > 0:
+            return False, erreurs
+        
+        # On crée les données du codex
+        nouveauCodex = Codices(
+            cote=cote,
+            id_technique=id_technique,
+            descript_materielle=descript_materielle,
+            histoire=histoire,
+            conservation_id=conservation_id,
+            unites_codico=unites_codico
+        )
+        # On tente d'écrire le nouveau codex dans la base
+        try:
+            db.session.add(nouveauCodex)
+            # On envoie le paquet
+            db.session.commit()
+    
+            # On renvoie l'utilisateur
+            return True, nouveauCodex
+        except Exception as erreur:
+            return False, [str(erreur)]
 
 class Lieux(db.Model):
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
