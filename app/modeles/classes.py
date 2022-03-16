@@ -25,23 +25,26 @@ class Codices(db.Model):
     unites_codico = db.relationship("Unites_codico", back_populates="codex")
     
     @staticmethod
-    def creer(cote, id_technique, descript_materielle, histoire, conservation_id):
+    def creer(cote, id_technique, descript_materielle, histoire, conservation_id, date_pas_avant, date_pas_apres):
         """
         Création d'un codex dans la base de données.
         """
         # On vérifie la qualité des données
         erreurs = []
+        
         if not cote:
             erreurs.append("Une cote doit être renseignée.")
         if not conservation_id:
             erreurs.append("Un lieu de conservation doit être renseigné.")
-        
+        if not date_pas_avant:
+            erreurs.append("Une date de début doit être renseignée.")
+        if not date_pas_apres:
+            erreurs.append("Une date de fin doit être renseignée.")
+        if not isinstance(date_pas_avant, int) or not isinstance(date_pas_apres, int):
+            erreurs.append("Les dates doivent être des nombres entiers.")
         # Si on a au moins une erreur
         if len(erreurs) > 0:
             return False, erreurs
-        
-        # La création d'une première unité-codicologique doit être automatique
-        unites_codico = []
         
         # On crée les données du codex
         nouveauCodex = Codices(
@@ -50,13 +53,20 @@ class Codices(db.Model):
             descript_materielle=descript_materielle,
             histoire=histoire,
             conservation_id=conservation_id,
-            unites_codico=unites_codico
+            unites_codico=[]
         )
         # On tente d'écrire le nouveau codex dans la base
         try:
             db.session.add(nouveauCodex)
             # On envoie le paquet
             db.session.commit()
+            
+            # On crée la première unité codicologique
+            Unites_codico.creer(
+                code_id=nouveauCodex.id,
+                date_pas_avant=date_pas_avant,
+                date_pas_apres=date_pas_apres
+            )
             
             # On renvoie l'utilisateur
             return True, nouveauCodex
@@ -120,6 +130,7 @@ class Unites_codico(db.Model):
             
             # On renvoie l'UC créée
             return True, nouvelleUC
+        
         except Exception as erreur:
             return False, [str(erreur)]
 
