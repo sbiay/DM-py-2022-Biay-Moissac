@@ -199,22 +199,16 @@ def recherche(typeRecherche=["simple", "avancee"]):
         motsclesNets = {}
         # On initie des booléens pour savoir quel champs ont été remplis
         # TODO on peut factoriser en remplaçant par motscles["auteur"]
-        rechAuteur = False
-        rechCote = False
-        rechOeuvre = False
         # On effectue le traitement des mots-clés sur chaque champ saisi
         if motscles["cote"]:
             motsclesNets["cote"] = saisieTraitee(motscles["cote"], exclusive=True)
             vide = False
-            rechCote = True
         if motscles["auteur"]:
             motsclesNets["auteur"] = saisieTraitee(motscles["auteur"], True)
             vide = False
-            rechAuteur = True
         if motscles["oeuvre"]:
             motsclesNets["oeuvre"] = saisieTraitee(motscles["oeuvre"], True)
             vide = False
-            rechOeuvre = True
         
     # On récupère les listes de dictionnaires contenant les id, les labels et les scores initiés à 0 des codices
     # triés alphanumériquement par labels grâce à la fonction codicesListDict()
@@ -465,7 +459,7 @@ def recherche(typeRecherche=["simple", "avancee"]):
         # et récupérer leur label à afficher dans une liste
         listeCodicesPertinents = []
         # Si les recherches des autres champs ont de résultats, on les croise avec celui sur les cotes
-        if rechOeuvre or rechAuteur and idCodicesPertinents:
+        if motscles["oeuvre"] or motscles["auteur"] and idCodicesPertinents:
             if cotesPositives:
                 for cote in cotesPositives:
                     for id in idCodicesPertinents:
@@ -475,15 +469,15 @@ def recherche(typeRecherche=["simple", "avancee"]):
                 listeCodicesPertinents = [codexLabel(id) for id in idCodicesPertinents]
         
         # S'il n'y a pas de recherche sur les autres champs
-        elif rechCote and not rechAuteur and not rechOeuvre:
+        elif motscles["cote"] and not motscles["auteur"] and not motscles["oeuvre"]:
             listeCodicesPertinents = [codexLabel(cote["codex_id"]) for cote in cotesPositives]
     
         return render_template("pages/resultats.html",
                                type="avancee",
                                codices=listeCodicesPertinents,
-                               rechAuteur=rechAuteur,
+                               rechAuteur=motscles["auteur"],
                                resultatsAuteurs=auteursPositifs,
-                               rechOeuvre=rechOeuvre,
+                               rechOeuvre=motscles["oeuvre"],
                                resultatsOeuvres=oeuvresPositives
                                )
     
