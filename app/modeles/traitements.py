@@ -168,12 +168,18 @@ def saisieTraitee(motscles, exclusive):
     # On supprime l'opérateur
     motscles = motscles.replace(" ET ", " ").replace(" OU ", " ")
     # On élimine les caractères inutiles ou potentiellement dangereux
-    caracteresInterdits = """,.!<>\;"&#^'`?%{}[]|()"""
+    caracteresInterdits = """,.!<>\;"&#^`?%{}[]|()"""
     for caractere in caracteresInterdits:
-        # On passe également les mots en bas de casse
-        motscles = motscles.replace(caractere, "").lower()
+        motscles = motscles.replace(caractere, "")
+    # On remplace les caractères joignant deux mots par une espace
+    caracteresJointifs = "'-"
+    for caractere in caracteresJointifs:
+        motscles = motscles.replace(caractere, " ")
+    # On passe également les mots en bas de casse
+    motscles = motscles.lower()
     # On convertit les mots-clés en liste
     motscles = motscles.split(" ")
+    
     
     return [motscles, exclusive]
 

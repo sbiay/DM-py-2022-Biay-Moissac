@@ -198,7 +198,8 @@ def recherche(typeRecherche=["simple", "avancee"]):
         # On initie un dictionnaire pour récupérer les saisies après traitement
         motsclesNets = {}
         # On initie des booléens pour savoir quel champs ont été remplis
-        rechAuteur = False # TODO on peut factoriser en rempalçant par motscles["auteur"]
+        # TODO on peut factoriser en remplaçant par motscles["auteur"]
+        rechAuteur = False
         rechCote = False
         rechOeuvre = False
         # On effectue le traitement des mots-clés sur chaque champ saisi
@@ -219,18 +220,34 @@ def recherche(typeRecherche=["simple", "avancee"]):
     # triés alphanumériquement par labels grâce à la fonction codicesListDict()
     listeDictCodices = codicesListDict()
     
+    # On définit une liste de mots vides à éliminer pour optimiser les requêtes sur Data-BNF
+    motsVides = [
+        "ad", "à", "au", "aux",
+        "de", "du", "des",
+        "et",
+        "in",
+        "l", "le", "la", "les",
+        "un", "une",
+        "sur",
+        "saint", "sainte"
+    ]
+    
     # Si des mots-clés ont été envoyés à la recherche simple
     if typeRecherche == "simple" and motscles:
         # On boucle sur chaque mot-clé
         for mot in motscles:
             # On charge les arks de la base de donnée
             arks = tousArkDict("codices")
-            # On cherche chaque mot-clé sur Data-BNF au moyen de la fonction requeteDataBNF()
-            # qui retourne un set d'id de codices
-            try:
-                resultatsDataBNF = rechercheArk(mot, arks)
-            except requests.exceptions.SSLError:
-                resultatsDataBNF = {}
+            
+            # Si le mot n'est pas de type vide, on cherche chaque mot-clé sur Data-BNF au moyen de la fonction
+            # rechercheArk() qui retourne un set d'id de codices
+            # On initie les résultats de la recherche
+            resultatsDataBNF = {}
+            if mot not in motsVides:
+                try:
+                    resultatsDataBNF = rechercheArk(mot, arks)
+                except requests.exceptions.SSLError:
+                    resultatsDataBNF = {}
             
             # On boucle sur chaque codex via listeDictCodices
             for codex in listeDictCodices:
@@ -314,10 +331,15 @@ def recherche(typeRecherche=["simple", "avancee"]):
                         arks = {
                             "arkPersonnes": tousArks["arkPersonnes"]
                         }
-                        try:
-                            resultatsDataBNF = rechercheArk(mot, arks)
-                        except requests.exceptions.SSLError:
-                            resultatsDataBNF = {}
+                        # Si le mot n'est pas de type vide, on cherche chaque mot-clé sur Data-BNF au moyen de la fonction
+                        # rechercheArk() qui retourne un set d'id de codices
+                        # On initie les résultats de la recherche
+                        resultatsDataBNF = {}
+                        if mot not in motsVides:
+                            try:
+                                resultatsDataBNF = rechercheArk(mot, arks)
+                            except requests.exceptions.SSLError:
+                                resultatsDataBNF = {}
                         
                         # Pour la recherche sur les données locales
                         # on boucle sur les auteurs chargés dans listeDictAuteurs
@@ -339,10 +361,13 @@ def recherche(typeRecherche=["simple", "avancee"]):
                         arks = {
                             "arkOeuvres": tousArks["arkOeuvres"]
                         }
-                        try:
-                            resultatsDataBNF = rechercheArk(mot, arks)
-                        except requests.exceptions.SSLError:
-                            resultatsDataBNF = {}
+                        # On initie les résultats de la recherche
+                        resultatsDataBNF = {}
+                        if mot not in motsVides:
+                            try:
+                                resultatsDataBNF = rechercheArk(mot, arks)
+                            except requests.exceptions.SSLError:
+                                resultatsDataBNF = {}
                         
                         # Pour la recherche sur les données locales
                         # on boucle sur les oeuvres chargées dans listeDictOeuvres
