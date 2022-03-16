@@ -195,28 +195,28 @@ def recherche(typeRecherche=["simple", "avancee"]):
     # Si la recherche est de type "avancée"
     else:
         # On récupère les mots-clés de la recherche pour chaque champ
-        dictMotsCles = {
-            "motsClesCote": request.args.get("cote", None),
-            "motsClesAuteur": request.args.get("auteur", None),
-            "motsClesOeuvre": request.args.get("oeuvre", None)
+        motscles = {
+            "cote": request.args.get("cote", None),
+            "auteur": request.args.get("auteur", None),
+            "oeuvre": request.args.get("oeuvre", None)
         }
         # On initie un dictionnaire pour récupérer les saisies après traitement
-        dictMotsClesNets = {}
+        motsclesNets = {}
         # On initie des booléens pour savoir quel champs ont été remplis
         rechAuteur = False
         rechCote = False
         rechOeuvre = False
-        # On effectue le traitement des mots-clés sur chaque champ saisi
-        if dictMotsCles["motsClesCote"]:
-            dictMotsClesNets["motsClesCote"] = saisieTraitee(dictMotsCles["motsClesCote"], exclusive=True)
+        # On effectue le traitement des mots-clés sur chaque champ saisi grâce à la fonction saisieTraitee()
+        if motscles["cote"]:
+            motsclesNets["cote"] = saisieTraitee(motscles["cote"], exclusive=True)
             vide = False
             rechCote = True
-        if dictMotsCles["motsClesAuteur"]:
-            dictMotsClesNets["motsClesAuteur"] = saisieTraitee(dictMotsCles["motsClesAuteur"], True)
+        if motscles["auteur"]:
+            motsclesNets["auteur"] = saisieTraitee(motscles["auteur"], True)
             vide = False
             rechAuteur = True
-        if dictMotsCles["motsClesOeuvre"]:
-            dictMotsClesNets["motsClesOeuvre"] = saisieTraitee(dictMotsCles["motsClesOeuvre"], True)
+        if motscles["oeuvre"]:
+            motsclesNets["oeuvre"] = saisieTraitee(motscles["oeuvre"], True)
             vide = False
             rechOeuvre = True
     
@@ -224,18 +224,33 @@ def recherche(typeRecherche=["simple", "avancee"]):
     # triés alphanumériquement par labels grâce à la fonction codicesListDict()
     listeDictCodices = codicesListDict()
     
+    # On définit une liste de mots vides à éliminer pour optimiser les requêtes sur Data-BNF
+    motsVides = [
+        "ad", "à", "au", "aux",
+        "de", "du", "des",
+        "et",
+        "in",
+        "l", "le", "la", "les",
+        "un", "une",
+        "sur",
+        "saint", "sainte"
+    ]
+
     # Si des mots-clés ont été envoyés à la recherche simple
     if typeRecherche == "simple" and motscles:
         # On boucle sur chaque mot-clé
         for mot in motscles:
             # On charge les arks de la base de donnée
-            arks = tousArkDict("codices")
-            # On cherche chaque mot-clé sur Data-BNF au moyen de la fonction requeteDataBNF()
-            # qui retourne un set d'id de codices
-            try:
-                resultatsDataBNF = rechercheArk(mot, arks)
-            except requests.exceptions.SSLError:
-                resultatsDataBNF = {}
+            arks = tousArkDict(idSortie="codices")
+            # Si le mot n'est pas de type vide, on cherche chaque mot-clé sur Data-BNF au moyen de la fonction
+            # rechercheArk() qui retourne un set d'id de codices
+            resultatsDataBNF = {}
+            # On ne requête que les mots qui ne sont pas parmi les mots vides
+            if mot not in motsVides:
+                try:
+                    resultatsDataBNF = rechercheArk(mot, arks)
+                except requests.exceptions.SSLError:
+                    resultatsDataBNF = {}
             
             # On boucle sur chaque codex via listeDictCodices
             for codex in listeDictCodices:
@@ -294,14 +309,14 @@ def recherche(typeRecherche=["simple", "avancee"]):
         listeDictCodices = codicesListDict()
         
         # On boucle sur chaque champ de la saisie traitée
-        for champ in dictMotsClesNets:
+        for champ in motsclesNets:
             # On pose comme condition l'existence de mot-clé
-            if dictMotsClesNets[champ][0]:
+            if motsclesNets[champ][0]:
                 # On boucle sur chaque mot-clé
-                for mot in dictMotsClesNets[champ][0]:
+                for mot in motsclesNets[champ][0]:
                     
                     # Pour une recherche sur les cotes
-                    if champ == "motsClesCote":
+                    if champ == "cote":
                         for codex in listeDictCodices:
                             # On initie un booléen qui détermine si le codex courant est pertinent vis-à-vis du mot-clé
                             pertinent = False
@@ -313,15 +328,20 @@ def recherche(typeRecherche=["simple", "avancee"]):
                                 codex["score"] += 1
                     
                     # Pour une recherche sur les auteurs
-                    if champ == "motsClesAuteur":
-                        tousArks = tousArkDict("personnes")
+                    elif champ == "auteur":
+                        tousArks = tousArkDict(idSortie="personnes")
                         arks = {
                             "arkPersonnes": tousArks["arkPersonnes"]
                         }
-                        try:
-                            resultatsDataBNF = rechercheArk(mot, arks)
-                        except requests.exceptions.SSLError:
-                            resultatsDataBNF = {}
+                        # Si le mot n'est pas de type vide, on le cherche sur Data-BNF au moyen de la fonction
+                        # rechercheArk() qui retourne un set d'id de codices pertinents
+                        # On initie les résultats de la recherche
+                        resultatsDataBNF = {}
+                        if mot not in motsVides:
+                            try:
+                                resultatsDataBNF = rechercheArk(mot, arks)
+                            except requests.exceptions.SSLError:
+                                resultatsDataBNF = {}
                         
                         # Pour la recherche sur les données locales
                         # on boucle sur les auteurs chargés dans listeDictAuteurs
@@ -338,15 +358,17 @@ def recherche(typeRecherche=["simple", "avancee"]):
                                 auteur["score"] += 1
                     
                     # Pour une recherche sur les oeuvres
-                    elif champ == "motsClesOeuvre":
-                        tousArks = tousArkDict("oeuvres")
+                    elif champ == "oeuvre":
+                        tousArks = tousArkDict(idSortie="oeuvres")
                         arks = {
                             "arkOeuvres": tousArks["arkOeuvres"]
                         }
-                        try:
-                            resultatsDataBNF = rechercheArk(mot, arks)
-                        except requests.exceptions.SSLError:
-                            resultatsDataBNF = {}
+                        resultatsDataBNF = {}
+                        if mot not in motsVides:    
+                            try:
+                                resultatsDataBNF = rechercheArk(mot, arks)
+                            except requests.exceptions.SSLError:
+                                resultatsDataBNF = {}
                         
                         # Pour la recherche sur les données locales
                         # on boucle sur les oeuvres chargées dans listeDictOeuvres
@@ -373,10 +395,10 @@ def recherche(typeRecherche=["simple", "avancee"]):
             for auteur in listeDictAuteurs:
                 # On récupère le booléen propre à la saisie du champ courant
                 # afin de déterminer si la recherche doit être inclusive ou exclusive
-                exclusive = dictMotsClesNets["motsClesAuteur"][1]
+                exclusive = motsclesNets["auteur"][1]
                 if exclusive:
                     # Si le score de l'auteur courant est inférieur au nombre de mots-clés, son score est annulé
-                    if auteur["score"] < len(dictMotsClesNets["motsClesAuteur"][0]):
+                    if auteur["score"] < len(motsclesNets["auteur"][0]):
                         auteur["score"] = 0
                 # S'il reste un auteur dont le score n'est pas nul, la recherche est fructueuse
                 if auteur["score"] != 0:
@@ -387,9 +409,9 @@ def recherche(typeRecherche=["simple", "avancee"]):
         boolPasOeuvre = True
         if rechOeuvre:
             for oeuvre in listeDictOeuvres:
-                exclusive = dictMotsClesNets["motsClesOeuvre"][1]
+                exclusive = motsclesNets["oeuvre"][1]
                 if exclusive:
-                    if oeuvre["score"] < len(dictMotsClesNets["motsClesOeuvre"][0]):
+                    if oeuvre["score"] < len(motsclesNets["oeuvre"][0]):
                         oeuvre["score"] = 0
                 if oeuvre["score"] != 0:
                     boolPasOeuvre = False
@@ -401,9 +423,9 @@ def recherche(typeRecherche=["simple", "avancee"]):
         boolPasCote = True
         if rechCote:
             for codex in listeDictCodices:
-                exclusive = dictMotsClesNets["motsClesCote"][1]
+                exclusive = motsclesNets["cote"][1]
                 if exclusive:
-                    if codex["score"] < len(dictMotsClesNets["motsClesCote"][0]):
+                    if codex["score"] < len(motsclesNets["cote"][0]):
                         codex["score"] = 0
                 if codex["score"] != 0:
                     boolPasCote = False
@@ -448,7 +470,7 @@ def recherche(typeRecherche=["simple", "avancee"]):
         # Pour croiser ces résultats avec les résultats de la recherche sur les cotes
         # et récupérer leur label à afficher dans une liste
         listeCodicesPertinents = []
-        # Si les recherches des autres champs ont de résultats, on les croise avec celui sur les cotes
+        # Si les recherches des autres champs ont des résultats, on les croise avec celui sur les cotes
         if rechOeuvre or rechAuteur and idCodicesPertinents:
             if cotesPositives:
                 for cote in cotesPositives:
@@ -467,10 +489,10 @@ def recherche(typeRecherche=["simple", "avancee"]):
                                codices=listeCodicesPertinents,
                                rechAuteur=rechAuteur,
                                boolPasAuteur=boolPasAuteur,
-                               resultatsAuteurs=listeDictAuteurs,
+                               resultatsAuteurs=auteursPositifs,
                                rechOeuvre=rechOeuvre,
                                boolPasOeuvre=boolPasOeuvre,
-                               resultatsOeuvres=listeDictOeuvres
+                               resultatsOeuvres=oeuvresPositives
                                )
     
     elif typeRecherche == "avancee" and vide:

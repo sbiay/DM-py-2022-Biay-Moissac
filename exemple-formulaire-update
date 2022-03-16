@@ -1,0 +1,51 @@
+{% extends "conteneur.html" %}
+
+{% block titre %}
+    {%if lieu %}| Lieu : {{lieu.place_nom}} | Modification {% endif %}
+{% endblock %}
+
+
+
+
+{% block corps %}
+    {% if lieu %}
+    {% if updated %}
+    	<div class="alert alert-success">
+    		<p>WOoohooo</p>
+    	</div>
+    {% endif %}
+    <form method="POST" action="{{ url_for('lieu_update', place_id=lieu.place_id)}}">
+    	 <div class="mb-3">
+		    <label for="placeNom" class="form-label">Nom du lieu</label>
+		    <input type="text" name="placeNom" class="form-control {% if 'placeNom' in erreurs%}is-invalid{% endif %}" id="placeNom" aria-describedby="placeNomHelp" value="{{lieu.place_nom}}" />
+		    <div id="placeNomHelp" class="form-text">Appellation principale du lieu</div>
+		  </div>
+    	 <div class="mb-3">
+		    <label for="placeLongitude" class="form-label">Longitude du lieu</label>
+		    <input type="text" name="placeLongitude" class="form-control {% if 'placeLongitude' in erreurs%}is-invalid{% endif %}" id="placeLongitude" value="{{lieu.place_longitude}}" />
+		  </div>
+    	 <div class="mb-3">
+		    <label for="placeLatitude" class="form-label">Latitude du lieu</label>
+		    <input type="text" step="0.000001" name="placeLatitude" class="form-control {% if 'placeLatitude' in erreurs%}is-invalid{% endif %}" id="placeLatitude" value="{{lieu.place_latitude}}" />
+		  </div>
+    	 <div class="mb-3">
+		    <label for="placeDescription" class="form-label">Description</label>
+		    <textarea name="placeDescription" class="form-control {% if 'placeDescription' in erreurs%}is-invalid{% endif %}" id="placeDescription">{{lieu.place_description}}</textarea>
+		  </div>
+    	 <div class="mb-3">
+		    <label for="placeType" class="form-label {% if 'placeType' in erreurs%}is-invalid{% endif %}">Type de lieu</label>
+		    <select name="placeType" id="placeType">
+		    	{% for placeType in placeTypes %}
+		    		<option value="{{placeType.value}}" {% if placeType.value == lieu.place_type %}selected{% endif %}>
+			    		{{placeType.display_fr}}
+			    	</option>
+		    	{% endfor %}
+		    </select>
+		  </div>
+		  <input type="submit" name="Modifier" class="btn btn-primary" />
+    </form>
+    {% else %}
+        <p>La base de données est en cours de constitution</p>
+    {% endif %}
+    <p><a href="{{url_for('accueil')}}">Retour à l'accueil</a></p>
+{% endblock %}
