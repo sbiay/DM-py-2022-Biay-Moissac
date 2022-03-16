@@ -25,7 +25,7 @@ class Codices(db.Model):
     unites_codico = db.relationship("Unites_codico", back_populates="codex")
     
     @staticmethod
-    def creer(cote, id_technique, descript_materielle, histoire, conservation_id, unites_codico):
+    def creer(cote, id_technique, descript_materielle, histoire, conservation_id):
         """
         Création d'un codex dans la base de données.
         """
@@ -35,10 +35,13 @@ class Codices(db.Model):
             erreurs.append("Une cote doit être renseignée.")
         if not conservation_id:
             erreurs.append("Un lieu de conservation doit être renseigné.")
-            
+        
         # Si on a au moins une erreur
         if len(erreurs) > 0:
             return False, erreurs
+        
+        # La création d'une première unité-codicologique doit être automatique
+        unites_codico = []
         
         # On crée les données du codex
         nouveauCodex = Codices(
@@ -54,11 +57,12 @@ class Codices(db.Model):
             db.session.add(nouveauCodex)
             # On envoie le paquet
             db.session.commit()
-    
+            
             # On renvoie l'utilisateur
             return True, nouveauCodex
         except Exception as erreur:
             return False, [str(erreur)]
+
 
 class Lieux(db.Model):
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
@@ -75,9 +79,9 @@ contient = Table("contient", db.metadata,
 
 
 class Unites_codico(db.Model):
-    id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
+    id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True, autoincrement=True)
     # Description physique
-    descript = db.Column(db.Text)
+    descript = db.Column(db.Text, nullable=True)
     # Localisation d'une unité dans un codex (f. n-f. m)
     loc_init = db.Column(db.Integer, default=None)
     loc_init_v = db.Column(db.Boolean, default=None)
@@ -88,6 +92,36 @@ class Unites_codico(db.Model):
     code_id = db.Column(db.Integer, db.ForeignKey("codices.id"))
     codex = db.relationship("Codices", back_populates="unites_codico")
     contenu = db.relationship("Oeuvres", secondary=contient, backref="Unites_codico")
+    
+    @staticmethod
+    def creer(code_id, date_pas_avant, date_pas_apres,
+              descript=None, loc_init=None, loc_init_v=None, loc_fin=None, loc_fin_v=None):
+        """
+        Création d'une unité codicologique dans la base de données.
+        """
+        # TODO ajouter un test des valeurs entrantes
+        
+        # On crée les données de la nouvelle unité codicologique
+        nouvelleUC = Unites_codico(
+            descript=descript,
+            loc_init=loc_init,
+            loc_init_v=loc_init_v,
+            loc_fin=loc_fin,
+            loc_fin_v=loc_fin_v,
+            date_pas_avant=date_pas_avant,
+            date_pas_apres=date_pas_apres,
+            code_id=code_id,
+        )
+        # On tente d'écrire le nouveau codex dans la base
+        try:
+            db.session.add(nouvelleUC)
+            # On envoie le paquet
+            db.session.commit()
+            
+            # On renvoie l'UC créée
+            return True, nouvelleUC
+        except Exception as erreur:
+            return False, [str(erreur)]
 
 
 class Oeuvres(db.Model):
