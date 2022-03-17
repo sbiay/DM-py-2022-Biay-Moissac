@@ -8,8 +8,9 @@ from ..constantes import ROWS_PER_PAGE
 from ..modeles.classes import Codices, Lieux, Unites_codico, Oeuvres, Personnes, Provenances
 from ..modeles.utilisateurs import User
 from ..modeles.traitements import auteursListDict, codexJson, codicesListDict, conservationDict, personneLabel, \
-    codexLabel, tousAuteursJson, tousArkDict, toutesOeuvresJson, saisieTraitee, oeuvreDict, oeuvresListDict
-from ..modeles.requetes import rechercheArk
+    codexLabel, tousAuteursJson, tousArkDict, toutesOeuvresJson, saisieRecherche, saisieTexte, \
+    oeuvreDict, oeuvresListDict
+from ..modeles.requetes import rechercheArk, rechercheCote
 from ..comutTest import test
 
 
@@ -89,6 +90,7 @@ def deconnexion():
     flash("Vous êtes bien déconnecté.", "info")
     return redirect(url_for("accueil"))
 
+
 # TODO factoriser les routes des index
 @app.route("/pages/auteurs")
 def indexAuteurs():
@@ -115,6 +117,7 @@ def indexOeuvres():
     classOeuvres = Oeuvres.query.order_by(Oeuvres.titre).paginate(page=page, per_page=ROWS_PER_PAGE)
     
     return render_template("pages/oeuvres.html", oeuvres=donneesOeuvres, classOeuvres=classOeuvres)
+
 
 # TODO factoriser les routes des notices
 @app.route("/pages/codex/<int:num>")
@@ -188,9 +191,9 @@ def recherche(typeRecherche=["simple", "avancee"]):
     if typeRecherche == "simple":
         # On récupère la chaîne de requête passée dans l'URL
         motscles = request.args.get("keyword", None)
-        # On récupère les mots-clés traités grâce à la fonction saisieTraitee()
+        # On récupère les mots-clés traités grâce à la fonction saisieRecherche()
         # La recherche simple est à priori inclusive
-        motscles, exclusive = saisieTraitee(motscles, exclusive=False)
+        motscles, exclusive = saisieRecherche(motscles, exclusive=False)
     
     # Si la recherche est de type "avancée"
     else:
@@ -206,17 +209,17 @@ def recherche(typeRecherche=["simple", "avancee"]):
         rechAuteur = False
         rechCote = False
         rechOeuvre = False
-        # On effectue le traitement des mots-clés sur chaque champ saisi grâce à la fonction saisieTraitee()
+        # On effectue le traitement des mots-clés sur chaque champ saisi grâce à la fonction saisieRecherche()
         if motscles["cote"]:
-            motsclesNets["cote"] = saisieTraitee(motscles["cote"], exclusive=True)
+            motsclesNets["cote"] = saisieRecherche(motscles["cote"], exclusive=True)
             vide = False
             rechCote = True
         if motscles["auteur"]:
-            motsclesNets["auteur"] = saisieTraitee(motscles["auteur"], True)
+            motsclesNets["auteur"] = saisieRecherche(motscles["auteur"], True)
             vide = False
             rechAuteur = True
         if motscles["oeuvre"]:
-            motsclesNets["oeuvre"] = saisieTraitee(motscles["oeuvre"], True)
+            motsclesNets["oeuvre"] = saisieRecherche(motscles["oeuvre"], True)
             vide = False
             rechOeuvre = True
     
@@ -501,15 +504,14 @@ def recherche(typeRecherche=["simple", "avancee"]):
 
 @app.route("/creer/<typeCreation>", methods=["GET", "POST"])
 def creer(typeCreation=["codex"]):
-    # On charge les données nécessaires au chargement des menus :
+    
+    # On récupère les données nécessaires au chargement des menus :
     # On récupère la liste des lieux de conservations existants
     lieuxConservation = Lieux.query.filter(Lieux.conserve).order_by(Lieux.localite).order_by(Lieux.label).all()
     # On définit la BNF comme lieu par défaut pour la saisie
     lieuParDefaut = Lieux.query.get(2)
-    
     # On récupère la liste des provenances existantes
     provenances = Lieux.query.filter(Lieux.est_provenance_de).order_by(Lieux.localite).order_by(Lieux.label).all()
-    
     # On récupère la liste des provenances qui sont marquées comme origine
     origines = Provenances.query.filter(Provenances.origine).all()
     lieuxOrigine = []
@@ -530,15 +532,22 @@ def creer(typeCreation=["codex"]):
     elif request.method == "POST":
         # On contrôle la saisie des données
         erreurs = []
-        if not request.form.get("cote", "").strip():
-            erreurs.append("Une cote doit être renseignée. ")
+        
         if not request.form.get("conservation_id", "").strip():
             erreurs.append("Un lieu de conservation doit être renseigné. ")
+        if not request.form.get("cote", "").strip():
+            erreurs.append("Une cote doit être renseignée. ")
+        else:
+            # Si une cote a été saisie, on vérifie qu'elle ne soit pas déjà renseignée dans la base
+            # en relation avec le même lieu de conservation, et ce au moyen de la fonction rechercheCote()
+            if request.form.get("conservation_id", "").strip():
+                if rechercheCote(request.form["cote"], request.form["conservation_id"]):
+                    erreurs.append("Cette cote est déjà présente dans la base. ")
         if not request.form.get("date_pas_avant", "").strip():
             erreurs.append("Une date de début doit être renseignée. ")
         if not request.form.get("date_pas_apres", "").strip():
             erreurs.append("Une date de fin doit être renseignée. ")
-
+        
         # Si on a au moins une erreur
         if len(erreurs) > 0:
             for erreur in erreurs:
@@ -557,13 +566,37 @@ def creer(typeCreation=["codex"]):
                                    saisieDatepasapres=request.form.get("date_pas_apres", ""),
                                    )
         
-        # S'il n'y a pas d'erreur, on récupère les valeurs # TODO en fait on doit les passer à la fonction de création
-        #  d'un codex
-        cote = request.form["cote"]
-        conservation_id = request.form["conservation_id"]
+        # S'il n'y a pas d'erreur, on récupère les valeurs
+        cote = saisieTexte(request.form["cote"])
+        id_technique = saisieTexte(request.form["id_technique"])
+        descript_materielle = saisieTexte(request.form["descript_materielle"])
+        histoire = saisieTexte(request.form["histoire"])
         date_pas_avant = int(request.form.get("date_pas_avant", ""))
         date_pas_apres = int(request.form.get("date_pas_apres", ""))
-        print(conservation_id)
+        conservation_id = request.form["conservation_id"]
+        origine = request.form["origine"]
+        provient = request.form["provient"]
         
-        # TODO retourner un message
-        return redirect(url_for("accueil")), flash("Le codex a bien été créé", "success")
+        """
+        # Créer une première UC par défaut
+        uniteCodico = Unites_codico.creer(
+            creer(code_id, date_pas_avant, date_pas_apres,
+                  descript=None, loc_init=None, loc_init_v=None, loc_fin=None, loc_fin_v=None)
+        )
+        """
+        # TODO rediriger vers la page du codex créé
+        #return redirect(url_for("accueil")), flash("Le codex a bien été créé", "success")
+        flash("Le codex a bien été créé", "success")
+        return render_template("pages/creer.html",
+                               titre="codex",
+                               lieuxConservation=lieuxConservation,
+                               lieuParDefaut=lieuParDefaut,
+                               provenances=provenances,
+                               origines=lieuxOrigine,
+                               saisieCote=request.form.get("cote", ""),
+                               saisieIdentifiant=request.form.get("identifiant_technique", ""),
+                               saisieDescription=request.form.get("descript_materielle", ""),
+                               saisieHistoire=request.form.get("histoire", ""),
+                               saisieDatepasavant=request.form.get("date_pas_avant", ""),
+                               saisieDatepasapres=request.form.get("date_pas_apres", ""),
+                               )

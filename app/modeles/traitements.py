@@ -144,7 +144,7 @@ def personneLabel(idPersonne, forme=["court", "long"]):
         return None
 
 
-def saisieTraitee(motscles, exclusive):
+def saisieRecherche(motscles, exclusive):
     """
     Cette fonction prend comme argument la saisie d'un utilisateur,
     détermine si la recherche contient l'opérateur ET,
@@ -183,6 +183,21 @@ def saisieTraitee(motscles, exclusive):
     
     return [motscles, exclusive]
 
+
+def saisieTexte(texte):
+    """
+    Cette fonction prend comme argument la saisie d'un utilisateur dans un champ "texte"
+    élimine les caractères dangereux,et retourne le texte nettoyé.
+    :param texte: saisie d'un utilisateur
+    :type texte: str
+    :returns: texte nettoyé
+    :return type: str
+    """
+    caracteresInterdits = """<>\&"#^`%{}[]|"""
+    for caractere in caracteresInterdits:
+        texte = texte.replace(caractere, "")
+    
+    return texte
 
 # Les scripts suivants mettent sous la forme de dictionnaires ou d'objet Json
 # les données d'un enregistrement ou d'un objet particulier

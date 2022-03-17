@@ -1,6 +1,55 @@
 import requests, time
 from bs4 import BeautifulSoup
 
+from ..modeles.classes import Codices
+from ..modeles.traitements import saisieRecherche
+
+def rechercheCote(saisie, id_conservation):
+    """
+    Cette fonction prend comme argument la saisie d'un utilisateur
+    et cherche parmi les cotes des manuscrits de la base une cote correspondante.
+    :param saisie: Saisie d'un utilisateur
+    :type saisie: str
+    :param id_conservation: identifiant du lieu de conservation associé au codex dont on analyse la cote
+    :type id_conservation: int
+    :returns: False si la saisie ne correspond à aucune cote, True si la saisie correspond à une cote
+    :return type: bool
+    """
+    
+    # On charge les codices de la base pour récupérer leur cote
+    
+    codices = Codices.query.filter(Codices.conservation_id == id_conservation).all()
+    # On écrit une liste de dictionnaires pour récupérer les scores de la recherche
+    listeCotes = []
+    for codex in codices:
+        # On initie un score
+        dictCote = {
+            "cote": codex.cote,
+            "score": 0
+        }
+        listeCotes.append(dictCote)
+    
+    # On nettoie et découpe la saisie
+    motscles = saisieRecherche(saisie, False)
+    
+    # On boucle sur chaque mot-clé
+    for mot in motscles[0]:
+        # On boucle sur chaque codex via listeDictCodices
+        for cote in listeCotes:
+            # On cherche une occurrence du mot-clé courant dans les données
+            chaine = cote["cote"].lower()
+            chaine = chaine.split()
+            if mot in chaine:
+                # Si une ou plusieurs occurrences sont trouvées, la pertinence est vraie
+                cote["score"] += 1
+    # On parse les scores pour déterminer si la saisie correspond totalement à une cote
+    for cote in listeCotes:
+        # Si une cote a un score égal au nombre de mots clés, alors la cote existe déjà dans la base
+        if cote["score"] == len(motscles):
+            return True
+    # Si la condition n'a jamais été remplie : aucun match, on retourne False
+    return False
+
 
 def rechercheArk(motcle, arks, reponse=["codices", "oeuvres", "personnes"]):
     """
