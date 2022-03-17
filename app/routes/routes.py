@@ -254,55 +254,61 @@ def recherche(typeRecherche=["simple", "avancee"]):
                     resultatsDataBNF = rechercheArk(mot, arks)
                 except requests.exceptions.SSLError:
                     resultatsDataBNF = {}
-            
-            # On boucle sur chaque codex via listeDictCodices
+
+        # On initie une liste d'id des codices résultats
+        idResultats = []
+        # Pour une recherche inclusive
+        # On boucle sur chaque codex via listeDictCodices
+        if not exclusive:
             for codex in listeDictCodices:
                 # On initie un booléen qui détermine si le codex courant est pertinent vis-à-vis du mot-clé courant
-                pertinent = False
-                
-                # Pour charger les données d'un codex on les récupère grâce à la fonction codexJson()
-                donneesCodex = codexJson(codex["codex_id"])
-                # On passe tous les mots en bas de casse
-                donneesCodex = donneesCodex.lower()
-                
-                # On cherche une occurrence du mot-clé courant dans les données
-                if mot in donneesCodex:
-                    # Si une ou plusieurs occurrences sont trouvées, la pertinence est vraie
-                    pertinent = True
-                # A défaut, on cherche les résulats parmis ceux retournés par la requête sur Data-BNF
-                else:
-                    for id in resultatsDataBNF:
-                        # Si l'id courant parmi les résulats de la requête DataBNF correspond à l'id du codex en cours de
-                        # traitement, la pertinence est établie
-                        if codex["codex_id"] == id:
-                            pertinent = True
+                for mot in motscles:
+                    # Pour charger les données d'un codex on les récupère grâce à la fonction codexJson()
+                    donneesCodex = codexJson(codex["codex_id"])
+                    # On passe tous les mots en bas de casse
+                    donneesCodex = donneesCodex.lower()
+                    
+                    # On cherche une occurrence du mot-clé courant dans les données
+                    if mot in donneesCodex:
+                        # Si une ou plusieurs occurrences sont trouvées, la pertinence est vraie
+                        idResultats.append(codex["codex_id"])
+                    # A défaut, on cherche les résulats parmis ceux retournés par la requête sur Data-BNF
+                    else:
+                        for id in resultatsDataBNF:
+                            # Si l'id courant parmi les résulats de la requête DataBNF correspond à l'id du codex en cours de
+                            # traitement, la pertinence est établie
+                            if codex["codex_id"] == id:
+                                idResultats.append(codex["codex_id"])
+        else:
+            for codex in listeDictCodices:
+                pertinent = True
+                # On initie un booléen qui détermine si le codex courant est pertinent vis-à-vis du mot-clé courant
+                for mot in motscles:
+                    # Pour charger les données d'un codex on les récupère grâce à la fonction codexJson()
+                    donneesCodex = codexJson(codex["codex_id"])
+                    # On passe tous les mots en bas de casse
+                    donneesCodex = donneesCodex.lower()
+            
+                    # On cherche une occurrence du mot-clé courant dans les données
+                    if mot not in donneesCodex:
+                        # Si une ou plusieurs occurrences sont trouvées, la pertinence est vraie
+                        pertinent = False
+                    # A défaut, on cherche les résulats parmis ceux retournés par la requête sur Data-BNF
+                    else:
+                        for id in resultatsDataBNF:
+                            # Si l'id courant parmi les résulats de la requête DataBNF correspond à l'id du codex en cours de
+                            # traitement, la pertinence est établie
+                            if codex["codex_id"] != id:
+                                pertinent = False
                 if pertinent:
-                    codex["score"] += 1
+                    idResultats.append(codex["codex_id"])
         
         # On prépare la pagination des résultats
         page = request.args.get('page', 1, type=int)
         
-        # On initie une liste d'id des codices résultats
-        idResultats = []
-        
-        # On définit un booléen pour indiquer le succès ou non de la recherche
-        bredouille = True  # Ou plutôt "broucouille", comme on dit dans le Bouchonnois
-        for codex in listeDictCodices:
-            # Si l'on recherche une intersection entre les mots-clés,
-            # seuls les codices ayant un score égal au nombre de mots-clés sont des résultats positifs,
-            # sinon, leur score est annulé
-            if exclusive:
-                if codex["score"] < len(motscles):
-                    codex["score"] = 0
-            if codex["score"] != 0:
-                bredouille = False
-                # On ajoute les objets Codices aux résultats paginés
-                idResultats.append(codex["codex_id"])
-        
         resultats = Codices.query.filter(Codices.id.in_(idResultats)).paginate(page=page, per_page=ROWS_PER_PAGE)
         
-        return render_template("pages/resultats.html", type="simple", resultats=resultats, donnees=listeDictCodices,
-                               bredouille=bredouille)
+        return render_template("pages/resultats.html", type="simple", resultats=resultats, donnees=listeDictCodices)
     
     # Si la recherche est de type avancé et que des mots-clés ont été inscrits dans au moins un champ
     elif typeRecherche == "avancee" and not vide:
