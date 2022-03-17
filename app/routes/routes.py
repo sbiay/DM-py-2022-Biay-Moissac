@@ -235,7 +235,7 @@ def recherche(typeRecherche=["simple", "avancee"]):
         "sur",
         "saint", "sainte"
     ]
-
+    
     # Si des mots-clés ont été envoyés à la recherche simple
     if typeRecherche == "simple" and motscles:
         # On boucle sur chaque mot-clé
@@ -364,7 +364,7 @@ def recherche(typeRecherche=["simple", "avancee"]):
                             "arkOeuvres": tousArks["arkOeuvres"]
                         }
                         resultatsDataBNF = {}
-                        if mot not in motsVides:    
+                        if mot not in motsVides:
                             try:
                                 resultatsDataBNF = rechercheArk(mot, arks)
                             except requests.exceptions.SSLError:
@@ -501,6 +501,7 @@ def recherche(typeRecherche=["simple", "avancee"]):
 
 @app.route("/creer/<typeCreation>", methods=["GET", "POST"])
 def creer(typeCreation=["codex"]):
+    # On charge les données nécessaires au chargement des menus :
     # On récupère la liste des lieux de conservations existants
     lieuxConservation = Lieux.query.filter(Lieux.conserve).order_by(Lieux.localite).order_by(Lieux.label).all()
     # On définit la BNF comme lieu par défaut pour la saisie
@@ -515,7 +516,7 @@ def creer(typeCreation=["codex"]):
     for item in origines:
         if item.a_pour_lieu not in lieuxOrigine:
             lieuxOrigine.append(item.a_pour_lieu)
-            
+    
     if request.method == "GET":
         return render_template(
             "pages/creer.html",
@@ -537,13 +538,7 @@ def creer(typeCreation=["codex"]):
             erreurs.append("Une date de début doit être renseignée. ")
         if not request.form.get("date_pas_apres", "").strip():
             erreurs.append("Une date de fin doit être renseignée. ")
-        # TODO autre erreur à gérer
-        """
-        if not isinstance(date_pas_avant, int) or not isinstance(date_pas_apres, int):
-            erreurs.append("Les dates doivent être des nombres entiers.")
-        """
-        conservation_id = request.form["conservation_id"]
-        print(conservation_id)
+
         # Si on a au moins une erreur
         if len(erreurs) > 0:
             for erreur in erreurs:
@@ -558,19 +553,17 @@ def creer(typeCreation=["codex"]):
                                    saisieIdentifiant=request.form.get("identifiant_technique", ""),
                                    saisieDescription=request.form.get("descript_materielle", ""),
                                    saisieHistoire=request.form.get("histoire", ""),
-                                )
-    
-        # On récupère les valeurs
-        # TODO en fait on doit les passer à la fonction de création d'un codex
+                                   saisieDatepasavant=request.form.get("date_pas_avant", ""),
+                                   saisieDatepasapres=request.form.get("date_pas_apres", ""),
+                                   )
+        
+        # S'il n'y a pas d'erreur, on récupère les valeurs # TODO en fait on doit les passer à la fonction de création
+        #  d'un codex
         cote = request.form["cote"]
         conservation_id = request.form["conservation_id"]
+        date_pas_avant = int(request.form.get("date_pas_avant", ""))
+        date_pas_apres = int(request.form.get("date_pas_apres", ""))
         print(conservation_id)
-
-        lieuxConservation = Lieux.query.filter(Lieux.conserve).order_by(Lieux.localite).all()
         
         # TODO retourner un message
-        return render_template(
-            "pages/creer.html",
-            titre="codex",
-            lieuxConservation=lieuxConservation
-        )
+        return redirect(url_for("accueil")), flash("Le codex a bien été créé", "success")
