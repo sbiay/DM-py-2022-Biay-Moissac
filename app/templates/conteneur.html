@@ -35,12 +35,16 @@
                     <li class="nav-item">
                         <a class="nav-link active" aria-current="page" href="{{ url_for('recherche', typeRecherche="avancee")}}">Recherche avancée</a>
                     </li>
+                    {% if not current_user.is_authenticated %}
                     <li class="nav-item">
                         <a class="nav-link active" aria-current="page" method="GET" href="{{ url_for('connexion')}}">Se connecter</a>
                     </li>
+                    {% endif %}
+                    {% if current_user.is_authenticated %}
                     <li class="nav-item">
                         <a class="nav-link active" aria-current="page" href="{{ url_for('deconnexion')}}">Se déconnecter</a>
                     </li>
+                    {% endif %}
                 </ul>
             </div>
         </div>

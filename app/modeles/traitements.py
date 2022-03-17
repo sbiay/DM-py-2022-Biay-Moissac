@@ -345,7 +345,7 @@ def codexJson(codex_id):
     
     # Pour les provenances et l'origine du manuscrit, on opère des jointures manuelles sur la classe Provenances
     for provenance in Provenances.query.filter(Provenances.codex == codex_id):
-        # Pour l'origine du codices, on pose comme condition que l'attirbut booléen "origine" soit True
+        # Pour l'origine du codices, on pose comme condition que l'attribut booléen "origine" soit True
         if provenance.origine:
             id = Lieux.query.get(provenance.lieu).id
             label = Lieux.query.get(provenance.lieu).label

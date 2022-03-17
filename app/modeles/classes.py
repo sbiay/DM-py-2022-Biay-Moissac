@@ -6,11 +6,15 @@ from sqlalchemy import Table, Column, ForeignKey
 class Provenances(db.Model):
     rowid = db.Column(db.Integer, primary_key=True)
     codex = db.Column(db.Integer, db.ForeignKey("codices.id"))
+    codex_provenant = db.relationship("Codices", back_populates="provient")
     lieu = db.Column(db.Integer, db.ForeignKey("lieux.id"))
+    a_pour_lieu = db.relationship("Lieux", back_populates="est_provenance_de")
     origine = db.Column(db.Boolean)
     remarque = db.Column(db.Text)
     cas_particulier = db.Column(db.Integer, db.ForeignKey("unites_codico.id"))
-    """On procédera à des jointures à la main en raison des différents attributs portés sur la relation.
+    """
+    Pour les cas particuliers, on procédera à des jointures à la main en raison des différents attributs
+    portant sur la relation.
     """
 
 
@@ -23,28 +27,14 @@ class Codices(db.Model):
     conservation_id = db.Column(db.Integer, db.ForeignKey("lieux.id"))
     lieu_conservation = db.relationship("Lieux", back_populates="conserve")
     unites_codico = db.relationship("Unites_codico", back_populates="codex")
+    provient = db.relationship("Provenances", back_populates="codex_provenant")
     
     @staticmethod
     def creer(cote, id_technique, descript_materielle, histoire, conservation_id, date_pas_avant, date_pas_apres):
         """
         Création d'un codex dans la base de données.
         """
-        # On vérifie la qualité des données
-        erreurs = []
-        
-        if not cote:
-            erreurs.append("Une cote doit être renseignée.")
-        if not conservation_id:
-            erreurs.append("Un lieu de conservation doit être renseigné.")
-        if not date_pas_avant:
-            erreurs.append("Une date de début doit être renseignée.")
-        if not date_pas_apres:
-            erreurs.append("Une date de fin doit être renseignée.")
-        if not isinstance(date_pas_avant, int) or not isinstance(date_pas_apres, int):
-            erreurs.append("Les dates doivent être des nombres entiers.")
-        # Si on a au moins une erreur
-        if len(erreurs) > 0:
-            return False, erreurs
+        # La qualité des données est contrôlée dans la route creer(), méthode POST
         
         # On crée les données du codex
         nouveauCodex = Codices(
@@ -79,6 +69,7 @@ class Lieux(db.Model):
     localite = db.Column(db.String(20))
     label = db.Column(db.String(30))
     conserve = db.relationship("Codices", back_populates="lieu_conservation")
+    est_provenance_de = db.relationship("Provenances", back_populates="a_pour_lieu")
 
 
 # Table de relation "contient"

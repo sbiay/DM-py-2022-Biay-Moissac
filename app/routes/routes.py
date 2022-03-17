@@ -87,9 +87,9 @@ def deconnexion():
     if current_user.is_authenticated is True:
         logout_user()
     flash("Vous êtes bien déconnecté.", "info")
-    return render_template("pages/accueil.html")
+    return redirect(url_for("accueil"))
 
-
+# TODO factoriser les routes des index
 @app.route("/pages/auteurs")
 def indexAuteurs():
     # On définit de la variable "page"
@@ -116,7 +116,7 @@ def indexOeuvres():
     
     return render_template("pages/oeuvres.html", oeuvres=donneesOeuvres, classOeuvres=classOeuvres)
 
-
+# TODO factoriser les routes des notices
 @app.route("/pages/codices/<int:num>")
 def notice_codex(num):
     # Test d'existence de l'identifiant cherché
@@ -501,27 +501,71 @@ def recherche(typeRecherche=["simple", "avancee"]):
 
 @app.route("/creer/<typeCreation>", methods=["GET", "POST"])
 def creer(typeCreation=["codex"]):
+    # On récupère la liste des lieux de conservations existants
+    lieuxConservation = Lieux.query.filter(Lieux.conserve).order_by(Lieux.localite).order_by(Lieux.label).all()
+    # On définit la BNF comme lieu par défaut pour la saisie
+    lieuParDefaut = Lieux.query.get(2)
+    
+    # On récupère la liste des provenances existantes
+    provenances = Lieux.query.filter(Lieux.est_provenance_de).order_by(Lieux.localite).order_by(Lieux.label).all()
+    
+    # On récupère la liste des provenances qui sont marquées comme origine
+    origines = Provenances.query.filter(Provenances.origine).all()
+    lieuxOrigine = []
+    for item in origines:
+        if item.a_pour_lieu not in lieuxOrigine:
+            lieuxOrigine.append(item.a_pour_lieu)
+            
     if request.method == "GET":
-        lieuxConservation = Lieux.query.filter(Lieux.conserve).order_by(Lieux.localite).all()
-        
         return render_template(
             "pages/creer.html",
             titre="codex",
-            lieuxConservation=lieuxConservation
+            lieuxConservation=lieuxConservation,
+            lieuParDefaut=lieuParDefaut,
+            provenances=provenances,
+            origines=lieuxOrigine
         )
+    
     elif request.method == "POST":
         # On contrôle la saisie des données
+        erreurs = []
+        if not request.form.get("cote", "").strip():
+            erreurs.append("Une cote doit être renseignée. ")
+        if not request.form.get("conservation_id", "").strip():
+            erreurs.append("Un lieu de conservation doit être renseigné. ")
+        if not request.form.get("date_pas_avant", "").strip():
+            erreurs.append("Une date de début doit être renseignée. ")
+        if not request.form.get("date_pas_apres", "").strip():
+            erreurs.append("Une date de fin doit être renseignée. ")
         """
-        if not request.form.get("placeNom", "").strip():
-            erreurs.append("placeNom")
+        if not isinstance(date_pas_avant, int) or not isinstance(date_pas_apres, int):
+            erreurs.append("Les dates doivent être des nombres entiers.")
         """
+        
+        # Si on a au moins une erreur
+        if len(erreurs) > 0:
+            for erreur in erreurs:
+                flash(erreur, "error")
+            return render_template("pages/creer.html",
+                                   titre="codex",
+                                   lieuxConservation=lieuxConservation,
+                                   lieuParDefaut=lieuParDefaut,
+                                   provenances=provenances,
+                                   origines=lieuxOrigine,
+                                   saisieCote=request.form.get("cote", ""),
+                                   saisieIdentifiant=request.form.get("identifiant_technique", ""),
+                                   saisieDescription=request.form.get("descript_materielle", ""),
+                                   saisieHistoire=request.form.get("histoire", ""),
+                                )
+    
         # On récupère les valeurs
         # TODO en fait on doit les passer à la fonction de création d'un codex
         cote = request.form["cote"]
         conservation_id = request.form["conservation_id"]
-        print(conservation_id)
 
         lieuxConservation = Lieux.query.filter(Lieux.conserve).order_by(Lieux.localite).all()
+        
+        # TODO retourner un message
         return render_template(
             "pages/creer.html",
             titre="codex",

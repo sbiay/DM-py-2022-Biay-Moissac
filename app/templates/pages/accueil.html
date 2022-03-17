@@ -6,9 +6,11 @@
     <h1>La librairie de Moissac</h1>
     <p>Bienvenue sur le site !</p>
     <h2>Les manuscrits</h2>
+    {% if current_user.is_authenticated %}
     <form class="d-flex" method="GET" action="{{url_for("creer", typeCreation="codex")}}">
         <button class="btn btn-outline-success" type="submit" role="button">Créer</button>
     </form>
+    {% endif %}
     <br>
     <table class="table table-striped table-hover">
         <thead>

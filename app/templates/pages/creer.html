@@ -6,42 +6,74 @@
 
 {% block corps %}
 
-    <h1>Création : {{ titre }}</h1>
+    <h1>Création {{ "d'un " + titre }}</h1>
+
     <br>
+
     <form class="form" method="POST" action="{{url_for("creer", typeCreation="codex")}}">
         <div class="form-group row">
             <label for="register-cote" class="col-sm-2 col-form-label">Cote</label>
             <div class="col-sm-10">
-                <input type="text" class="form-control" id="register-cote" name="cote" placeholder="ex. Latin 2077">
+                <input type="text" class="form-control" id="register-cote" name="cote" placeholder="ex. Latin 2077" {% if saisieCote %}value="{{ saisieCote }}"{% endif %}>
             </div>
         </div>
         <div class="form-group row">
             <label for="register-id-technique" class="col-sm-2 col-form-label">Identifiant technique</label>
             <div class="col-sm-10">
-                <input type="text" class="form-control" id="register-id-technique" name="id_technique" placeholder="ex. ark:/12148/cc599714">
+                <input type="text" class="form-control" id="register-id-technique" name="id_technique" placeholder="ex. ark:/12148/cc599714" {% if saisieIdentifiant %}value="{{ saisieIdentifiant }}"{% endif %}>
             </div>
         </div>
         <div class="form-group row">
             <label for="register-descript-materielle" class="col-sm-2 col-form-label">Description matérielle</label>
             <div class="col-sm-10">
-                <input type="textarea" class="form-control" id="register-descript-materielle" name="descript_materielle" placeholder="Description matérielle de la reliure">
+                <input type="textarea" class="form-control" id="register-descript-materielle" name="descript_materielle" placeholder="Description matérielle de la reliure" {% if saisieDescription %}value="{{ saisieDescription }}"{% endif %}>
             </div>
         </div>
         <div class="form-group row">
             <label for="register-histoire" class="col-sm-2 col-form-label">Histoire</label>
             <div class="col-sm-10">
-                <input type="textarea" class="form-control" id="register-histoire" placeholder="Histoire du codex et de sa conservation" name="histoire">
+                <input type="textarea" class="form-control" id="register-histoire" placeholder="Histoire du codex et de sa conservation" name="histoire" {% if saisieHistoire %}value="{{ saisieHistoire }}"{% endif %}>
             </div>
         </div>
         <div class="form-group row">
             <label for="register-conservation" class="col-sm-2 col-form-label {% if 'conservation_id' in erreurs %}is-invalid{% endif %}">Lieu de conservation</label>
             <select name="conservation_id" class="col-sm-5" id="register-conservation">
-		    	{% for lieu in lieuxConservation %}
-                    <option value="{{lieu.id}}">
-			    		{{ lieu.localite + ", " + lieu.label }}
-			    	</option>
-		    	{% endfor %}
-		    </select>
+                {% for lieu in lieuxConservation %}
+                    <option value="{{ lieu.id }}" {% if lieu.id == lieuParDefaut.id %}selected{% endif %}>
+                        {{ lieu.localite + ", " + lieu.label }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group row">
+            <label for="register-origine" class="col-sm-2 col-form-label">Origine</label>
+            <select name="origine" class="col-sm-5" id="register-origine">
+                <option value=""/>
+                {% for lieu in origines %}
+                    <option value="{{ lieu.id }}">
+                        {% if lieu.label %}
+                            {{ lieu.localite + ", " + lieu.label }}
+                        {% else %}
+                            {{ lieu.localite }}
+                        {% endif %}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group row">
+            <label for="register-provenance" class="col-sm-2 col-form-label">Provenance</label>
+            <select name="provient" class="col-sm-5" id="register-provenance">
+                <option value=""/>
+                {% for lieu in provenances %}
+                    <option value="{{ lieu.id }}">
+                        {% if lieu.label %}
+                            {{ lieu.localite + ", " + lieu.label }}
+                        {% else %}
+                            {{ lieu.localite }}
+                        {% endif %}
+                    </option>
+                {% endfor %}
+            </select>
         </div>
         <div>
             <button type="submit" class="btn btn-primary">Créer</button>
