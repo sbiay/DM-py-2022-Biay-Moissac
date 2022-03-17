@@ -35,11 +35,16 @@
                 <input type="textarea" class="form-control" id="register-histoire" placeholder="Histoire du codex et de sa conservation" name="histoire" {% if saisieHistoire %}value="{{ saisieHistoire }}"{% endif %}>
             </div>
         </div>
+
+        <!--Ajouter les champs pour les dates-->
+
         <div class="form-group row">
             <label for="register-conservation" class="col-sm-2 col-form-label {% if 'conservation_id' in erreurs %}is-invalid{% endif %}">Lieu de conservation</label>
             <select name="conservation_id" class="col-sm-5" id="register-conservation">
                 {% for lieu in lieuxConservation %}
+                    <!-- L'@value définit la variable qui passe dans l'@name du champ courant -->
                     <option value="{{ lieu.id }}" {% if lieu.id == lieuParDefaut.id %}selected{% endif %}>
+                        <!-- Contenu affiché dans le champ -->
                         {{ lieu.localite + ", " + lieu.label }}
                     </option>
                 {% endfor %}

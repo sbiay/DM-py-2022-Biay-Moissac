@@ -117,7 +117,7 @@ def indexOeuvres():
     return render_template("pages/oeuvres.html", oeuvres=donneesOeuvres, classOeuvres=classOeuvres)
 
 # TODO factoriser les routes des notices
-@app.route("/pages/codices/<int:num>")
+@app.route("/pages/codex/<int:num>")
 def notice_codex(num):
     # Test d'existence de l'identifiant cherché
     codex = Codices.query.get_or_404(num)
@@ -126,7 +126,7 @@ def notice_codex(num):
     codex = json.loads(codexJson(num))
     
     if not test:
-        return render_template("pages/codices.html",
+        return render_template("pages/codex.html",
                                titre=codex["label"],
                                materielle=codex["description_materielle"],
                                histoire=codex["histoire"],
@@ -537,11 +537,13 @@ def creer(typeCreation=["codex"]):
             erreurs.append("Une date de début doit être renseignée. ")
         if not request.form.get("date_pas_apres", "").strip():
             erreurs.append("Une date de fin doit être renseignée. ")
+        # TODO autre erreur à gérer
         """
         if not isinstance(date_pas_avant, int) or not isinstance(date_pas_apres, int):
             erreurs.append("Les dates doivent être des nombres entiers.")
         """
-        
+        conservation_id = request.form["conservation_id"]
+        print(conservation_id)
         # Si on a au moins une erreur
         if len(erreurs) > 0:
             for erreur in erreurs:
@@ -562,6 +564,7 @@ def creer(typeCreation=["codex"]):
         # TODO en fait on doit les passer à la fonction de création d'un codex
         cote = request.form["cote"]
         conservation_id = request.form["conservation_id"]
+        print(conservation_id)
 
         lieuxConservation = Lieux.query.filter(Lieux.conserve).order_by(Lieux.localite).all()
         

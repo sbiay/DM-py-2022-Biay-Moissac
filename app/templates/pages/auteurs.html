@@ -13,20 +13,25 @@
         {% for auteur in auteurs %}
             {% if item.id == auteur["personne_id"] %}
                 <h2>{{ auteur["label"] }}</h2>
-                {% for oeuvre in auteur["oeuvres"] %}
-                    <!-- Pour les titres des oeuvres -->
-                    <a href="{{ url_for("noticeOeuvre", id=oeuvre["oeuvre_id"]) }}">
-                        <i>{{ oeuvre["titre"] }}</i></a>
-                    {% if oeuvre["relation"] == "a pour attribution" %}
-                        <span> (attribué à)</span>
-                    {% endif %}
-                    <!-- Pour les codices qui les contiennent-->
-                    {% for codex in oeuvre["contenue_dans"] %}
-                        <ul>
-                            <li><a href="{{ url_for('notice_codex', num=codex["codex_id"])}}">{{codex["label"]}}</a></li>
-                        </ul>
+                <p>Lien : <a href="{{ url_for("noticePersonne", id=auteur["personne_id"]) }}">notice</a>.</p>
+                <head>Oeuvres :</head>
+                <ul>
+                    {% for oeuvre in auteur["oeuvres"] %}
+                        <!-- Pour les titres des oeuvres -->
+                        <li><a href="{{ url_for("noticeOeuvre", id=oeuvre["oeuvre_id"]) }}">
+                            <i>{{ oeuvre["titre"] }}</i></a>
+                            {% if oeuvre["relation"] == "a pour attribution" %}
+                                <span> (attribué à)</span>
+                            {% endif %}
+                            <!-- Pour les codices qui les contiennent-->
+                            <ul>
+                                {% for codex in oeuvre["contenue_dans"] %}
+                                    <li><a href="{{ url_for('notice_codex', num=codex["codex_id"])}}">{{codex["label"]}}</a></li>
+                                {% endfor %}
+                            </ul>
+                        </li>
                     {% endfor %}
-                {% endfor %}
+                </ul>
             {% endif %}
         {% endfor %}
     {% endfor %}
