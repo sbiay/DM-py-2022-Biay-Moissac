@@ -153,6 +153,8 @@ def notice_codex(num, idUC=None):
         for item in origines:
             if item.a_pour_lieu not in lieuxOrigine:
                 lieuxOrigine.append(item.a_pour_lieu)
+        # On récupère les données sur les oeuvres
+        toutesOeuvres = json.loads(toutesOeuvresJson())
         
         # Pour mettre à jour les champs textes de la première zone
         modifZ1 = False
@@ -245,22 +247,17 @@ def notice_codex(num, idUC=None):
         # Si l'utilisateur veut supprimer une oeuvre dans une unité codicologique
         if request.form.get("oeuvreSuppr", "").strip():
             idAsupprimer = request.form["oeuvreSuppr"]
-            print(idAsupprimer)
-            print(idUC)
-            r = Contient.query.filter(Contient.unites_codico == 8).all()
+            # La requête suivante retourne une liste d'un seul item
             injection = Contient.query.filter(
-                and_(Contient.unites_codico == idUC, Contient.oeuvre == idAsupprimer)).all()
-            for item in r:
-                print(item.oeuvre)
-            """
+                and_(Contient.unites_codico == int(idUC), Contient.oeuvre == int(idAsupprimer))).all()
             try:
-                db.session.delete(injection)
+                db.session.delete(injection[0])
                 db.session.commit()
                 flash("Enregistrement correctement supprimé.", "success")
             except Exception as erreur:
                 flash("La suppression a rencontré un problème.", "error")
                 print(erreur)
-        """
+
         # On recharge les données du codex
         codex = json.loads(codexJson(num))
         
@@ -275,6 +272,7 @@ def notice_codex(num, idUC=None):
                                descUCs=codex["contenu"],
                                toutesProvenances=provenances,
                                toutesOrigines=lieuxOrigine,
+                               toutesOeuvres=toutesOeuvres,
                                maj=maj)
 
 

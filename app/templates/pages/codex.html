@@ -266,7 +266,7 @@
             {% for UC in descUCs %}
                 <h3>{% if UC["localisation"] %}{{UC["localisation"]}}{% else %}Unité codicologique unique{% endif %} ({{UC["date"]}})</h3>
                 <form class="row g-3" method="POST" action="{{url_for("notice_codex", num=id, idUC=UC.uc_id)}}">
-                <!-- Champs textes : deuxième zone -->
+                    <!-- Champs textes : deuxième zone -->
                     <h4>Paléographie et datation</h4>
                     <div class="col-md-12 mb-3">
                         <div class="">
@@ -295,6 +295,11 @@
                     </div>
                 </form>
                 <!-- Menus pour les textes -->
+                {% if UC["oeuvres"] %}
+                    <h4>Les textes</h4>
+                {% else %}
+                    <p>Cette unité codicologique ne contient aucun texte.</p>
+                {% endif %}
                 {% for oeuvre in UC["oeuvres"] %}
                     <form class="row gx-3 gy-2 align-items-center" method="POST" action="{{url_for("notice_codex", num=id, idUC=UC.uc_id)}}">
                         <div class="col-md-6 mb-3">
@@ -306,8 +311,27 @@
                             <button type="submit" class="btn btn-primary">Supprimer</button>
                         </div>
                     </form>
+                    <form class="row g-3" method="POST" action="{{url_for("notice_codex", num=id, idUC=UC.uc_id)}}">
+                        <!--Formulaire d'ajout d'une oeuvre -->
+                        <div class="col-md-6 mb-3">
+                            <label for="register-origine" class="form-label">Ajouter une oeuvre</label>
+                            <select name="oeuvreAjout" class="form-select">
+                                <option value="" selected/>
+                                {% for oeuvre in toutesOeuvres %}
+                                    <option value="{{ oeuvre["oeuvre_id"] }}"><i>{{ oeuvre.titre }}</i>{% if oeuvre.auteur %}, {{ oeuvre.auteur }}{% endif %}{% if oeuvre.attr %}, {{ oeuvre.attr }}{% endif %}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <button type="submit" class="btn btn-primary">Mettre à jour</button>
+                        </div>
+                    </form>
                 {% endfor %}
             {% endfor %}
+
+            <!--Formulaire d'ajout d'une UC -->
+
         {% endif %}
 
 
