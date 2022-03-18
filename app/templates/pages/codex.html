@@ -9,38 +9,107 @@
         <header>
             <h1>{{titre}}</h1>
         </header>
-        <div>
-            <h2>Histoire</h2>
-            <p>{{histoire}}</p>
-            <h3>Origine</h3>
-            {% for lieu in origine %}
-                {% if not lieu["cas_particulier"] %}
-                    <ul>
-                        <li>{{ lieu["localite"] }}, {{ lieu["label"] }}{% if lieu["remarque"] %} ({{ lieu["remarque"] }}){% endif %}.</li>
-                    </ul>
+        {% if current_user.is_authenticated and not maj %}
+            <br>
+            <form class="d-flex" method="POST" action="{{url_for("notice_codex", num=id)}}">
+                <button class="btn btn-outline-success" type="submit" role="button">Mettre à jour</button>
+            </form>
+            <br>
+        {% endif %}
+        <!--Affichage en mode consultation-->
+        {% if not maj %}
+            <div>
+                {% if histoire %}
+                    <h2>Histoire</h2>
+                    <p>{{histoire}}</p>
                 {% endif %}
-            {% endfor %}
-            {% for provenance in provenances %}
-                {% if not provenance["cas_particulier"] %}
+                {% if origine %}
+                    <h3>Origine</h3>
+                    {% for lieu in origine %}
+                        <ul>
+                            <li>{{ lieu["localite"] }}
+                                {% if lieu["label"] %}
+                                    <!-- Gestion du problème de ponctuation en cas de label avec parenthèses -->
+                                    {% if lieu["label"][1] != '(' %}, {% endif %}
+                                    {{ lieu["label"] }}
+                                {% endif %}.
+                            </li>
+                        </ul>
+                    {% endfor %}
+                {% endif %}
+                {% if provenances %}
                     <h3>Provenances</h3>
-                    <ul>
-                        <li>{{ provenance["localite"] }}, {{ provenance["label"] }}.</li>
-                    </ul>
-                {% endif %}
-            {% endfor %}
+                    {% for provenance in provenances %}
+                        {% if not provenance["cas_particulier"] %}
 
-            {% if materielle %}
-                <h2>Description matérielle</h2>
-                <p>{{materielle}}</p>
-            {% endif %}
-            {% if descUCs|length > 1 %}
-                <h2>Contenu</h2>
-                {% for UC in descUCs %}
-                    <h3>{{UC["localisation"]}} ({{UC["date"]}})</h3>
-                    {% if UC["description"] %}
-                        <p>{{UC["description"]}}</p>
+                            <ul>
+                                <li>{{ provenance["localite"] }}, {{ provenance["label"] }}.</li>
+                            </ul>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+                {% if descript_materielle %}
+                    <h2>Description matérielle</h2>
+                    <p>{{descript_materielle}}</p>
+                {% endif %}
+                {% if descUCs|length > 1 %}
+                    <h2>Contenu</h2>
+                    {% for UC in descUCs %}
+                        <h3>{{UC["localisation"]}} ({{UC["date"]}})</h3>
+                        {% if UC["description"] %}
+                            <p>{{UC["description"]}}</p>
+                        {% endif %}
+                        {% for oeuvres in UC["oeuvres"] %}
+                            <ul>
+                                {% if oeuvres["auteur"] and oeuvres["attr"] %}
+                                    <li>
+                                        <!--Nom d'auteur-->
+                                        <a href="{{ url_for('noticePersonne', id=oeuvres["auteur_id"]) }}">
+                                            {{oeuvres["auteur"]}}</a>,
+                                        <!-- Titre -->
+                                        <a href="{{ url_for('noticeOeuvre', id=oeuvres["oeuvre_id"]) }}">
+                                            <i>{{oeuvres["titre"]}}</i></a>
+                                        <!-- Attribution --> (attribué à
+                                        <a href="{{ url_for('noticePersonne', id=oeuvres["auteur_id"]) }}">
+                                            {{ oeuvres["attr"] }}</a>).
+                                    </li>
+                                {% elif oeuvres["auteur"] and not oeuvres["attr"] %}
+                                    <li>
+                                        <!--Nom d'auteur-->
+                                        <a href="{{ url_for('noticePersonne', id=oeuvres["auteur_id"]) }}">
+                                            {{oeuvres["auteur"]}}</a>,
+                                        <!-- Titre -->
+                                        <a href="{{ url_for('noticeOeuvre', id=oeuvres["oeuvre_id"]) }}">
+                                            <i>{{oeuvres["titre"]}}</i></a>.
+                                    </li>
+                                {% elif not oeuvres["auteur"] and oeuvres["attr"] %}
+                                    <li>
+                                        <!-- Titre -->
+                                        <a href="{{ url_for('noticeOeuvre', id=oeuvres["oeuvre_id"]) }}">
+                                            <i>{{oeuvres["titre"]}}</i></a>
+                                        <!-- Attribution --> (attribué à
+                                        <a href="{{ url_for('noticePersonne', id=oeuvres["auteur_id"]) }}">
+                                            {{ oeuvres["attr"] }}</a>).
+                                    </li>
+                                {% else %}
+                                    <li>
+                                        <!-- Titre -->
+                                        <a href="{{ url_for('noticeOeuvre', id=oeuvres["oeuvre_id"]) }}">
+                                            <i>{{oeuvres["titre"]}}</i></a>.
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        {% endfor %}
+                    {% endfor %}
+                {% else %}
+                    {% if descUCs[0]["description"] %}
+                        <h2>Paléographie</h2>
+                        <p>{{descUCs[0]["description"]}}</p>
                     {% endif %}
-                    {% for oeuvres in UC["oeuvres"] %}
+                    <h2>Date</h2>
+                    <p>{{descUCs[0]["date"]}}</p>
+                    <h2>Textes</h2>
+                    {% for oeuvres in descUCs[0]["oeuvres"] %}
                         <ul>
                             {% if oeuvres["auteur"] and oeuvres["attr"] %}
                                 <li>
@@ -51,7 +120,7 @@
                                     <a href="{{ url_for('noticeOeuvre', id=oeuvres["oeuvre_id"]) }}">
                                         <i>{{oeuvres["titre"]}}</i></a>
                                     <!-- Attribution --> (attribué à
-                                    <a href="{{ url_for('noticePersonne', id=oeuvres["auteur_id"]) }}">
+                                    <a href="{{ url_for('noticePersonne', id=oeuvres["attr_id"]) }}">
                                         {{ oeuvres["attr"] }}</a>).
                                 </li>
                             {% elif oeuvres["auteur"] and not oeuvres["attr"] %}
@@ -69,7 +138,7 @@
                                     <a href="{{ url_for('noticeOeuvre', id=oeuvres["oeuvre_id"]) }}">
                                         <i>{{oeuvres["titre"]}}</i></a>
                                     <!-- Attribution --> (attribué à
-                                    <a href="{{ url_for('noticePersonne', id=oeuvres["auteur_id"]) }}">
+                                    <a href="{{ url_for('noticePersonne', id=oeuvres["attr_id"]) }}">
                                         {{ oeuvres["attr"] }}</a>).
                                 </li>
                             {% else %}
@@ -81,58 +150,102 @@
                             {% endif %}
                         </ul>
                     {% endfor %}
-                {% endfor %}
-            {% else %}
-                {% if descUCs[0]["description"] %}
-                    <h2>Paléographie</h2>
-                    <p>{{descUCs[0]["description"]}}</p>
                 {% endif %}
-                <h2>Date</h2>
-                <p>{{descUCs[0]["date"]}}</p>
-                <h2>Textes</h2>
-                {% for oeuvres in descUCs[0]["oeuvres"] %}
-                    <ul>
-                        {% if oeuvres["auteur"] and oeuvres["attr"] %}
-                            <li>
-                                <!--Nom d'auteur-->
-                                <a href="{{ url_for('noticePersonne', id=oeuvres["auteur_id"]) }}">
-                                    {{oeuvres["auteur"]}}</a>,
-                                <!-- Titre -->
-                                <a href="{{ url_for('noticeOeuvre', id=oeuvres["oeuvre_id"]) }}">
-                                    <i>{{oeuvres["titre"]}}</i></a>
-                                <!-- Attribution --> (attribué à
-                                <a href="{{ url_for('noticePersonne', id=oeuvres["attr_id"]) }}">
-                                    {{ oeuvres["attr"] }}</a>).
-                            </li>
-                        {% elif oeuvres["auteur"] and not oeuvres["attr"] %}
-                            <li>
-                                <!--Nom d'auteur-->
-                                <a href="{{ url_for('noticePersonne', id=oeuvres["auteur_id"]) }}">
-                                    {{oeuvres["auteur"]}}</a>,
-                                <!-- Titre -->
-                                <a href="{{ url_for('noticeOeuvre', id=oeuvres["oeuvre_id"]) }}">
-                                    <i>{{oeuvres["titre"]}}</i></a>.
-                            </li>
-                        {% elif not oeuvres["auteur"] and oeuvres["attr"] %}
-                            <li>
-                                <!-- Titre -->
-                                <a href="{{ url_for('noticeOeuvre', id=oeuvres["oeuvre_id"]) }}">
-                                    <i>{{oeuvres["titre"]}}</i></a>
-                                <!-- Attribution --> (attribué à
-                                <a href="{{ url_for('noticePersonne', id=oeuvres["attr_id"]) }}">
-                                    {{ oeuvres["attr"] }}</a>).
-                            </li>
-                        {% else %}
-                            <li>
-                                <!-- Titre -->
-                                <a href="{{ url_for('noticeOeuvre', id=oeuvres["oeuvre_id"]) }}">
-                                    <i>{{oeuvres["titre"]}}</i></a>.
-                            </li>
-                        {% endif %}
-                    </ul>
+            </div>
+
+        {% else %}
+            <!--Affichage en mode mise à jour-->
+            <br>
+            <form class="d-flex" method="GET" action="{{url_for("notice_codex", num=id)}}">
+                <button class="btn btn-outline-success" type="submit" role="button">Revenir à la notice</button>
+            </form>
+            <br>
+            <form class="row g-3" method="POST" action="{{url_for("notice_codex", num=id)}}">
+                <div class="col-md-6 mb-3">
+                    <label for="register-id-technique" class="form-label">Identifiant technique</label>
+                    <div class="">
+                        <input type="text" class="form-control" id="register-id-technique"
+                               name="id_technique"
+                               placeholder="ex. ark:/12148/cc599714" {% if id_technique %}value="{{ id_technique }}"{% endif %}>
+                    </div>
+                </div>
+                <div class="col-12 mb-3">
+                    <label for="register-histoire" class="form-label">Histoire</label>
+                    <div class="">
+                        <input type="textarea" class="form-control" id="register-histoire"
+                               placeholder="Histoire du codex et de sa conservation"
+                               name="histoire" {% if histoire %}value="{{ histoire }}"{% endif %}>
+                    </div>
+                </div>
+                <div class="col-12 mb-3">
+                    <label for="register-descript-materielle" class="form-label">Description matérielle</label>
+                    <div class="">
+                        <input type="textarea" class="form-control" id="register-descript-materielle"
+                               name="descript_materielle"
+                               placeholder="Description matérielle de la reliure"
+                               {% if descript_materielle %}value="{{ descript_materielle }}"{% endif %}>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <button type="submit" class="btn btn-primary">Mettre à jour</button>
+                </div>
+            </form>
+            <h3>Origine</h3>
+            <p>Plusieurs lieux d'origines peuvent être renseignés à titre d'hypothèses.</p>
+            {% if origine %}
+                {% for lieu in origine %}
+                    <form class="row gx-3 gy-2 align-items-center" method="POST" action="{{url_for("notice_codex", num=id)}}">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-control">{{ lieu["localite"] }}, {{ lieu["label"] }}{% if lieu["remarque"] %} ({{ lieu["remarque"] }}){% endif %}</label>
+                            <input type="hidden" class="form-control" name="originesuppr"
+                                   value="{{ lieu.lieu_id }}">
+                        </div>
+                        <div class="col-auto mb-3">
+                            <button type="submit" class="btn btn-primary">Supprimer</button>
+                        </div>
+                    </form>
                 {% endfor %}
             {% endif %}
-        </div>
+            <form class="row g-3" method="POST" action="{{url_for("notice_codex", num=id)}}">
+                <div class="col-md-6 mb-3">
+                    <label for="register-origine" class="form-label">Ajouter une origine</label>
+                    <select name="origineAjout" class="form-select">
+                        <option value="" selected/>
+                        {% for lieu in toutesOrigines %}
+                            <option value="{{ lieu.id }}">
+                                {% if lieu.label %}
+                                    {{ lieu.localite + ", " + lieu.label }}
+                                {% else %}
+                                    {{ lieu.localite }}
+                                {% endif %}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="register-provenance" class="form-label">Ajouter une provenance</label>
+                    <select name="provenanceAjout" class="form-select" id="register-provenance">
+                        <option value=""/>
+                        {% for lieu in toutesProvenances %}
+                            <option value="{{ lieu.id }}">
+                                {% if lieu.label %}
+                                    {{ lieu.localite + ", " + lieu.label }}
+                                {% else %}
+                                    {{ lieu.localite }}
+                                {% endif %}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <button type="submit" class="btn btn-primary">Mettre à jour</button>
+                </div>
+            </form>
+
+
+
+
+        {% endif %}
 
 
     {% else %}

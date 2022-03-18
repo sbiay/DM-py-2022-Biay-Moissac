@@ -1,9 +1,10 @@
 import json, requests, time
 from flask import flash, Flask, redirect, render_template, request, url_for
 from flask_login import login_user, current_user, logout_user
+from sqlalchemy import delete, update, or_, and_
 from bs4 import BeautifulSoup
 
-from ..appliMoissac import app, login
+from ..appliMoissac import app, login, db
 from ..constantes import ROWS_PER_PAGE
 from ..modeles.classes import Codices, Lieux, Unites_codico, Oeuvres, Personnes, Provenances
 from ..modeles.utilisateurs import User
@@ -120,7 +121,7 @@ def indexOeuvres():
 
 
 # TODO factoriser les routes des notices
-@app.route("/pages/codex/<int:num>")
+@app.route("/pages/codex/<int:num>", methods=["GET", "POST"])
 def notice_codex(num):
     # Test d'existence de l'identifiant cherché
     codex = Codices.query.get_or_404(num)
@@ -128,16 +129,65 @@ def notice_codex(num):
     # Réassignation de la variable codex par l'objet Json retourné par la fonction codexJson()
     codex = json.loads(codexJson(num))
     
-    if not test:
+    if request.method == "GET":
+        # On définit un booléen pour savoir si l'on affiche les champs en mode mise à jour ou en mode consultation
+        maj = False
         return render_template("pages/codex.html",
+                               id=codex["codex_id"],
                                titre=codex["label"],
-                               materielle=codex["description_materielle"],
+                               descript_materielle=codex["description_materielle"],
                                histoire=codex["histoire"],
                                provenances=codex["provenances"],
                                origine=codex["origine"],
-                               descUCs=codex["contenu"])
+                               descUCs=codex["contenu"],
+                               maj=maj)
+    
+    # Pour mettre à jour un codex
+    elif request.method == "POST":
+        maj = True
+        # On récupère la liste des provenances existantes
+        provenances = Lieux.query.filter(Lieux.est_provenance_de).order_by(Lieux.localite).order_by(Lieux.label).all()
+        # On récupère la liste des provenances qui sont marquées comme origine
+        origines = Provenances.query.filter(Provenances.origine).all()
+        lieuxOrigine = []
+        for item in origines:
+            if item.a_pour_lieu not in lieuxOrigine:
+                lieuxOrigine.append(item.a_pour_lieu)
+        
+        # Si l'utilisateur veut supprimer une origine
+        if request.form.get("originesuppr", "").strip():
+            idAsupprimer = request.form["originesuppr"]
+            print(idAsupprimer)
+            injection = Provenances.query.filter(
+                and_(Provenances.codex == num, Provenances.lieu == idAsupprimer)).first()
+            print(injection)
+            try:
+                db.session.delete(injection)
+                db.session.commit()
+            except Exception as erreur:
+                flash(erreur, "error")
+        
+        if request.form.get("origineAjout", "").strip():
+            origineAjout = request.form["origineAjout"]
+            #print(origineAjout)
+        
+        # On recharge les données du codex
+        codex = json.loads(codexJson(num))
+        
+        return render_template("pages/codex.html",
+                                   id=codex["codex_id"],
+                                   id_technique=codex["id_technique"],
+                                   titre=codex["label"],
+                                   descript_materielle=codex["description_materielle"],
+                                   histoire=codex["histoire"],
+                                   provenances=codex["provenances"],
+                                   origine=codex["origine"],
+                                   descUCs=codex["contenu"],
+                                   toutesProvenances=provenances,
+                                   toutesOrigines=lieuxOrigine,
+                                   maj=maj)
 
-
+        
 @app.route("/pages/auteur/<int:id>")
 def noticePersonne(id):
     """Cette route prend pour argument l'identifiant d'un auteur et retourne le template de sa notice"""
@@ -596,26 +646,26 @@ def creer(typeCreation=["codex"]):
         
         # On crée le codex dans la base
         if Codices.creer(cote,
-                      id_technique,
-                      descript_materielle,
-                      histoire,
-                      conservation_id,
-                      origine,
-                      provient,
-                      unites_codico
-                      )[0]:
+                         id_technique,
+                         descript_materielle,
+                         histoire,
+                         conservation_id,
+                         origine,
+                         provient,
+                         unites_codico
+                         )[0]:
             return redirect(url_for("notice_codex", num=idFuturCodex)), flash("Le codex a bien été créé", "success")
         else:
             return render_template("pages/creer.html",
-                               titre="codex",
-                               lieuxConservation=lieuxConservation,
-                               lieuParDefaut=lieuParDefaut,
-                               provenances=provenances,
-                               origines=lieuxOrigine,
-                               saisieCote=request.form.get("cote", ""),
-                               saisieIdentifiant=request.form.get("identifiant_technique", ""),
-                               saisieDescription=request.form.get("descript_materielle", ""),
-                               saisieHistoire=request.form.get("histoire", ""),
-                               saisieDatepasavant=request.form.get("date_pas_avant", ""),
-                               saisieDatepasapres=request.form.get("date_pas_apres", ""),
-                               ), flash("La création du codex a rencontré un problème.", "error")
+                                   titre="codex",
+                                   lieuxConservation=lieuxConservation,
+                                   lieuParDefaut=lieuParDefaut,
+                                   provenances=provenances,
+                                   origines=lieuxOrigine,
+                                   saisieCote=request.form.get("cote", ""),
+                                   saisieIdentifiant=request.form.get("identifiant_technique", ""),
+                                   saisieDescription=request.form.get("descript_materielle", ""),
+                                   saisieHistoire=request.form.get("histoire", ""),
+                                   saisieDatepasavant=request.form.get("date_pas_avant", ""),
+                                   saisieDatepasapres=request.form.get("date_pas_apres", ""),
+                                   ), flash("La création du codex a rencontré un problème.", "error")
