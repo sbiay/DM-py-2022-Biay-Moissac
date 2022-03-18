@@ -32,21 +32,24 @@ def rechercheCote(saisie, id_conservation):
     # On nettoie et découpe la saisie
     motscles = saisieRecherche(saisie, False)
     
-    # On boucle sur chaque mot-clé
-    for mot in motscles[0]:
-        # On boucle sur chaque codex via listeDictCodices
-        for cote in listeCotes:
+    cotePertinentes = []
+    # On boucle sur chaque codex via listeDictCodices
+    for cote in listeCotes:
+        # On procède par élimination des cotes qui ne sont pas pertinentes, vis-à-vis des mots
+        pertinent = True
+        # On boucle sur chaque mot-clé
+        for mot in motscles[0]:
             # On cherche une occurrence du mot-clé courant dans les données
             chaine = cote["cote"].lower()
             chaine = chaine.split()
-            if mot in chaine:
-                # Si une ou plusieurs occurrences sont trouvées, la pertinence est vraie
-                cote["score"] += 1
-    # On parse les scores pour déterminer si la saisie correspond totalement à une cote
-    for cote in listeCotes:
-        # Si une cote a un score égal au nombre de mots clés, alors la cote existe déjà dans la base
-        if cote["score"] == len(motscles):
-            return True
+            if mot not in chaine:
+                pertinent = False
+        # Si tous les mots sont présents dans la cote, alors on ajoute la cote aux résultats
+        if pertinent:
+            cotePertinentes.append(cote)
+    
+    if cotePertinentes:
+        return True
     # Si la condition n'a jamais été remplie : aucun match, on retourne False
     return False
 
