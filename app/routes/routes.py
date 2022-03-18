@@ -575,14 +575,38 @@ def creer(typeCreation=["codex"]):
         conservation_id = request.form["conservation_id"]
         origine = request.form["origine"]
         provient = request.form["provient"]
+        unites_codico = []
         
-        """
-        # Créer une première UC par défaut
-        uniteCodico = Unites_codico.creer(
-            creer(code_id, date_pas_avant, date_pas_apres,
-                  descript=None, loc_init=None, loc_init_v=None, loc_fin=None, loc_fin_v=None)
+        # Créer une première unité codicologique par défaut
+        # Déterminer l'identifiant du codex en cours de création, dont l'UC sera enfant
+        idFuturCodex = len(Codices.query.all()) + 1
+        nouvelle_uc = Unites_codico.creer(
+            code_id=idFuturCodex,
+            date_pas_avant=date_pas_avant,
+            date_pas_apres=date_pas_apres,
+            descript=None, loc_init=None, loc_init_v=None, loc_fin=None, loc_fin_v=None
         )
-        """
+        # Si la création de la nouvelle UC est un succès
+        if nouvelle_uc[0]:
+            unites_codico.append(nouvelle_uc[1].id)
+        else:
+            print(
+                f"L'unité codicologique par défaut du codex {idFuturCodex}"
+                f" en cours de création a rencontré un problème.")
+        
+        # On crée le codex dans la base
+        print(
+            Codices.creer(cote,
+                          id_technique,
+                          descript_materielle,
+                          histoire,
+                          conservation_id,
+                          origine,
+                          provient,
+                          unites_codico
+                    )
+        )
+        
         # TODO rediriger vers la page du codex créé
         # return redirect(url_for("accueil")), flash("Le codex a bien été créé", "success")
         flash("Le codex a bien été créé", "success")

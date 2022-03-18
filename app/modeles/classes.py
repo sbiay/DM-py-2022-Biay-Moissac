@@ -30,12 +30,14 @@ class Codices(db.Model):
     provient = db.relationship("Provenances", back_populates="codex_provenant")
     
     @staticmethod
-    def creer(cote, id_technique, descript_materielle, histoire, conservation_id, date_pas_avant, date_pas_apres):
+    def creer(cote, id_technique, descript_materielle, histoire, conservation_id, origine, provient, unites_codico):
         """
         Création d'un codex dans la base de données.
         """
         # La qualité des données est contrôlée dans la route creer(), méthode POST
-        
+        nouvelleUC = Unites_codico.query.get(unites_codico[0])
+        codextest = Codices.query.get(6)
+        print(codextest.unites_codico)
         # On crée les données du codex
         nouveauCodex = Codices(
             cote=cote,
@@ -43,20 +45,13 @@ class Codices(db.Model):
             descript_materielle=descript_materielle,
             histoire=histoire,
             conservation_id=conservation_id,
-            unites_codico=[]
+            unites_codico=[nouvelleUC]
         )
         # On tente d'écrire le nouveau codex dans la base
         try:
             db.session.add(nouveauCodex)
             # On envoie le paquet
             db.session.commit()
-            
-            # On crée la première unité codicologique
-            Unites_codico.creer(
-                code_id=nouveauCodex.id,
-                date_pas_avant=date_pas_avant,
-                date_pas_apres=date_pas_apres
-            )
             
             # On renvoie l'utilisateur
             return True, nouveauCodex
