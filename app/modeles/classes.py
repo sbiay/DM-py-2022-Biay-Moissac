@@ -86,11 +86,13 @@ class Lieux(db.Model):
     est_provenance_de = db.relationship("Provenances", back_populates="a_pour_lieu")
 
 
-# Table de relation "contient"
-contient = Table("contient", db.metadata,
-                 Column("oeuvre", ForeignKey("oeuvres.id")),
-                 Column("unites_codico", ForeignKey("unites_codico.id"))
-                 )
+class Contient(db.Model):
+    rowid = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    oeuvre = db.Column(db.Integer, db.ForeignKey("oeuvres.id"))
+    unites_codico = db.Column(db.Integer, db.ForeignKey("unites_codico.id"))
+    a_pour_oeuvre = db.relationship("Oeuvres", back_populates="contenu_defini_par")
+    a_pour_uc = db.relationship("Unites_codico", back_populates="contenu_defini_par")
+
 
 
 class Unites_codico(db.Model):
@@ -106,7 +108,7 @@ class Unites_codico(db.Model):
     date_pas_apres = db.Column(db.Integer, nullable=False)
     code_id = db.Column(db.Integer, db.ForeignKey("codices.id"))
     codex = db.relationship("Codices", back_populates="unites_codico")
-    contenu = db.relationship("Oeuvres", secondary=contient, backref="Unites_codico")
+    contenu_defini_par = db.relationship("Contient", back_populates="a_pour_uc")
     
     @staticmethod
     def creer(code_id, date_pas_avant, date_pas_apres,
@@ -145,11 +147,11 @@ class Oeuvres(db.Model):
     titre = db.Column(db.Text, nullable=False)
     data_bnf = db.Column(db.Integer, nullable=True)
     partie_de = db.Column(db.Boolean, nullable=True)
-    unites_codico = db.relationship("Unites_codico", secondary=contient, backref="Oeuvres")
     auteur = db.Column(db.Integer, db.ForeignKey("personnes.id"))
     lien_auteur = db.relationship("Personnes", back_populates="oeuvres_aut", foreign_keys=auteur)
     attr = db.Column(db.Integer, db.ForeignKey("personnes.id"))
     lien_attr = db.relationship("Personnes", back_populates="oeuvres_attr", foreign_keys=attr)
+    contenu_defini_par = db.relationship("Contient", back_populates="a_pour_oeuvre")
 
 
 class Personnes(db.Model):

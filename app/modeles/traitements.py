@@ -1,6 +1,6 @@
 import json
 from operator import attrgetter
-from .classes import Codices, Lieux, Oeuvres, Personnes, Provenances, Unites_codico
+from .classes import Codices, Lieux, Oeuvres, Personnes, Provenances, Unites_codico, Contient
 
 
 # Les scripts suivants mettent en forme des chaînes de caractères pour l'affichage d'un enregistrement particulier
@@ -542,10 +542,10 @@ def toutesOeuvresJson():
     for objetOeuvre in toutesOeuvres:
         # On décrit les métadonnées d'une oeuvre grâce à la fonction dicoOeuvre()
         oeuvre = oeuvreDict(objetOeuvre.id)
-        
         # Pour renseigner les codices contenant l'oeuvre
         oeuvre["contenue_dans"] = []
-        for objetUC in Oeuvres.query.get(objetOeuvre.id).unites_codico:
+        for objetContient in Oeuvres.query.get(objetOeuvre.id).contenu_defini_par:
+            objetUC = objetContient.a_pour_uc
             objetCodex = objetUC.codex
             dicoCodex = {
                 "codex_id": objetCodex.id,
@@ -557,7 +557,6 @@ def toutesOeuvresJson():
             }
             oeuvre["contenue_dans"].append(dicoCodex)
         oeuvres.append(oeuvre)
-    
     # test
     with open("resultats-tests/oeuvres.json", mode="w") as jsonf:
         json.dump(oeuvres, jsonf)
