@@ -1,26 +1,3 @@
-/* Barre de navigation */
-.navbar {
-    background-color: #a45337;
-    padding: 20px;
-}
-
-/* Liens hypertextes propres à la barre de navigation */
-.navbar a {color: #dad6d1;}
-.navbar a:hover {color: #ae8167;}
-
-/* Barre de navigation : bouton recherche */
-.btn-outline-success {
-    color: #ae8167;
-    border-color:#ae8167;
-}
-.btn-outline-success:hover {
-    background-color: #ae8167;
-    border-color:#dad6d1;
-}
-
-header > nav > form {
-    margin-left: 800px;
-}
 
 body {
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
@@ -36,16 +13,74 @@ body {
     padding: 0px;
 }
 
-
 main {
     color: #dad6d1;
     background-color: #333537;
 }
 
-/* Liens hypertextes */
-a{color: #ae8167;}
-a:hover{color:#a45337;}
+/* Image latérale */
+.humilite {
+    max-width: 100%;
+}
 
+.container {
+    margin-left: 0px;
+}
+
+/* Barre de navigation */
+.navbar {
+    background-color: #a45337;
+    padding: 20px;
+}
+
+/* Liens hypertextes propres à la barre de navigation */
+.navbar a {
+    color: #dad6d1;
+}
+
+.navbar a:hover {
+    color: #ae8167;
+}
+
+/* Barre de navigation : bouton recherche */
+.btn-outline-success {
+    color: #ae8167;
+    border-color: #ae8167;
+}
+
+.btn-outline-success:hover {
+    background-color: #ae8167;
+    border-color: #dad6d1;
+}
+
+header > nav > form {
+    margin-left: 800px;
+}
+
+/* Tableaux de résultats */
+thead, tbody, tfoot, tr, td, th {
+    border-style: none;
+    color: #dad6d1;
+}
+
+.table-striped > tbody > tr:nth-of-type(2n+1) > * {
+    color: #dad6d1;
+    background-color: #424547;
+}
+
+.table-striped > tbody > tr:nth-of-type(2n) > * {
+    color: #dad6d1;
+    background-color: #313436;
+}
+
+/* Liens hypertextes */
+a {
+    color: #ae8167;
+}
+
+a:hover {
+    color: #a45337;
+}
 
 
 .alert-success {
@@ -64,12 +99,4 @@ a:hover{color:#a45337;}
     color: #ff969c;
     background-color: #a43109;
     border-color: #ff969c
-}
-
-.humilite {
-    max-width: 100%;
-}
-
-.container {
-    margin-left: 0px;
 }
