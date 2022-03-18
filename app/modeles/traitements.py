@@ -347,6 +347,8 @@ def codexJson(codex_id):
         dicoUC["localisation"] = localisationUClabel(objetUC.id)
         dicoUC["description"] = objetUC.descript
         dicoUC["date"] = f"entre {objetUC.date_pas_avant} et {objetUC.date_pas_apres}"
+        dicoUC["date_pas_avant"] = objetUC.date_pas_avant
+        dicoUC["date_pas_apres"] = objetUC.date_pas_apres
         dicoUC["oeuvres"] = []
         
         # Pour chaque oeuvre contenue dans l'objet UC courant, on ajoutera un dictionnaire décrivant ses métadonnées

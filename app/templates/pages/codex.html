@@ -160,7 +160,10 @@
                 <button class="btn btn-outline-success" type="submit" role="button">Revenir à la notice</button>
             </form>
             <br>
+            <h2>Informations générales</h2>
             <form class="row g-3" method="POST" action="{{url_for("notice_codex", num=id)}}">
+                <!-- Champs textes : première zone -->
+                <!-- Identifiant technique -->
                 <div class="col-md-6 mb-3">
                     <label for="register-id-technique" class="form-label">Identifiant technique</label>
                     <div class="">
@@ -169,6 +172,7 @@
                                placeholder="ex. ark:/12148/cc599714" {% if id_technique %}value="{{ id_technique }}"{% endif %}>
                     </div>
                 </div>
+                <!-- Histoire -->
                 <div class="col-12 mb-3">
                     <label for="register-histoire" class="form-label">Histoire</label>
                     <div class="">
@@ -190,17 +194,29 @@
                     <button type="submit" class="btn btn-primary">Mettre à jour</button>
                 </div>
             </form>
-            <h3>Origine</h3>
-            <p>Plusieurs lieux d'origines peuvent être renseignés à titre d'hypothèses.</p>
+            <h2>Données géographiques</h2>
             {% if origine %}
+                <h3>Origine</h3>
+                <p>Plusieurs lieux d'origines peuvent être renseignés à titre d'hypothèses.</p>
                 {% for lieu in origine %}
                     <form class="row gx-3 gy-2 align-items-center" method="POST" action="{{url_for("notice_codex", num=id)}}">
                         <div class="col-md-6 mb-3">
-                            <label class="form-control">{{ lieu["localite"] }}
-                                {% if lieu["label"][1] != '(' %}, {% endif %}
-                                {{ lieu["label"] }}
-                                {% if lieu["remarque"] %} ({{ lieu["remarque"] }}){% endif %}
-                            </label>
+                            <label class="form-control">{{ lieu["localite"] }}{% if lieu["label"][1] != '(' %}, {% endif %}{{ lieu["label"] }}{% if lieu["remarque"] %} ({{ lieu["remarque"] }}){% endif %}</label>
+                            <input type="hidden" class="form-control" name="originesuppr"
+                                   value="{{ lieu.lieu_id }}">
+                        </div>
+                        <div class="col-auto mb-3">
+                            <button type="submit" class="btn btn-primary">Supprimer</button>
+                        </div>
+                    </form>
+                {% endfor %}
+            {% endif %}
+            {% if provenances %}
+                <h3>Provenances</h3>
+                {% for lieu in provenances %}
+                    <form class="row gx-3 gy-2 align-items-center" method="POST" action="{{url_for("notice_codex", num=id)}}">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-control">{{ lieu["localite"] }}{% if lieu["label"] %}{% if lieu["label"][1] != '(' %}, {% endif %}{{ lieu["label"] }}{% endif %}{% if lieu["remarque"] %} ({{ lieu["remarque"] }}){% endif %}</label>
                             <input type="hidden" class="form-control" name="originesuppr"
                                    value="{{ lieu.lieu_id }}">
                         </div>
@@ -211,6 +227,7 @@
                 {% endfor %}
             {% endif %}
             <form class="row g-3" method="POST" action="{{url_for("notice_codex", num=id)}}">
+                <!--Formulaire d'ajout d'une origine -->
                 <div class="col-md-6 mb-3">
                     <label for="register-origine" class="form-label">Ajouter une origine</label>
                     <select name="origineAjout" class="form-select">
@@ -245,10 +262,80 @@
                     <button type="submit" class="btn btn-primary">Mettre à jour</button>
                 </div>
             </form>
-
-
-
-
+            <h2>Contenu</h2>
+            {% for UC in descUCs %}
+                <h3>{% if UC["localisation"] %}{{UC["localisation"]}}{% else %}Unité codicologique unique{% endif %} ({{UC["date"]}})</h3>
+                <form class="row g-3" method="POST" action="{{url_for("notice_codex", num=id, idUC=UC.uc_id)}}">
+                <!-- Champs textes : deuxième zone -->
+                    <h4>Paléographie et datation</h4>
+                    <div class="col-md-12 mb-3">
+                        <div class="">
+                            <label class="form-label">Paléographie</label>
+                            <input type="text" class="form-control" id="register-id-technique"
+                                   name="paleographie"
+                                   placeholder="Texte ici" {% if descUCs[0]["description"] %}value="{{ descUCs[0]["description"]}}"{% endif %}>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Date de début</label>
+                        <div class="">
+                            <input type="number" class="form-control"
+                                   name="date_pas_avant" value="{{UC["date_pas_avant"]}}">
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Date de fin</label>
+                        <div class="">
+                            <input type="number" class="form-control"
+                                   name="date_pas_apres" value="{{UC["date_pas_apres"]}}">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <button type="submit" class="btn btn-primary">Mettre à jour</button>
+                    </div>
+                </form>
+                {% for oeuvres in UC["oeuvres"] %}
+                    <ul>
+                        {% if oeuvres["auteur"] and oeuvres["attr"] %}
+                            <li>
+                                <!--Nom d'auteur-->
+                                <a href="{{ url_for('noticePersonne', id=oeuvres["auteur_id"]) }}">
+                                    {{oeuvres["auteur"]}}</a>,
+                                <!-- Titre -->
+                                <a href="{{ url_for('noticeOeuvre', id=oeuvres["oeuvre_id"]) }}">
+                                    <i>{{oeuvres["titre"]}}</i></a>
+                                <!-- Attribution --> (attribué à
+                                <a href="{{ url_for('noticePersonne', id=oeuvres["auteur_id"]) }}">
+                                    {{ oeuvres["attr"] }}</a>).
+                            </li>
+                        {% elif oeuvres["auteur"] and not oeuvres["attr"] %}
+                            <li>
+                                <!--Nom d'auteur-->
+                                <a href="{{ url_for('noticePersonne', id=oeuvres["auteur_id"]) }}">
+                                    {{oeuvres["auteur"]}}</a>,
+                                <!-- Titre -->
+                                <a href="{{ url_for('noticeOeuvre', id=oeuvres["oeuvre_id"]) }}">
+                                    <i>{{oeuvres["titre"]}}</i></a>.
+                            </li>
+                        {% elif not oeuvres["auteur"] and oeuvres["attr"] %}
+                            <li>
+                                <!-- Titre -->
+                                <a href="{{ url_for('noticeOeuvre', id=oeuvres["oeuvre_id"]) }}">
+                                    <i>{{oeuvres["titre"]}}</i></a>
+                                <!-- Attribution --> (attribué à
+                                <a href="{{ url_for('noticePersonne', id=oeuvres["attr_id"]) }}">
+                                    {{ oeuvres["attr"] }}</a>).
+                            </li>
+                        {% else %}
+                            <li>
+                                <!-- Titre -->
+                                <a href="{{ url_for('noticeOeuvre', id=oeuvres["oeuvre_id"]) }}">
+                                    <i>{{oeuvres["titre"]}}</i></a>.
+                            </li>
+                        {% endif %}
+                    </ul>
+                {% endfor %}
+            {% endfor %}
         {% endif %}
 
 

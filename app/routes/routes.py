@@ -122,9 +122,9 @@ def indexOeuvres():
 
 # TODO factoriser les routes des notices
 @app.route("/pages/codex/<int:num>", methods=["GET", "POST"])
-def notice_codex(num):
+def notice_codex(num, idUC=None):
     # Test d'existence de l'identifiant cherché
-    codex = Codices.query.get_or_404(num)
+    codexGet = Codices.query.get_or_404(num)
     
     # Réassignation de la variable codex par l'objet Json retourné par la fonction codexJson()
     codex = json.loads(codexJson(num))
@@ -154,6 +154,29 @@ def notice_codex(num):
             if item.a_pour_lieu not in lieuxOrigine:
                 lieuxOrigine.append(item.a_pour_lieu)
         
+        # Pour mettre à jour les champs textes de la première zone
+        modifZ1 = False
+        if request.form.get("id_technique", "").strip():
+            # On modifie les propriétés de l'objet codex courant après les avoir traitées avec la fonction saisieTexte()
+            codexGet.id_technique = saisieTexte(request.form["id_technique"])
+            modifZ1 = True
+        if request.form.get("histoire", "").strip():
+            # On modifie les propriétés de l'objet codex courant après les avoir traitées avec la fonction saisieTexte()
+            codexGet.histoire = saisieTexte(request.form["histoire"])
+            modifZ1 = True
+        if request.form.get("descript_materielle", "").strip():
+            # On modifie les propriétés de l'objet codex courant après les avoir traitées avec la fonction saisieTexte()
+            codexGet.descript_materielle = saisieTexte(request.form["descript_materielle"])
+            modifZ1 = True
+        if modifZ1:
+            try:
+                db.session.add(codexGet)
+                db.session.commit()
+                flash("Mise à jour correctement effectuée.", "success")
+            except Exception as erreur:
+                flash("La mise à jour a rencontré un problème.", "error")
+                print(erreur)
+        
         # Si l'utilisateur veut supprimer une origine
         if request.form.get("originesuppr", "").strip():
             idAsupprimer = request.form["originesuppr"]
@@ -167,6 +190,7 @@ def notice_codex(num):
                 flash("La suppression a rencontré un problème.", "error")
                 print(erreur)
         
+        # Pour ajouter une origine
         if request.form.get("origineAjout", "").strip():
             origineAjout = request.form["origineAjout"]
             injection = Provenances.creer(
@@ -179,23 +203,62 @@ def notice_codex(num):
                 flash("La nouvelle origine a été créée avec succès", "success")
             else:
                 flash("La création de la nouvelle origine a rencontré un problème", "error")
+        
+        # Pour ajouter une provenance
+        if request.form.get("provenanceAjout", "").strip():
+            origineAjout = request.form["provenanceAjout"]
+            injection = Provenances.creer(
+                codex=num,
+                lieu=origineAjout,
+                origine=False,
+                remarque=None,
+                cas_particulier=None)
+            if injection[0]:
+                flash("La nouvelle origine a été créée avec succès", "success")
+            else:
+                flash("La création de la nouvelle origine a rencontré un problème", "error")
+        
+        # Pour mettre à jour les champs textes de la deuxième zone
+        # On récupère l'identifiant de l'UC courante
+        idUC = request.args.get("idUC", None)
+        ucGet = Unites_codico.query.get(idUC)
+        modifZ2 = False
+        if request.form.get("paleographie", "").strip():
+            ucGet.descript = saisieTexte(request.form["paleographie"])
+            modifZ2 = True
+        if request.form.get("date_pas_avant", "").strip():
+            ucGet.date_pas_avant = saisieTexte(request.form["date_pas_avant"])
+            modifZ2 = True
+        if request.form.get("date_pas_apres", "").strip():
+            # On modifie les propriétés de l'objet codex courant après les avoir traitées avec la fonction saisieTexte()
+            ucGet.descript_materielle = saisieTexte(request.form["date_pas_apres"])
+            modifZ2 = True
+        if modifZ2:
+            try:
+                db.session.add(ucGet)
+                db.session.commit()
+                flash("Mise à jour correctement effectuée.", "success")
+            except Exception as erreur:
+                flash("La mise à jour a rencontré un problème.", "error")
+                print(erreur)
+        
         # On recharge les données du codex
         codex = json.loads(codexJson(num))
         
         return render_template("pages/codex.html",
-                                   id=codex["codex_id"],
-                                   id_technique=codex["id_technique"],
-                                   titre=codex["label"],
-                                   descript_materielle=codex["description_materielle"],
-                                   histoire=codex["histoire"],
-                                   provenances=codex["provenances"],
-                                   origine=codex["origine"],
-                                   descUCs=codex["contenu"],
-                                   toutesProvenances=provenances,
-                                   toutesOrigines=lieuxOrigine,
-                                   maj=maj)
+                               id=codex["codex_id"],
+                               id_technique=codex["id_technique"],
+                               titre=codex["label"],
+                               descript_materielle=codex["description_materielle"],
+                               histoire=codex["histoire"],
+                               provenances=codex["provenances"],
+                               origine=codex["origine"],
+                               descUCs=codex["contenu"],
+                               toutesProvenances=provenances,
+                               toutesOrigines=lieuxOrigine,
+                               maj=maj)
 
-        
+
 @app.route("/pages/auteur/<int:id>")
 def noticePersonne(id):
     """Cette route prend pour argument l'identifiant d'un auteur et retourne le template de sa notice"""
