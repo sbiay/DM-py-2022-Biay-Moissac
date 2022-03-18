@@ -595,22 +595,18 @@ def creer(typeCreation=["codex"]):
                 f" en cours de création a rencontré un problème.")
         
         # On crée le codex dans la base
-        print(
-            Codices.creer(cote,
-                          id_technique,
-                          descript_materielle,
-                          histoire,
-                          conservation_id,
-                          origine,
-                          provient,
-                          unites_codico
-                    )
-        )
-        
-        # TODO rediriger vers la page du codex créé
-        # return redirect(url_for("accueil")), flash("Le codex a bien été créé", "success")
-        flash("Le codex a bien été créé", "success")
-        return render_template("pages/creer.html",
+        if Codices.creer(cote,
+                      id_technique,
+                      descript_materielle,
+                      histoire,
+                      conservation_id,
+                      origine,
+                      provient,
+                      unites_codico
+                      )[0]:
+            return redirect(url_for("notice_codex", num=idFuturCodex)), flash("Le codex a bien été créé", "success")
+        else:
+            return render_template("pages/creer.html",
                                titre="codex",
                                lieuxConservation=lieuxConservation,
                                lieuParDefaut=lieuParDefaut,
@@ -622,4 +618,4 @@ def creer(typeCreation=["codex"]):
                                saisieHistoire=request.form.get("histoire", ""),
                                saisieDatepasavant=request.form.get("date_pas_avant", ""),
                                saisieDatepasapres=request.form.get("date_pas_apres", ""),
-                               )
+                               ), flash("La création du codex a rencontré un problème.", "error")
