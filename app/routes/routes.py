@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 
 from ..appliMoissac import app, login, db
 from ..constantes import ROWS_PER_PAGE
-from ..modeles.classes import Codices, Lieux, Unites_codico, Oeuvres, Personnes, Provenances
+from ..modeles.classes import Codices, Lieux, Unites_codico, Oeuvres, Personnes, Provenances, Contient
 from ..modeles.utilisateurs import User
 from ..modeles.traitements import auteursListDict, codexJson, codicesListDict, conservationDict, personneLabel, \
     codexLabel, tousAuteursJson, tousArkDict, toutesOeuvresJson, saisieRecherche, saisieTexte, \
@@ -246,18 +246,21 @@ def notice_codex(num, idUC=None):
         if request.form.get("oeuvreSuppr", "").strip():
             idAsupprimer = request.form["oeuvreSuppr"]
             print(idAsupprimer)
-            """
-            d = addresses_table.delete().where(addresses_table.c.retired == 1)
-            d.execute()
+            print(idUC)
+            r = Contient.query.filter(Contient.unites_codico == 8).all()
+            injection = Contient.query.filter(
+                and_(Contient.unites_codico == idUC, Contient.oeuvre == idAsupprimer)).all()
+            for item in r:
+                print(item.oeuvre)
             """
             try:
-                db.session.delete(contient).where(and_(contient.c.oeuvre == idAsupprimer, contient.c.unites_codico == idUC))
+                db.session.delete(injection)
                 db.session.commit()
                 flash("Enregistrement correctement supprimé.", "success")
             except Exception as erreur:
                 flash("La suppression a rencontré un problème.", "error")
                 print(erreur)
-
+        """
         # On recharge les données du codex
         codex = json.loads(codexJson(num))
         
