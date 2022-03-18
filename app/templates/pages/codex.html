@@ -294,46 +294,18 @@
                         <button type="submit" class="btn btn-primary">Mettre à jour</button>
                     </div>
                 </form>
-                {% for oeuvres in UC["oeuvres"] %}
-                    <ul>
-                        {% if oeuvres["auteur"] and oeuvres["attr"] %}
-                            <li>
-                                <!--Nom d'auteur-->
-                                <a href="{{ url_for('noticePersonne', id=oeuvres["auteur_id"]) }}">
-                                    {{oeuvres["auteur"]}}</a>,
-                                <!-- Titre -->
-                                <a href="{{ url_for('noticeOeuvre', id=oeuvres["oeuvre_id"]) }}">
-                                    <i>{{oeuvres["titre"]}}</i></a>
-                                <!-- Attribution --> (attribué à
-                                <a href="{{ url_for('noticePersonne', id=oeuvres["auteur_id"]) }}">
-                                    {{ oeuvres["attr"] }}</a>).
-                            </li>
-                        {% elif oeuvres["auteur"] and not oeuvres["attr"] %}
-                            <li>
-                                <!--Nom d'auteur-->
-                                <a href="{{ url_for('noticePersonne', id=oeuvres["auteur_id"]) }}">
-                                    {{oeuvres["auteur"]}}</a>,
-                                <!-- Titre -->
-                                <a href="{{ url_for('noticeOeuvre', id=oeuvres["oeuvre_id"]) }}">
-                                    <i>{{oeuvres["titre"]}}</i></a>.
-                            </li>
-                        {% elif not oeuvres["auteur"] and oeuvres["attr"] %}
-                            <li>
-                                <!-- Titre -->
-                                <a href="{{ url_for('noticeOeuvre', id=oeuvres["oeuvre_id"]) }}">
-                                    <i>{{oeuvres["titre"]}}</i></a>
-                                <!-- Attribution --> (attribué à
-                                <a href="{{ url_for('noticePersonne', id=oeuvres["attr_id"]) }}">
-                                    {{ oeuvres["attr"] }}</a>).
-                            </li>
-                        {% else %}
-                            <li>
-                                <!-- Titre -->
-                                <a href="{{ url_for('noticeOeuvre', id=oeuvres["oeuvre_id"]) }}">
-                                    <i>{{oeuvres["titre"]}}</i></a>.
-                            </li>
-                        {% endif %}
-                    </ul>
+                <!-- Menus pour les textes -->
+                {% for oeuvre in UC["oeuvres"] %}
+                    <form class="row gx-3 gy-2 align-items-center" method="POST" action="{{url_for("notice_codex", num=id, idUC=UC.uc_id)}}">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-control"><i>{{ oeuvre.titre }}</i>{% if oeuvre.auteur %}, {{ oeuvre.auteur }}{% endif %}{% if oeuvre.attr %}, {{ oeuvre.attr }}{% endif %}</label>
+                            <input type="hidden" class="form-control" name="oeuvreSuppr"
+                                   value="{{ oeuvre["oeuvre_id"] }}">
+                        </div>
+                        <div class="col-auto mb-3">
+                            <button type="submit" class="btn btn-primary">Supprimer</button>
+                        </div>
+                    </form>
                 {% endfor %}
             {% endfor %}
         {% endif %}

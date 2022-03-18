@@ -16,7 +16,7 @@ class Provenances(db.Model):
     Pour les cas particuliers, on procédera à des jointures à la main en raison des différents attributs
     portant sur la relation.
     """
-
+    
     @staticmethod
     def creer(codex, lieu, origine, remarque=None, cas_particulier=None):
         """
@@ -37,6 +37,7 @@ class Provenances(db.Model):
             return True, nouvelleProvenance
         except Exception as erreur:
             return False, [str(erreur)]
+
 
 class Codices(db.Model):
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True, autoincrement=True)
