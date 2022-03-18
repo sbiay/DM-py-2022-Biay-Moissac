@@ -353,8 +353,9 @@ def codexJson(codex_id):
         
         # Pour chaque oeuvre contenue dans l'objet UC courant, on ajoutera un dictionnaire décrivant ses métadonnées
         # en faisant appel à la fonction dicoOeuvre
-        for objetOeuvre in objetUC.contenu:
-            dicoUCcourante = oeuvreDict(objetOeuvre.id)
+        objetsContient = objetUC.contenu_defini_par
+        for item in objetsContient:
+            dicoUCcourante = oeuvreDict(item.a_pour_oeuvre.id)
             dicoUC["oeuvres"].append(dicoUCcourante)
         
         # On ajoute le dictionnaire décrivant le contenu de l'unité codicologique courante au dictionnaire description
@@ -396,7 +397,7 @@ def codexJson(codex_id):
             if provenance.remarque:
                 dicoProvenance["label"] = f"{label} ({provenance.remarque})"
             description["provenances"].append(dicoProvenance)
-    
+
     # Test : export
     with open("resultats-tests/codex.json", mode="w") as jsonf:
         json.dump(description, jsonf)
