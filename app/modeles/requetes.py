@@ -20,14 +20,7 @@ def rechercheCote(saisie, id_conservation):
     
     codices = Codices.query.filter(Codices.conservation_id == id_conservation).all()
     # On écrit une liste de dictionnaires pour récupérer les scores de la recherche
-    listeCotes = []
-    for codex in codices:
-        # On initie un score
-        dictCote = {
-            "cote": codex.cote,
-            "score": 0
-        }
-        listeCotes.append(dictCote)
+    listeCotes = [codex.cote for codex in codices]
     
     # On nettoie et découpe la saisie
     motscles = saisieRecherche(saisie, False)
@@ -40,14 +33,13 @@ def rechercheCote(saisie, id_conservation):
         # On boucle sur chaque mot-clé
         for mot in motscles[0]:
             # On cherche une occurrence du mot-clé courant dans les données
-            chaine = cote["cote"].lower()
-            chaine = chaine.split()
-            if mot not in chaine:
+            cote = cote.lower()
+            if mot not in cote:
                 pertinent = False
         # Si tous les mots sont présents dans la cote, alors on ajoute la cote aux résultats
         if pertinent:
             cotePertinentes.append(cote)
-    
+
     if cotePertinentes:
         return True
     # Si la condition n'a jamais été remplie : aucun match, on retourne False
