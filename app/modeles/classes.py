@@ -17,6 +17,26 @@ class Provenances(db.Model):
     portant sur la relation.
     """
 
+    @staticmethod
+    def creer(codex, lieu, origine, remarque=None, cas_particulier=None):
+        """
+        Création d'une provenance dans la base de données.
+        """
+        nouvelleProvenance = Provenances(
+            codex=codex,
+            lieu=lieu,
+            origine=origine,
+            remarque=remarque,
+            cas_particulier=cas_particulier
+        )
+        try:
+            db.session.add(nouvelleProvenance)
+            # On envoie le paquet
+            db.session.commit()
+            # On renvoie l'utilisateur
+            return True, nouvelleProvenance
+        except Exception as erreur:
+            return False, [str(erreur)]
 
 class Codices(db.Model):
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True, autoincrement=True)
@@ -36,8 +56,6 @@ class Codices(db.Model):
         """
         # La qualité des données est contrôlée dans la route creer(), méthode POST
         nouvelleUC = Unites_codico.query.get(unites_codico[0])
-        codextest = Codices.query.get(6)
-        print(codextest.unites_codico)
         # On crée les données du codex
         nouveauCodex = Codices(
             cote=cote,

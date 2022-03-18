@@ -169,8 +169,16 @@ def notice_codex(num):
         
         if request.form.get("origineAjout", "").strip():
             origineAjout = request.form["origineAjout"]
-            print(origineAjout)
-        
+            injection = Provenances.creer(
+                codex=num,
+                lieu=origineAjout,
+                origine=True,
+                remarque=None,
+                cas_particulier=None)
+            if injection[0]:
+                flash("La nouvelle origine a été créée avec succès", "success")
+            else:
+                flash("La création de la nouvelle origine a rencontré un problème", "error")
         # On recharge les données du codex
         codex = json.loads(codexJson(num))
         

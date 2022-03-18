@@ -180,7 +180,7 @@
                 <div class="col-12 mb-3">
                     <label for="register-descript-materielle" class="form-label">Description matérielle</label>
                     <div class="">
-                        <input type="textarea" class="form-control" id="register-descript-materielle"
+                        <input type="textarea" class="form-control textelong" id="register-descript-materielle"
                                name="descript_materielle"
                                placeholder="Description matérielle de la reliure"
                                {% if descript_materielle %}value="{{ descript_materielle }}"{% endif %}>
@@ -196,7 +196,11 @@
                 {% for lieu in origine %}
                     <form class="row gx-3 gy-2 align-items-center" method="POST" action="{{url_for("notice_codex", num=id)}}">
                         <div class="col-md-6 mb-3">
-                            <label class="form-control">{{ lieu["localite"] }}, {{ lieu["label"] }}{% if lieu["remarque"] %} ({{ lieu["remarque"] }}){% endif %}</label>
+                            <label class="form-control">{{ lieu["localite"] }}
+                                {% if lieu["label"][1] != '(' %}, {% endif %}
+                                {{ lieu["label"] }}
+                                {% if lieu["remarque"] %} ({{ lieu["remarque"] }}){% endif %}
+                            </label>
                             <input type="hidden" class="form-control" name="originesuppr"
                                    value="{{ lieu.lieu_id }}">
                         </div>
