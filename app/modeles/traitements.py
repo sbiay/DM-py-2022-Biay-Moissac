@@ -374,9 +374,10 @@ def codexJson(codex_id):
             }
             # L'attribut remarque, s'il existe, apporte un complément au label (approximation, incertitude) :
             # on les joints dans une chaîne unique.
-            if provenance.remarque:
+            if provenance.remarque and label:
                 dicoOrigine["label"] = f"{label} ({provenance.remarque})"
-            
+            elif provenance.remarque and not label:
+                dicoOrigine["label"] = f" ({provenance.remarque})"
             description["origine"].append(dicoOrigine)
         
         # Pour les autres provenances du codex
