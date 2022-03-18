@@ -157,19 +157,19 @@ def notice_codex(num):
         # Si l'utilisateur veut supprimer une origine
         if request.form.get("originesuppr", "").strip():
             idAsupprimer = request.form["originesuppr"]
-            print(idAsupprimer)
             injection = Provenances.query.filter(
                 and_(Provenances.codex == num, Provenances.lieu == idAsupprimer)).first()
-            print(injection)
             try:
                 db.session.delete(injection)
                 db.session.commit()
+                flash("Enregistrement correctement supprimé.", "success")
             except Exception as erreur:
-                flash(erreur, "error")
+                flash("La suppression a rencontré un problème.", "error")
+                print(erreur)
         
         if request.form.get("origineAjout", "").strip():
             origineAjout = request.form["origineAjout"]
-            #print(origineAjout)
+            print(origineAjout)
         
         # On recharge les données du codex
         codex = json.loads(codexJson(num))
