@@ -29,7 +29,6 @@ class User(UserMixin, db.Model):
         :param email: Email de l'utilisateur-rice
         :param nom: Nom de l'utilisateur-rice
         :param motdepasse: Mot de passe de l'utilisateur-rice (Minimum 6 caractères)
-
         """
         # On vérifie d'abord la qualité des données
         erreurs = []
@@ -76,7 +75,7 @@ class User(UserMixin, db.Model):
     
     @staticmethod
     def identification(login, motdepasse):
-        """ Identifie un utilisateur. Si cela fonctionne, renvoie les données de l'utilisateur.
+        """Identifie un utilisateur. Si cela fonctionne, renvoie les données de l'utilisateur.
     
         :param login: Login de l'utilisateur
         :param motdepasse: Mot de passe envoyé par l'utilisateur
