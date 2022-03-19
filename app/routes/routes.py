@@ -208,17 +208,17 @@ def notice_codex(num, idUC=None):
         
         # Pour ajouter une provenance
         if request.form.get("provenanceAjout", "").strip():
-            origineAjout = request.form["provenanceAjout"]
+            provenanceAjout = request.form["provenanceAjout"]
             injection = Provenances.creer(
                 codex=num,
-                lieu=origineAjout,
+                lieu=provenanceAjout,
                 origine=False,
                 remarque=None,
                 cas_particulier=None)
             if injection[0]:
-                flash("La nouvelle origine a été créée avec succès", "success")
+                flash("La nouvelle provenance a été créée avec succès", "success")
             else:
-                flash("La création de la nouvelle origine a rencontré un problème", "error")
+                flash("La création de la nouvelle provenance a rencontré un problème", "error")
         
         # Pour mettre à jour les champs textes de la deuxième zone
         # On récupère l'identifiant de l'UC courante
@@ -257,7 +257,16 @@ def notice_codex(num, idUC=None):
             except Exception as erreur:
                 flash("La suppression a rencontré un problème.", "error")
                 print(erreur)
-
+        
+        # Pour ajouter une oeuvre à l'unité codicologique courante
+        if request.form.get("oeuvreAjout", "").strip():
+            oeuvreAjout = request.form["oeuvreAjout"]
+            injection = Contient.creer(int(oeuvreAjout), int(idUC))
+            if injection[0]:
+                flash("L'oeuvre a été associée avec succès", "success")
+            else:
+                flash("L'association de l'oeuvre a rencontré un problème", "error")
+        
         # On recharge les données du codex
         codex = json.loads(codexJson(num))
         

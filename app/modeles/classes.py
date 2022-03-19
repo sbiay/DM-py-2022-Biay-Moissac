@@ -93,6 +93,20 @@ class Contient(db.Model):
     a_pour_oeuvre = db.relationship("Oeuvres", back_populates="contenu_defini_par")
     a_pour_uc = db.relationship("Unites_codico", back_populates="contenu_defini_par")
 
+    @staticmethod
+    def creer(oeuvre, unite_codico):
+        nouveauContenu = Contient(
+            oeuvre=oeuvre,
+            unites_codico=unite_codico
+        )
+        try:
+            db.session.add(nouveauContenu)
+            # On envoie le paquet
+            db.session.commit()
+            # On renvoie l'utilisateur
+            return True, nouveauContenu
+        except Exception as erreur:
+            return False, [str(erreur)]
 
 
 class Unites_codico(db.Model):

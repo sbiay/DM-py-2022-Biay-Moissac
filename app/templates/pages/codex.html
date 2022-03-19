@@ -311,14 +311,16 @@
                             <button type="submit" class="btn btn-primary">Supprimer</button>
                         </div>
                     </form>
-                    <form class="row g-3" method="POST" action="{{url_for("notice_codex", num=id, idUC=UC.uc_id)}}">
+
+                {% endfor %}
+                <form class="row g-3" method="POST" action="{{url_for("notice_codex", num=id, idUC=UC.uc_id)}}">
                         <!--Formulaire d'ajout d'une oeuvre -->
                         <div class="col-md-6 mb-3">
-                            <label for="register-origine" class="form-label">Ajouter une oeuvre</label>
+                            <label class="form-label">Ajouter une oeuvre</label>
                             <select name="oeuvreAjout" class="form-select">
                                 <option value="" selected/>
                                 {% for oeuvre in toutesOeuvres %}
-                                    <option value="{{ oeuvre["oeuvre_id"] }}"><i>{{ oeuvre.titre }}</i>{% if oeuvre.auteur %}, {{ oeuvre.auteur }}{% endif %}{% if oeuvre.attr %}, {{ oeuvre.attr }}{% endif %}</option>
+                                    <option value="{{ oeuvre["oeuvre_id"] }}"><i>{{ oeuvre.titre }}</i>{% if oeuvre.auteur %}, {{ oeuvre.auteur }}{% endif %}{% if oeuvre.attr %}, attribué à {{ oeuvre.attr }}{% endif %}</option>
                                 {% endfor %}
                             </select>
                         </div>
@@ -327,7 +329,6 @@
                             <button type="submit" class="btn btn-primary">Mettre à jour</button>
                         </div>
                     </form>
-                {% endfor %}
             {% endfor %}
 
             <!--Formulaire d'ajout d'une UC -->
