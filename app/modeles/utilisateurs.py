@@ -88,10 +88,3 @@ class User(UserMixin, db.Model):
             return utilisateur
         else:
             return None
-
-
-@login.user_loader
-def trouver_utilisateur_via_id(id):
-    """Cette fonction prend comme argument le login d'un utilisateur
-    et retourne les informations de la db le concernant"""
-    return User.query.get(int(id))
