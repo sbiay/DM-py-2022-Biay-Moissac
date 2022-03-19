@@ -23,15 +23,17 @@ def codex(num):
 
 @app.route("/api/codices")
 def codices():
-    # On récupère tous les codices
+    """
+    Cette route retourne de manière paginée tous les codices de la base avec leurs métadonnées au format Json.
+    """
+    # On récupère tous les codices pour dresser la liste de leurs id
     codices = Codices.query.all()
     tousId = [codex.id for codex in codices]
-    # On initie la pagination
+    # On initie la pagination et on pagine tous les codices
     page = request.args.get('page', 1, type=int)
     codicesPagines = Codices.query.filter(Codices.id.in_(tousId)).paginate(page=page, per_page=ROWS_PER_PAGE)
-    print(codicesPagines)
     
-    # On initie le code Json des résultats:
+    # On initie le dictionnaire des résultats:
     resultats = {
         "items": [
             # On charge dans le dict resultats les données json de chaque codex
@@ -40,7 +42,7 @@ def codices():
         "total": len(codices),
         "navigation": {}
      }
-
+    # On créé les liens de la navigation entre les pages de la réponse
     if codicesPagines.has_next:
         arguments = {
             "page": codicesPagines.next_num
