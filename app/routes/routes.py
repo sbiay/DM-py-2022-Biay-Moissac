@@ -30,6 +30,7 @@ def accueil():
     
     # On initie la pagination
     page = request.args.get('page', 1, type=int)
+    # On récupère les codex selon l'ordre prédéfini en paginant les réponses
     codicesPagines = Codices.query.filter(Codices.id.in_(idOrdonnés)).paginate(page=page, per_page=ROWS_PER_PAGE)
     
     return render_template("pages/accueil.html", resultats=listeDictCodices, codicesPagines=codicesPagines)
@@ -38,7 +39,6 @@ def accueil():
 @app.route("/pages/inscription", methods=["GET", "POST"])
 def inscription():
     if request.method == "POST":
-        print("Formulaire envoyé !")
         statut, donnees = User.creer(
             login=request.form.get("login", None),
             email=request.form.get("email", None),
