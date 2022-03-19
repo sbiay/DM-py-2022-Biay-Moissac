@@ -156,9 +156,14 @@
         {% else %}
             <!--Affichage en mode mise à jour-->
             <br>
-            <form class="d-flex" method="GET" action="{{url_for("notice_codex", num=id)}}">
-                <button class="btn btn-outline-success" type="submit" role="button">Revenir à la notice</button>
-            </form>
+            <div class="menuCodex">
+                <form class="d-flex" method="GET" action="{{url_for("notice_codex", num=id)}}">
+                    <button class="btn btn-outline-success" type="submit" role="button">Revenir à la notice</button>
+                </form>
+                <form class="d-flex" method="POST" action="{{url_for("notice_codex", num=id)}}">
+                    <button class="btn btn-outline-danger" name="codexSuppr" type="submit" role="button">Supprimer le codex</button>
+                </form>
+            </div>
             <br>
             <h2>Informations générales</h2>
             <form class="row g-3" method="POST" action="{{url_for("notice_codex", num=id)}}">
@@ -191,7 +196,7 @@
                     </div>
                 </div>
                 <div class="mb-3">
-                    <button type="submit" class="btn btn-primary">Mettre à jour</button>
+                    <button type="submit" class="btn btn-outline-success">Mettre à jour</button>
                 </div>
             </form>
             <h2>Données géographiques</h2>
@@ -206,7 +211,7 @@
                                    value="{{ lieu.lieu_id }}">
                         </div>
                         <div class="col-auto mb-3">
-                            <button type="submit" class="btn btn-primary">Supprimer</button>
+                            <button type="submit" class="btn btn-outline-danger">Supprimer</button>
                         </div>
                     </form>
                 {% endfor %}
@@ -221,7 +226,7 @@
                                    value="{{ lieu.lieu_id }}">
                         </div>
                         <div class="col-auto mb-3">
-                            <button type="submit" class="btn btn-primary">Supprimer</button>
+                            <button type="submit" class="btn btn-outline-danger">Supprimer</button>
                         </div>
                     </form>
                 {% endfor %}
@@ -259,7 +264,7 @@
                     </select>
                 </div>
                 <div class="mb-3">
-                    <button type="submit" class="btn btn-primary">Mettre à jour</button>
+                    <button type="submit" class="btn btn-outline-success">Mettre à jour</button>
                 </div>
             </form>
             <h2>Contenu</h2>
@@ -291,7 +296,7 @@
                         </div>
                     </div>
                     <div class="mb-3">
-                        <button type="submit" class="btn btn-primary">Mettre à jour</button>
+                        <button type="submit" class="btn btn-outline-success">Mettre à jour</button>
                     </div>
                 </form>
                 <!-- Menus pour les textes -->
@@ -308,27 +313,27 @@
                                    value="{{ oeuvre["oeuvre_id"] }}">
                         </div>
                         <div class="col-auto mb-3">
-                            <button type="submit" class="btn btn-primary">Supprimer</button>
+                            <button type="submit" class="btn btn-outline-danger">Supprimer</button>
                         </div>
                     </form>
 
                 {% endfor %}
                 <form class="row g-3" method="POST" action="{{url_for("notice_codex", num=id, idUC=UC.uc_id)}}">
-                        <!--Formulaire d'ajout d'une oeuvre -->
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Ajouter une oeuvre</label>
-                            <select name="oeuvreAjout" class="form-select">
-                                <option value="" selected/>
-                                {% for oeuvre in toutesOeuvres %}
-                                    <option value="{{ oeuvre["oeuvre_id"] }}"><i>{{ oeuvre.titre }}</i>{% if oeuvre.auteur %}, {{ oeuvre.auteur }}{% endif %}{% if oeuvre.attr %}, attribué à {{ oeuvre.attr }}{% endif %}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
+                    <!--Formulaire d'ajout d'une oeuvre -->
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Ajouter une oeuvre</label>
+                        <select name="oeuvreAjout" class="form-select">
+                            <option value="" selected/>
+                            {% for oeuvre in toutesOeuvres %}
+                                <option value="{{ oeuvre["oeuvre_id"] }}"><i>{{ oeuvre.titre }}</i>{% if oeuvre.auteur %}, {{ oeuvre.auteur }}{% endif %}{% if oeuvre.attr %}, attribué à {{ oeuvre.attr }}{% endif %}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
 
-                        <div class="mb-3">
-                            <button type="submit" class="btn btn-primary">Mettre à jour</button>
-                        </div>
-                    </form>
+                    <div class="mb-3">
+                        <button type="submit" class="btn btn-outline-success">Mettre à jour</button>
+                    </div>
+                </form>
             {% endfor %}
 
             <!--Formulaire d'ajout d'une UC -->

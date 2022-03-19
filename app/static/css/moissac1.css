@@ -101,3 +101,11 @@ a:hover {
     border-color: #ff969c
 }
 
+/* Boutons principaux dans la page de mise à jour d'un codex */
+.menuCodex {
+    display: flex;
+}
+
+.menuCodex > form {
+    margin-right: 30px;
+}
