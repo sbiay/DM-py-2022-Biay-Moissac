@@ -357,7 +357,6 @@ def codexJson(codex_id):
         for item in objetsContient:
             dicoUCcourante = oeuvreDict(item.a_pour_oeuvre.id)
             dicoUC["oeuvres"].append(dicoUCcourante)
-            print(dicoUCcourante)
         
         # On ajoute le dictionnaire décrivant le contenu de l'unité codicologique courante au dictionnaire description
         description["contenu"].append(dicoUC)
