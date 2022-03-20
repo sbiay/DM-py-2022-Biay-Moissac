@@ -5,101 +5,157 @@
 {% endblock %}
 
 {% block corps %}
+    {% if titre == "codex" %}
+        <h1>Création {{ "d'un " + titre }}</h1>
 
-    <h1>Création {{ "d'un " + titre }}</h1>
+        <br>
 
-    <br>
-
-    <form class="row g-3" method="POST" action="{{url_for("creer", typeCreation="codex")}}">
-        <div class="col-md-6 mb-3">
-            <label for="register-cote" class="form-label">Cote</label>
-            <div class="">
-                <input type="text" class="form-control" id="register-cote" name="cote" placeholder="ex. Latin 2077" {% if saisieCote %}value="{{ saisieCote }}"{% endif %}>
+        <form class="row g-3" method="POST" action="{{url_for("creer", typeCreation="codex")}}">
+            <div class="col-md-6 mb-3">
+                <label for="register-cote" class="form-label">Cote</label>
+                <div class="">
+                    <input type="text" class="form-control" id="register-cote" name="cote" placeholder="ex. Latin 2077" {% if saisieCote %}value="{{ saisieCote }}"{% endif %}>
+                </div>
             </div>
-        </div>
-        <div class="col-md-6 mb-3">
-            <label for="register-id-technique" class="form-label">Identifiant technique</label>
-            <div class="">
-                <input type="text" class="form-control" id="register-id-technique" name="id_technique" placeholder="ex. ark:/12148/cc599714" {% if saisieIdentifiant %}value="{{ saisieIdentifiant }}"{% endif %}>
+            <div class="col-md-6 mb-3">
+                <label for="register-id-technique" class="form-label">Identifiant technique</label>
+                <div class="">
+                    <input type="text" class="form-control" id="register-id-technique" name="id_technique" placeholder="ex. ark:/12148/cc599714" {% if saisieIdentifiant %}value="{{ saisieIdentifiant }}"{% endif %}>
+                </div>
             </div>
-        </div>
-        <div class="col-12 mb-3">
-            <label for="register-descript-materielle" class="form-label">Description matérielle</label>
-            <div class="">
-                <input type="textarea" class="form-control" id="register-descript-materielle" name="descript_materielle" placeholder="Description matérielle de la reliure" {% if saisieDescription %}value="{{ saisieDescription }}"{% endif %}>
+            <div class="col-12 mb-3">
+                <label for="register-descript-materielle" class="form-label">Description matérielle</label>
+                <div class="">
+                    <input type="textarea" class="form-control" id="register-descript-materielle" name="descript_materielle" placeholder="Description matérielle de la reliure" {% if saisieDescription %}value="{{ saisieDescription }}"{% endif %}>
+                </div>
             </div>
-        </div>
-        <div class="col-12 mb-3">
-            <label for="register-histoire" class="form-label">Histoire</label>
-            <div class="">
-                <input type="textarea" class="form-control" id="register-histoire"
-                       placeholder="Histoire du codex et de sa conservation"
-                       name="histoire" {% if saisieHistoire %}value="{{ saisieHistoire }}"{% endif %}>
+            <div class="col-12 mb-3">
+                <label for="register-histoire" class="form-label">Histoire</label>
+                <div class="">
+                    <input type="textarea" class="form-control" id="register-histoire"
+                           placeholder="Histoire du codex et de sa conservation"
+                           name="histoire" {% if saisieHistoire %}value="{{ saisieHistoire }}"{% endif %}>
+                </div>
             </div>
-        </div>
-        <div class="col-md-6 mb-3">
-            <label class="form-label">Date de début</label>
-            <div class="">
-                <input type="number" class="form-control"
-                       placeholder="ex. 1050"
-                       name="date_pas_avant" {% if saisieDatepasavant %}value="{{ saisieDatepasavant }}"{% endif %}>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Date de début</label>
+                <div class="">
+                    <input type="number" class="form-control"
+                           placeholder="ex. 1050"
+                           name="date_pas_avant" {% if saisieDatepasavant %}value="{{ saisieDatepasavant }}"{% endif %}>
+                </div>
             </div>
-        </div>
-        <div class="col-md-6 mb-3">
-            <label class="form-label">Date de fin</label>
-            <div class="">
-                <input type="number" class="form-control"
-                       placeholder="ex. 1080"
-                       name="date_pas_apres" {% if saisieDatepasapres %}value="{{ saisieDatepasapres }}"{% endif %}>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Date de fin</label>
+                <div class="">
+                    <input type="number" class="form-control"
+                           placeholder="ex. 1080"
+                           name="date_pas_apres" {% if saisieDatepasapres %}value="{{ saisieDatepasapres }}"{% endif %}>
+                </div>
             </div>
-        </div>
-        <div class="col-md-6 mb-3">
-            <label for="register-conservation"
-                   class="form-label {% if 'conservation_id' in erreurs %}is-invalid{% endif %}">
-                Lieu de conservation
-            </label>
-            <select name="conservation_id" class="form-select" id="register-conservation">
-                {% for lieu in lieuxConservation %}
-                    <!-- L'@value définit la variable qui passe dans l'@name du champ courant -->
-                    <option value="{{ lieu.id }}" {% if lieu.id == lieuParDefaut.id %}selected{% endif %}>
-                        <!-- Contenu affiché dans le champ -->
-                        {{ lieu.localite + ", " + lieu.label }}
-                    </option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="col-md-6 mb-3">
-            <label for="register-origine" class="form-label">Origine</label>
-            <select name="origine" class="form-select" id="register-origine">
-                <option value=""/>
-                {% for lieu in origines %}
-                    <option value="{{ lieu.id }}">
-                        {% if lieu.label %}
+            <div class="col-md-6 mb-3">
+                <label for="register-conservation"
+                       class="form-label {% if 'conservation_id' in erreurs %}is-invalid{% endif %}">
+                    Lieu de conservation
+                </label>
+                <select name="conservation_id" class="form-select" id="register-conservation">
+                    {% for lieu in lieuxConservation %}
+                        <!-- L'@value définit la variable qui passe dans l'@name du champ courant -->
+                        <option value="{{ lieu.id }}" {% if lieu.id == lieuParDefaut.id %}selected{% endif %}>
+                            <!-- Contenu affiché dans le champ -->
                             {{ lieu.localite + ", " + lieu.label }}
-                        {% else %}
-                            {{ lieu.localite }}
-                        {% endif %}
-                    </option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="col-md-6 mb-3">
-            <label for="register-provenance" class="form-label">Provenance</label>
-            <select name="provient" class="form-select" id="register-provenance">
-                <option value=""/>
-                {% for lieu in provenances %}
-                    <option value="{{ lieu.id }}">
-                        {% if lieu.label %}
-                            {{ lieu.localite + ", " + lieu.label }}
-                        {% else %}
-                            {{ lieu.localite }}
-                        {% endif %}
-                    </option>
-                {% endfor %}
-            </select>
-        </div>
-        <div>
-            <button type="submit" class="btn btn-primary">Créer</button>
-        </div>
-    </form>
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="register-origine" class="form-label">Origine</label>
+                <select name="origine" class="form-select" id="register-origine">
+                    <option value=""/>
+                    {% for lieu in origines %}
+                        <option value="{{ lieu.id }}">
+                            {% if lieu.label %}
+                                {{ lieu.localite + ", " + lieu.label }}
+                            {% else %}
+                                {{ lieu.localite }}
+                            {% endif %}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="register-provenance" class="form-label">Provenance</label>
+                <select name="provient" class="form-select" id="register-provenance">
+                    <option value=""/>
+                    {% for lieu in provenances %}
+                        <option value="{{ lieu.id }}">
+                            {% if lieu.label %}
+                                {{ lieu.localite + ", " + lieu.label }}
+                            {% else %}
+                                {{ lieu.localite }}
+                            {% endif %}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <button type="submit" class="btn btn-primary">Créer</button>
+            </div>
+        </form>
+
+    {% elif titre == "oeuvre" %}
+        <h1>Création {{ "d'une " + titre }}</h1>
+
+        <br>
+
+        {% if not personnes and not auteurAbsent %}
+            <!--Menu de départ-->
+            <div class=".menusAlignesVertic">
+                <form class="d-flex" method="POST" action="{{url_for("creer", typeCreation="oeuvre", idUC=idUC, auteur=True)}}">
+                    <button class="btn btn-outline-light mb-3" name="oeuvreCreer" type="submit" role="button">L'oeuvre possède un auteur</button>
+                </form>
+                <form class="d-flex" method="POST" action="{{url_for("creer", typeCreation="oeuvre", idUC=idUC, auteur=False)}}">
+                    <button class="btn btn-outline-light mb-3" name="oeuvreCreer" type="submit" role="button">L'oeuvre ne possède pas d'auteur</button>
+                </form>
+            </div>
+
+        {% elif personnes %}
+            <!--Menu de sélection des auteurs existants-->
+            <form class="" method="POST" action="{{url_for("creer", typeCreation="oeuvre", idUC=idUC)}}">
+                <div class="col-md-6 mb-3 menusAlignesVertic">
+                    <label class="form-label">Choisissez un auteur</label>
+                    <select name="auteurChoisi" class="form-select">
+                        <option value="" selected/>
+                        {% for personne in personnes %}
+                            <option value="{{ personne.personne_id }}">{{ personne.label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="menusAlignesVertic">
+                    <button type="submit" class="btn btn-outline-success mb-3">Sélectionner</button>
+                </div>
+            </form>
+            <form class="" method="POST" action="{{url_for("creer", typeCreation="oeuvre", idUC=idUC, auteur=True, auteurAbsent=True)}}">
+                <button type="submit" name="auteurAbsent" class="btn btn-outline-success mb-3">L'auteur n'est pas dans la liste</button>
+            </form>
+
+        {% endif %}
+
+        {% if auteurAbsent %}
+            <form class="row g-3" method="GET" action="{{url_for("recherche", typeRecherche="avancee")}}">
+                <div class="col-12">
+                    <label for="rech-auteur" class="col-sm-2 col-form-label">Saisissez un nom d'auteur</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="rech-auteur" name="auteur" placeholder="ex. saint Augustin">
+                    </div>
+                </div>
+                <div>
+                    <button type="submit" class="btn btn-primary">C'est parti !</button>
+                </div>
+            </form>
+
+        {% endif %}
+
+    {% endif %}
+
 {% endblock %}

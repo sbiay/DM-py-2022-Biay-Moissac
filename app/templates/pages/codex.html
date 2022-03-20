@@ -329,10 +329,12 @@
                             {% endfor %}
                         </select>
                     </div>
-
                     <div class="mb-3">
                         <button type="submit" class="btn btn-outline-success">Mettre à jour</button>
                     </div>
+                </form>
+                <form class="d-flex" method="POST" action="{{url_for("creer", typeCreation="oeuvre", idUC=UC.uc_id)}}">
+                    <button class="btn btn-outline-warning mb-3" name="oeuvreCreer" type="submit" role="button">Créer une oeuvre</button>
                 </form>
             {% endfor %}
 

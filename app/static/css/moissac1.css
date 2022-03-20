@@ -109,3 +109,10 @@ a:hover {
 .menuCodex > form {
     margin-right: 30px;
 }
+
+/* Boutons principaux dans la page de création d'une oeuvre */
+.menusAlignesVertic {
+    display: flex;
+    flex-direction: column;
+    max-width: 300px;
+}

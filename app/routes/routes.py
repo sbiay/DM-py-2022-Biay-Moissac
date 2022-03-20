@@ -145,6 +145,8 @@ def notice_codex(num, idUC=None):
     # Pour mettre à jour un codex
     elif request.method == "POST":
         maj = True
+        # On définit l'ancre pour la redirection consécutive à la mise à jour
+        ancre = ""
         # On récupère la liste des provenances existantes
         provenances = Lieux.query.filter(Lieux.est_provenance_de).order_by(Lieux.localite).order_by(Lieux.label).all()
         # On récupère la liste des provenances qui sont marquées comme origine
@@ -225,6 +227,9 @@ def notice_codex(num, idUC=None):
         idUC = request.args.get("idUC", None)
         ucGet = Unites_codico.query.get(idUC)
         modifZ2 = False
+        # On définit l'ancre pour la redirection consécutive à la mise à jour
+        
+        
         if request.form.get("paleographie", "").strip():
             ucGet.descript = saisieTexte(request.form["paleographie"])
             modifZ2 = True
@@ -270,7 +275,7 @@ def notice_codex(num, idUC=None):
         # On recharge les données du codex
         codex = json.loads(codexJson(num))
         
-        return render_template("pages/codex.html",
+        return render_template(f"pages/codex.html",
                                id=codex["codex_id"],
                                id_technique=codex["id_technique"],
                                titre=codex["label"],
@@ -650,119 +655,161 @@ def recherche(typeRecherche=["simple", "avancee"]):
 
 
 @app.route("/creer/<typeCreation>", methods=["GET", "POST"])
-def creer(typeCreation=["codex"]):
-    # On récupère les données nécessaires au chargement des menus :
-    # On récupère la liste des lieux de conservations existants
-    lieuxConservation = Lieux.query.filter(Lieux.conserve).order_by(Lieux.localite).order_by(Lieux.label).all()
-    # On définit la BNF comme lieu par défaut pour la saisie
-    lieuParDefaut = Lieux.query.get(2)
-    # On récupère la liste des provenances existantes
-    provenances = Lieux.query.filter(Lieux.est_provenance_de).order_by(Lieux.localite).order_by(Lieux.label).all()
-    # On récupère la liste des provenances qui sont marquées comme origine
-    origines = Provenances.query.filter(Provenances.origine).all()
-    lieuxOrigine = []
-    for item in origines:
-        if item.a_pour_lieu not in lieuxOrigine:
-            lieuxOrigine.append(item.a_pour_lieu)
-    
-    if request.method == "GET":
+def creer(typeCreation=["codex", "oeuvre"], idUC=None, auteur=None, auteurAbsent=None):
+    if typeCreation == "codex":
+        # On récupère les données nécessaires au chargement des menus :
+        # On récupère la liste des lieux de conservations existants
+        lieuxConservation = Lieux.query.filter(Lieux.conserve).order_by(Lieux.localite).order_by(Lieux.label).all()
+        # On définit la BNF comme lieu par défaut pour la saisie
+        lieuParDefaut = Lieux.query.get(2)
+        # On récupère la liste des provenances existantes
+        provenances = Lieux.query.filter(Lieux.est_provenance_de).order_by(Lieux.localite).order_by(Lieux.label).all()
+        # On récupère la liste des provenances qui sont marquées comme origine
+        origines = Provenances.query.filter(Provenances.origine).all()
+        lieuxOrigine = []
+        for item in origines:
+            if item.a_pour_lieu not in lieuxOrigine:
+                lieuxOrigine.append(item.a_pour_lieu)
+        
+        if request.method == "GET":
+            return render_template(
+                "pages/creer.html",
+                titre="codex",
+                lieuxConservation=lieuxConservation,
+                lieuParDefaut=lieuParDefaut,
+                provenances=provenances,
+                origines=lieuxOrigine
+            )
+        
+        elif request.method == "POST":
+            # On contrôle la saisie des données
+            erreurs = []
+            
+            if not request.form.get("conservation_id", "").strip():
+                erreurs.append("Un lieu de conservation doit être renseigné. ")
+            if not request.form.get("cote", "").strip():
+                erreurs.append("Une cote doit être renseignée. ")
+            else:
+                # Si une cote a été saisie, on vérifie qu'elle ne soit pas déjà renseignée dans la base
+                # en relation avec le même lieu de conservation, et ce au moyen de la fonction rechercheCote()
+                if request.form.get("conservation_id", "").strip():
+                    if rechercheCote(request.form["cote"], request.form["conservation_id"]):
+                        erreurs.append("Cette cote est déjà présente dans la base. ")
+            if not request.form.get("date_pas_avant", "").strip():
+                erreurs.append("Une date de début doit être renseignée. ")
+            if not request.form.get("date_pas_apres", "").strip():
+                erreurs.append("Une date de fin doit être renseignée. ")
+            
+            # Si on a au moins une erreur
+            if len(erreurs) > 0:
+                for erreur in erreurs:
+                    flash(erreur, "error")
+                return render_template("pages/creer.html",
+                                       titre="codex",
+                                       lieuxConservation=lieuxConservation,
+                                       lieuParDefaut=lieuParDefaut,
+                                       provenances=provenances,
+                                       origines=lieuxOrigine,
+                                       saisieCote=request.form.get("cote", ""),
+                                       saisieIdentifiant=request.form.get("identifiant_technique", ""),
+                                       saisieDescription=request.form.get("descript_materielle", ""),
+                                       saisieHistoire=request.form.get("histoire", ""),
+                                       saisieDatepasavant=request.form.get("date_pas_avant", ""),
+                                       saisieDatepasapres=request.form.get("date_pas_apres", ""),
+                                       )
+            
+            # S'il n'y a pas d'erreur, on récupère les valeurs
+            cote = saisieTexte(request.form["cote"])
+            id_technique = saisieTexte(request.form["id_technique"])
+            descript_materielle = saisieTexte(request.form["descript_materielle"])
+            histoire = saisieTexte(request.form["histoire"])
+            date_pas_avant = int(request.form.get("date_pas_avant", ""))
+            date_pas_apres = int(request.form.get("date_pas_apres", ""))
+            conservation_id = request.form["conservation_id"]
+            origine = request.form["origine"]
+            provient = request.form["provient"]
+            unites_codico = []
+            
+            # Créer une première unité codicologique par défaut
+            # Déterminer l'identifiant du codex en cours de création, dont l'UC sera enfant
+            idFuturCodex = len(Codices.query.all()) + 1
+            nouvelle_uc = Unites_codico.creer(
+                code_id=idFuturCodex,
+                date_pas_avant=date_pas_avant,
+                date_pas_apres=date_pas_apres,
+                descript=None, loc_init=None, loc_init_v=None, loc_fin=None, loc_fin_v=None
+            )
+            # Si la création de la nouvelle UC est un succès
+            if nouvelle_uc[0]:
+                unites_codico.append(nouvelle_uc[1].id)
+            else:
+                print(
+                    f"L'unité codicologique par défaut du codex {idFuturCodex}"
+                    f" en cours de création a rencontré un problème.")
+            
+            # On crée le codex dans la base
+            if Codices.creer(cote,
+                             id_technique,
+                             descript_materielle,
+                             histoire,
+                             conservation_id,
+                             origine,
+                             provient,
+                             unites_codico
+                             )[0]:
+                return redirect(url_for("notice_codex", num=idFuturCodex)), flash("Le codex a bien été créé", "success")
+            else:
+                return render_template("pages/creer.html",
+                                       titre="codex",
+                                       lieuxConservation=lieuxConservation,
+                                       lieuParDefaut=lieuParDefaut,
+                                       provenances=provenances,
+                                       origines=lieuxOrigine,
+                                       saisieCote=request.form.get("cote", ""),
+                                       saisieIdentifiant=request.form.get("identifiant_technique", ""),
+                                       saisieDescription=request.form.get("descript_materielle", ""),
+                                       saisieHistoire=request.form.get("histoire", ""),
+                                       saisieDatepasavant=request.form.get("date_pas_avant", ""),
+                                       saisieDatepasapres=request.form.get("date_pas_apres", ""),
+                                       ), flash("La création du codex a rencontré un problème.", "error")
+    if typeCreation == "oeuvre":
+        # On récupère le booléen définissant si l'oeuvre à créer possède un auteur ou est anonyme
+        auteur = request.args.get("auteur", None)
+        # Si l'oeuvre à créer possède un auteur
+        if auteur:
+            # On doit proposer la liste des auteurs
+            tousAuteurs = json.loads(tousAuteursJson())
+            
+            # Si la case "l'auteur n'est pas dans la liste a été cochée
+            if request.args.get("auteurAbsent", None):
+                print("bot")
+                return render_template(
+                    "pages/creer.html",
+                    titre="oeuvre",
+                    idUC=idUC,
+                    auteurAbsent=auteurAbsent
+                )
+            
+            
+            # Si on a sélectionné un auteur
+            else:
+                return render_template(
+                "pages/creer.html",
+                titre="oeuvre",
+                idUC=idUC,
+                personnes=tousAuteurs
+            )
+
+        
+        
+        
+        # Si l'oeuvre à créer est anonyme
+        else:
+            True
+        
         return render_template(
             "pages/creer.html",
-            titre="codex",
-            lieuxConservation=lieuxConservation,
-            lieuParDefaut=lieuParDefaut,
-            provenances=provenances,
-            origines=lieuxOrigine
+            titre="oeuvre",
+            idUC=idUC
         )
-    
-    elif request.method == "POST":
-        # On contrôle la saisie des données
-        erreurs = []
         
-        if not request.form.get("conservation_id", "").strip():
-            erreurs.append("Un lieu de conservation doit être renseigné. ")
-        if not request.form.get("cote", "").strip():
-            erreurs.append("Une cote doit être renseignée. ")
-        else:
-            # Si une cote a été saisie, on vérifie qu'elle ne soit pas déjà renseignée dans la base
-            # en relation avec le même lieu de conservation, et ce au moyen de la fonction rechercheCote()
-            if request.form.get("conservation_id", "").strip():
-                if rechercheCote(request.form["cote"], request.form["conservation_id"]):
-                    erreurs.append("Cette cote est déjà présente dans la base. ")
-        if not request.form.get("date_pas_avant", "").strip():
-            erreurs.append("Une date de début doit être renseignée. ")
-        if not request.form.get("date_pas_apres", "").strip():
-            erreurs.append("Une date de fin doit être renseignée. ")
-        
-        # Si on a au moins une erreur
-        if len(erreurs) > 0:
-            for erreur in erreurs:
-                flash(erreur, "error")
-            return render_template("pages/creer.html",
-                                   titre="codex",
-                                   lieuxConservation=lieuxConservation,
-                                   lieuParDefaut=lieuParDefaut,
-                                   provenances=provenances,
-                                   origines=lieuxOrigine,
-                                   saisieCote=request.form.get("cote", ""),
-                                   saisieIdentifiant=request.form.get("identifiant_technique", ""),
-                                   saisieDescription=request.form.get("descript_materielle", ""),
-                                   saisieHistoire=request.form.get("histoire", ""),
-                                   saisieDatepasavant=request.form.get("date_pas_avant", ""),
-                                   saisieDatepasapres=request.form.get("date_pas_apres", ""),
-                                   )
-        
-        # S'il n'y a pas d'erreur, on récupère les valeurs
-        cote = saisieTexte(request.form["cote"])
-        id_technique = saisieTexte(request.form["id_technique"])
-        descript_materielle = saisieTexte(request.form["descript_materielle"])
-        histoire = saisieTexte(request.form["histoire"])
-        date_pas_avant = int(request.form.get("date_pas_avant", ""))
-        date_pas_apres = int(request.form.get("date_pas_apres", ""))
-        conservation_id = request.form["conservation_id"]
-        origine = request.form["origine"]
-        provient = request.form["provient"]
-        unites_codico = []
-        
-        # Créer une première unité codicologique par défaut
-        # Déterminer l'identifiant du codex en cours de création, dont l'UC sera enfant
-        idFuturCodex = len(Codices.query.all()) + 1
-        nouvelle_uc = Unites_codico.creer(
-            code_id=idFuturCodex,
-            date_pas_avant=date_pas_avant,
-            date_pas_apres=date_pas_apres,
-            descript=None, loc_init=None, loc_init_v=None, loc_fin=None, loc_fin_v=None
-        )
-        # Si la création de la nouvelle UC est un succès
-        if nouvelle_uc[0]:
-            unites_codico.append(nouvelle_uc[1].id)
-        else:
-            print(
-                f"L'unité codicologique par défaut du codex {idFuturCodex}"
-                f" en cours de création a rencontré un problème.")
-        
-        # On crée le codex dans la base
-        if Codices.creer(cote,
-                         id_technique,
-                         descript_materielle,
-                         histoire,
-                         conservation_id,
-                         origine,
-                         provient,
-                         unites_codico
-                         )[0]:
-            return redirect(url_for("notice_codex", num=idFuturCodex)), flash("Le codex a bien été créé", "success")
-        else:
-            return render_template("pages/creer.html",
-                                   titre="codex",
-                                   lieuxConservation=lieuxConservation,
-                                   lieuParDefaut=lieuParDefaut,
-                                   provenances=provenances,
-                                   origines=lieuxOrigine,
-                                   saisieCote=request.form.get("cote", ""),
-                                   saisieIdentifiant=request.form.get("identifiant_technique", ""),
-                                   saisieDescription=request.form.get("descript_materielle", ""),
-                                   saisieHistoire=request.form.get("histoire", ""),
-                                   saisieDatepasavant=request.form.get("date_pas_avant", ""),
-                                   saisieDatepasapres=request.form.get("date_pas_apres", ""),
-                                   ), flash("La création du codex a rencontré un problème.", "error")
