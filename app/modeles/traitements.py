@@ -118,7 +118,9 @@ def personneLabel(idPersonne, forme=["court", "long"]):
     
     elif forme == "long":
         # Si l'on veut obtenir un label de nom avec les dates de la personne
-        if nomPersonne.split("(")[1][0] not in "0123456789":
+        if '(' not in nomPersonne:
+            return nomPersonne
+        elif nomPersonne.split("(")[1][0] not in "0123456789":
             # Si la forme d'autorité DataBNF place en tête de parenthèse non une date (chiffre) mais un rôle (lettre)
             parenthese = nomPersonne.split('(')[1][:-1]
             role = parenthese.split(", ")[0]
@@ -139,6 +141,7 @@ def personneLabel(idPersonne, forme=["court", "long"]):
             dateMort = dateLabel(dateMort)
             nom = f"{nomPersonne.split('(')[0][:-1]} ({dateNaissance}-{dateMort})"
             return nom
+        
     else:
         print('''Le paramètre forme n'accepte que les valeurs "long" et "court"''')
         return None
