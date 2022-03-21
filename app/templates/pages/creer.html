@@ -108,7 +108,7 @@
 
         <br>
 
-        {% if not personnes and not auteurAbsent %}
+        {% if not personnes and not auteurAbsent and not resultats %}
             <!--Menu de départ-->
             <div>
                 <form class="menusAlignesVertic" method="POST" action="{{url_for("creer", typeCreation="oeuvre", idUC=idUC, oeuvreAvecAuteur=True)}}">
@@ -154,6 +154,38 @@
                     <button type="submit" class="btn btn-primary">C'est parti !</button>
                 </div>
             </form>
+        {% endif %}
+
+        {% if resultats %}
+            <!-- Tableau des résultats donnés par une requête sur les auteurs -->
+            <table class="table table-striped table-hover">
+                <thead>
+                <tr>
+                    <th id="col1" scope="col">Nom</th>
+                    <th id="col3" scope="col">Ajouter</th>
+                </tr>
+                <tbody id="listeResultats">
+                {% for resultat in resultats %}
+                    <tr>
+                        <td>{{ resultat.nomFr.value }}</td>
+                        <td>
+                            <form class="" method="POST"
+                                  action="{{url_for("creer", typeCreation="oeuvre", idUC=idUC, oeuvreAvecAuteur=True, auteurAbsent=True)}}">
+                                <div class="">
+                                    <div class="">
+                                        <input type="hidden" name="auteurChoisiNom" value="{{ resultat.nomFr.value }}">
+                                        <input type="hidden" name="auteurChoisiUriAbout" value="{{ resultat.uriAbout.value }}">
+                                    </div>
+                                </div>
+                                <div>
+                                    <button type="submit" class="btn btn-outline-success">Sélectionner</button>
+                                </div>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
         {% endif %}
 
 

@@ -815,25 +815,85 @@ def creer(typeCreation=["codex", "oeuvre"], idUC=None, oeuvreAvecAuteur=None, au
                     } LIMIT 100
                     '''
                     requHTTP = requests.get("https://data.bnf.fr/sparql?format=json&query=" + urllib.parse.quote(requete))
-
+                    print("https://data.bnf.fr/sparql?format=json&query=" + urllib.parse.quote(requete))
                     try:
                         resultat = requHTTP.json()
-                        for resultat in resultat["results"]["bindings"]:
-                            print(resultat)
-                    except json.decoder.JSONDecodeError:
-                        print(f"There was a problem accessing the equipment data on {enregistrement['Pays item']}.")
+                        if not resultat["results"]["bindings"]:
+                            return render_template(
+                                "pages/creer.html",
+                                titre="oeuvre",
+                                idUC=idUC,
+                                auteurAbsent=True,
+                                personnes=None
+                            ), flash("La requête n'a donné aucun résultat.", "info")
                         
-                    return render_template(
-                        "pages/creer.html",
-                        titre="oeuvre",
-                        idUC=idUC,
-                        auteurAbsent=True,
-                        personnes=None
-                    )
+                        else:
+                            resultats = []
+                            for resultat in resultat["results"]["bindings"]:
+                                resultats.append(resultat)
+                            # TODO retourner un tableau des résultats
+                            return render_template(
+                                "pages/creer.html",
+                                titre="oeuvre",
+                                idUC=idUC,
+                                resultats=resultats
+                            )
+                    except json.decoder.JSONDecodeError:
+                        flash("La requête à rencontré un problème, veuillez réessayer plus tard.", "error")
+                        
+                        return render_template(
+                            "pages/creer.html",
+                            titre="oeuvre",
+                            idUC=idUC,
+                            auteurAbsent=True,
+                            personnes=None
+                        )
+
+                # Si un auteur a été choisi dans la liste des résultats
+                elif request.form.get("auteurChoisiNom", "").strip():
+                    # On récupère l'URI de l'auteur et son nom
+                    nom = request.form["auteurChoisiNom"]
+                    uri = request.form["auteurChoisiUriAbout"]
+                    
+                    # On récupère le numéro ark dans l'uri
+                    ark = uri[19:-6]
+                    # On vérifie que l'ark ne soit finalement pas déjà présent dans la base
+                    tousArksPersonnes = tousArkDict("personnes")["arkPersonnes"]
+                    # Si c'est le cas, on est renvoé à la liste de sélection des auteurs
+                    if tousArksPersonnes.get(ark):
+                        flash("L'auteur est déjà présent dans la liste.", "info")
+                        return render_template(
+                            "pages/creer.html",
+                            titre="oeuvre",
+                            idUC=idUC,
+                            personnes=tousAuteurs
+                        )
+                    # Si l'auteur est effectivement nouveau, on ajoute l'auteur à la base
+                    # puis on revient à la liste des auteurs
+                    else:
+                        statut, nouvelAuteur = Personnes.creer(nom=nom, data_bnf=ark)
+                        if statut:
+                            flash("L'auteur a été ajouté avec succès.", "success")
+                            # On recharge la liste des auteurs
+                            tousAuteurs = json.loads(tousAuteursJson())
+                            
+                            return render_template(
+                                "pages/creer.html",
+                                titre="oeuvre",
+                                idUC=idUC,
+                                personnes=tousAuteurs
+                            )
+                        else:
+                            flash("La création de l'auteur a rencontré un problème.", "error")
+                            return render_template(
+                                "pages/creer.html",
+                                titre="oeuvre",
+                                idUC=idUC,
+                                personnes=tousAuteurs
+                            )
                 
-                # Si rien n'a été saisi, on reste sur le formulaire
+                # Si aucun nom n'a été saisi pour la recherche d'un auteur, on reste sur le formulaire
                 else:
-                    print("botbot")
                     return render_template(
                         "pages/creer.html",
                         titre="oeuvre",

@@ -174,3 +174,24 @@ class Personnes(db.Model):
     data_bnf = db.Column(db.Integer, nullable=True)
     oeuvres_aut = db.relationship("Oeuvres", back_populates="lien_auteur", foreign_keys=Oeuvres.auteur)
     oeuvres_attr = db.relationship("Oeuvres", back_populates="lien_attr", foreign_keys=Oeuvres.attr)
+
+    @staticmethod
+    def creer(nom, data_bnf):
+        """
+        Création d'une personne dans la base de données.
+        """
+        nouvellePersonnes = Personnes(
+            nom=nom,
+            data_bnf=data_bnf,
+        )
+        # On tente d'écrire dans la base
+        try:
+            db.session.add(nouvellePersonnes)
+            # On envoie le paquet
+            db.session.commit()
+        
+            # On renvoie la personne créée
+            return True, nouvellePersonnes
+    
+        except Exception as erreur:
+            return False, [str(erreur)]
