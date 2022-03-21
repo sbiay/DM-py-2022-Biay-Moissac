@@ -108,7 +108,7 @@
 
         <br>
 
-        {% if not personnes and not auteurAbsent and not resultats %}
+        {% if not personnes and not auteurAbsent and not resultats and not resultatsOeuvres %}
             <!--Menu de départ-->
             <div>
                 <form class="menusAlignesVertic" method="POST" action="{{url_for("creer", typeCreation="oeuvre", idUC=idUC, oeuvreAvecAuteur=True)}}">
@@ -121,7 +121,7 @@
 
         {% elif personnes %}
             <!--Menu de sélection des auteurs existants-->
-            <form class="" method="POST" action="{{url_for("creer", typeCreation="oeuvre", idUC=idUC)}}">
+            <form class="" method="POST" action="{{url_for("creer", typeCreation="oeuvre", idUC=idUC, oeuvreAvecAuteur=True)}}">
                 <div class="col-md-6 mb-3">
                     <label class="form-label">Choisissez un auteur</label>
                     <select name="auteurChoisi" class="form-select">
@@ -186,9 +186,36 @@
                 {% endfor %}
                 </tbody>
             </table>
+        {% elif resultatsOeuvres %}
+            <!-- Tableau des résultats donnés par une requête sur les oeuvres d'un auteur particulier -->
+            <table class="table table-striped table-hover">
+                <thead>
+                <tr>
+                    <th id="col1" scope="col">Titre</th>
+                    <th id="col3" scope="col">Ajouter</th>
+                </tr>
+                <tbody id="listeResultats">
+                {% for resultat in resultatsOeuvres %}
+                    <tr>
+                        <td>{{ resultat.titre.value }}</td>
+                        <td>
+                            <form class="" method="POST"
+                                  action="{{url_for("creer", typeCreation="oeuvre", idUC=idUC, oeuvreAvecAuteur=True, auteurAbsent=True)}}">
+                                <div class="">
+                                    <div class="">
+                                        <input type="hidden" name="auteurChoisiNom" value="{{ resultat.titre.value }}">
+                                        <input type="hidden" name="auteurChoisiUriAbout" value="{{ resultat.uriOeuvre.value }}">
+                                    </div>
+                                </div>
+                                <div>
+                                    <button type="submit" class="btn btn-outline-success">Sélectionner</button>
+                                </div>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
         {% endif %}
-
-
     {% endif %}
-
 {% endblock %}

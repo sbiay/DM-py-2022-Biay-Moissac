@@ -815,7 +815,7 @@ def creer(typeCreation=["codex", "oeuvre"], idUC=None, oeuvreAvecAuteur=None, au
                     } LIMIT 100
                     '''
                     requHTTP = requests.get("https://data.bnf.fr/sparql?format=json&query=" + urllib.parse.quote(requete))
-                    print("https://data.bnf.fr/sparql?format=json&query=" + urllib.parse.quote(requete))
+                    # On récupère les données au format Json
                     try:
                         resultat = requHTTP.json()
                         if not resultat["results"]["bindings"]:
@@ -831,7 +831,6 @@ def creer(typeCreation=["codex", "oeuvre"], idUC=None, oeuvreAvecAuteur=None, au
                             resultats = []
                             for resultat in resultat["results"]["bindings"]:
                                 resultats.append(resultat)
-                            # TODO retourner un tableau des résultats
                             return render_template(
                                 "pages/creer.html",
                                 titre="oeuvre",
@@ -901,9 +900,46 @@ def creer(typeCreation=["codex", "oeuvre"], idUC=None, oeuvreAvecAuteur=None, au
                         auteurAbsent=True,
                         personnes=None
                     )
-            
-            # Si on a sélectionné un auteur dans la liste
-            # TODO proposer une recherche de l'oeuvre en fonction d'un ark d'auteur
+
+            # Si on a sélectionné un auteur dans la liste des auteurs existants
+            elif request.form.get("auteurChoisi", None):
+                idAuteurChoisi = request.form["auteurChoisi"]
+                # On récupère l'ark de cet auteur
+                ark = Personnes.query.get(int(idAuteurChoisi)).data_bnf
+                # On recompose l'URI Data-BNF de l'auteur
+                uriAuteurAbout = f"http://data.bnf.fr/{ark}#about"
+                
+                # On écrit une requête sparql pour aller chercher les oeuvres de cet auteur
+                requete = '''SELECT DISTINCT ?uriOeuvre ?titre
+                WHERE {
+                    ?uriOeuvre <http://purl.org/dc/terms/creator> <''' + uriAuteurAbout +'''>.
+                    ?uriOeuvre <http://www.w3.org/2000/01/rdf-schema#label> ?titre.
+                    } LIMIT 100'''
+                requHTTP = requests.get("https://data.bnf.fr/sparql?format=json&query=" + urllib.parse.quote(requete))
+                # On procède comme ci-dessus pour la récupération des résultats
+                try:
+                    resultat = requHTTP.json()
+                    if not resultat["results"]["bindings"]:
+                        return render_template(
+                            "pages/creer.html",
+                            titre="oeuvre",
+                            idUC=idUC,
+                            auteurAbsent=True,
+                            personnes=None
+                        ), flash("Aucune oeuvre n'est associée à cet auteur.", "info")
+    
+                    else:
+                        resultats = []
+                        for resultat in resultat["results"]["bindings"]:
+                            resultats.append(resultat)
+                        return render_template(
+                            "pages/creer.html",
+                            titre="oeuvre",
+                            idUC=idUC,
+                            resultatsOeuvres=resultats,
+                        )
+                except json.decoder.JSONDecodeError:
+                    flash("La requête à rencontré un problème, veuillez réessayer plus tard.", "error")
             else:
                 return render_template(
                 "pages/creer.html",
