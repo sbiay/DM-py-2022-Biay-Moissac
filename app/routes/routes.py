@@ -228,11 +228,9 @@ def notice_codex(num, idUC=None):
         # Pour mettre à jour les champs textes de la deuxième zone
         # On récupère l'identifiant de l'UC courante
         idUC = request.args.get("idUC", None)
-        idUC = int(idUC)
-        ucGet = Unites_codico.query.get(idUC)
+        if idUC:
+            ucGet = Unites_codico.query.get(int(idUC))
         modifZ2 = False
-        # On définit l'ancre pour la redirection consécutive à la mise à jour
-        
         
         if request.form.get("paleographie", "").strip():
             ucGet.descript = saisieTexte(request.form["paleographie"])
@@ -258,7 +256,7 @@ def notice_codex(num, idUC=None):
             idAsupprimer = request.form["oeuvreSuppr"]
             # La requête suivante retourne une liste d'un seul item
             injection = Contient.query.filter(
-                and_(Contient.unites_codico == idUC, Contient.oeuvre == int(idAsupprimer))).all()
+                and_(Contient.unites_codico == int(idUC), Contient.oeuvre == int(idAsupprimer))).all()
             try:
                 db.session.delete(injection[0])
                 db.session.commit()
@@ -270,7 +268,7 @@ def notice_codex(num, idUC=None):
         # Pour ajouter une oeuvre à l'unité codicologique courante
         if request.form.get("oeuvreAjout", "").strip():
             oeuvreAjout = request.form["oeuvreAjout"]
-            injection = Contient.creer(int(oeuvreAjout), idUC)
+            injection = Contient.creer(int(oeuvreAjout), int(idUC))
             if injection[0]:
                 flash("L'oeuvre a été associée avec succès", "success")
             else:
