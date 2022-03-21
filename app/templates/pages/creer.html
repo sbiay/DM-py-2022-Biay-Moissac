@@ -110,11 +110,11 @@
 
         {% if not personnes and not auteurAbsent %}
             <!--Menu de départ-->
-            <div class=".menusAlignesVertic">
-                <form class="d-flex" method="POST" action="{{url_for("creer", typeCreation="oeuvre", idUC=idUC, auteur=True)}}">
+            <div>
+                <form class="menusAlignesVertic" method="POST" action="{{url_for("creer", typeCreation="oeuvre", idUC=idUC, oeuvreAvecAuteur=True)}}">
                     <button class="btn btn-outline-light mb-3" name="oeuvreCreer" type="submit" role="button">L'oeuvre possède un auteur</button>
                 </form>
-                <form class="d-flex" method="POST" action="{{url_for("creer", typeCreation="oeuvre", idUC=idUC, auteur=False)}}">
+                <form class="menusAlignesVertic" method="POST" action="{{url_for("creer", typeCreation="oeuvre", idUC=idUC, oeuvreAvecAuteur=False)}}">
                     <button class="btn btn-outline-light mb-3" name="oeuvreCreer" type="submit" role="button">L'oeuvre ne possède pas d'auteur</button>
                 </form>
             </div>
@@ -122,7 +122,7 @@
         {% elif personnes %}
             <!--Menu de sélection des auteurs existants-->
             <form class="" method="POST" action="{{url_for("creer", typeCreation="oeuvre", idUC=idUC)}}">
-                <div class="col-md-6 mb-3 menusAlignesVertic">
+                <div class="col-md-6 mb-3">
                     <label class="form-label">Choisissez un auteur</label>
                     <select name="auteurChoisi" class="form-select">
                         <option value="" selected/>
@@ -135,26 +135,27 @@
                     <button type="submit" class="btn btn-outline-success mb-3">Sélectionner</button>
                 </div>
             </form>
-            <form class="" method="POST" action="{{url_for("creer", typeCreation="oeuvre", idUC=idUC, auteur=True, auteurAbsent=True)}}">
+            <form class="menusAlignesVertic" method="POST" action="{{url_for("creer", typeCreation="oeuvre", idUC=idUC, oeuvreAvecAuteur=True, auteurAbsent=True)}}">
                 <button type="submit" name="auteurAbsent" class="btn btn-outline-success mb-3">L'auteur n'est pas dans la liste</button>
             </form>
 
         {% endif %}
 
-        {% if auteurAbsent %}
-            <form class="row g-3" method="GET" action="{{url_for("recherche", typeRecherche="avancee")}}">
+        {% if auteurAbsent and not personnes %}
+            <!-- Formulaire de saisie pour chercher un nouvel auteur -->
+            <form class="row g-3" method="POST" action="{{url_for("creer", typeCreation="oeuvre", idUC=idUC, oeuvreAvecAuteur=True, auteurAbsent=True)}}">
                 <div class="col-12">
-                    <label for="rech-auteur" class="col-sm-2 col-form-label">Saisissez un nom d'auteur</label>
+                    <label class="col-sm-2 col-form-label">Saisissez un nom d'auteur</label>
                     <div class="col-sm-10">
-                        <input type="text" class="form-control" id="rech-auteur" name="auteur" placeholder="ex. saint Augustin">
+                        <input type="text" class="form-control" name="auteur" placeholder="ex. saint Augustin">
                     </div>
                 </div>
                 <div>
                     <button type="submit" class="btn btn-primary">C'est parti !</button>
                 </div>
             </form>
-
         {% endif %}
+
 
     {% endif %}
 

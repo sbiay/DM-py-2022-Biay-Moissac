@@ -3,6 +3,9 @@ from flask import flash, Flask, redirect, render_template, request, url_for
 from flask_login import login_user, current_user, logout_user
 from sqlalchemy import delete, update, or_, and_
 from bs4 import BeautifulSoup
+import urllib.parse
+import requests
+import json
 
 from ..appliMoissac import app, login, db
 from ..constantes import ROWS_PER_PAGE
@@ -655,7 +658,7 @@ def recherche(typeRecherche=["simple", "avancee"]):
 
 
 @app.route("/creer/<typeCreation>", methods=["GET", "POST"])
-def creer(typeCreation=["codex", "oeuvre"], idUC=None, auteur=None, auteurAbsent=None):
+def creer(typeCreation=["codex", "oeuvre"], idUC=None, oeuvreAvecAuteur=None, auteurAbsent=None):
     if typeCreation == "codex":
         # On récupère les données nécessaires au chargement des menus :
         # On récupère la liste des lieux de conservations existants
@@ -774,24 +777,73 @@ def creer(typeCreation=["codex", "oeuvre"], idUC=None, auteur=None, auteurAbsent
                                        ), flash("La création du codex a rencontré un problème.", "error")
     if typeCreation == "oeuvre":
         # On récupère le booléen définissant si l'oeuvre à créer possède un auteur ou est anonyme
-        auteur = request.args.get("auteur", None)
+        oeuvreAvecAuteur = request.args.get("oeuvreAvecAuteur", None)
         # Si l'oeuvre à créer possède un auteur
-        if auteur:
+        if oeuvreAvecAuteur:
             # On doit proposer la liste des auteurs
             tousAuteurs = json.loads(tousAuteursJson())
             
-            # Si la case "l'auteur n'est pas dans la liste a été cochée
+            # Si la case "l'auteur n'est pas dans la liste" a été cochée
             if request.args.get("auteurAbsent", None):
-                print("bot")
-                return render_template(
-                    "pages/creer.html",
-                    titre="oeuvre",
-                    idUC=idUC,
-                    auteurAbsent=auteurAbsent
-                )
+                auteurAbsent = True
+                
+                # Si des mots clés ont été saisis par l'utilisateur
+                if request.form.get("auteur", "").strip():
+                    # On récupère la saisie et on en élimine les caracètes dangereux
+                    motscles = saisieRecherche(request.form["auteur"])
+                    # Les mots-clés sont une list en index 0 du retour de la fonction saisieRecherche()
+                    motscles = motscles[0]
+                    # On écrit un filtre sparql pour chaque mot-clé
+                    listeFiltres = [f'filter contains(lcase(?nomAutre), "{mot}").' for mot in motscles]
+                    # On écrit ces filtres dans une str :
+                    chaineFiltres = ""
+                    for index, filtre in enumerate(listeFiltres):
+                        # On n'ajoutera pas de saut de ligne pour le dernier filtre de la liste
+                        if index == len(listeFiltres) - 1:
+                            chaineFiltres += "\n" + filtre
+                        else:
+                            chaineFiltres += filtre
+                    # On écrit une requête sparql pour l'adresser à DataBNF
+                    requete = '''PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+                    SELECT DISTINCT ?uri ?nomFr ?uriAbout
+                    WHERE {
+                        ?uri skos:altLabel ?nomAutre.
+                        ?uri <http://www.w3.org/2004/02/skos/core#prefLabel> ?nomFr.
+                        ?uri <http://xmlns.com/foaf/0.1/focus> ?uriAbout.
+                        ?uriAbout <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person>.
+                        ''' + chaineFiltres +'''
+                    } LIMIT 100
+                    '''
+                    requHTTP = requests.get("https://data.bnf.fr/sparql?format=json&query=" + urllib.parse.quote(requete))
+
+                    try:
+                        resultat = requHTTP.json()
+                        for resultat in resultat["results"]["bindings"]:
+                            print(resultat)
+                    except json.decoder.JSONDecodeError:
+                        print(f"There was a problem accessing the equipment data on {enregistrement['Pays item']}.")
+                        
+                    return render_template(
+                        "pages/creer.html",
+                        titre="oeuvre",
+                        idUC=idUC,
+                        auteurAbsent=True,
+                        personnes=None
+                    )
+                
+                # Si rien n'a été saisi, on reste sur le formulaire
+                else:
+                    print("botbot")
+                    return render_template(
+                        "pages/creer.html",
+                        titre="oeuvre",
+                        idUC=idUC,
+                        auteurAbsent=True,
+                        personnes=None
+                    )
             
-            
-            # Si on a sélectionné un auteur
+            # Si on a sélectionné un auteur dans la liste
+            # TODO proposer une recherche de l'oeuvre en fonction d'un ark d'auteur
             else:
                 return render_template(
                 "pages/creer.html",
