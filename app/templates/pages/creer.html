@@ -108,13 +108,13 @@
 
         <br>
 
-        {% if not personnes and not auteurAbsent and not resultats and not resultatsOeuvres %}
+        {% if not personnes and not auteurAbsent and not resultats and not resultatsOeuvres and not oeuvreAnonyme %}
             <!--Menu de départ-->
             <div>
                 <form class="menusAlignesVertic" method="POST" action="{{url_for("creer", typeCreation="oeuvre", idUC=idUC, oeuvreAvecAuteur=True)}}">
                     <button class="btn btn-outline-light mb-3" name="oeuvreCreer" type="submit" role="button">L'oeuvre possède un auteur</button>
                 </form>
-                <form class="menusAlignesVertic" method="POST" action="{{url_for("creer", typeCreation="oeuvre", idUC=idUC, oeuvreAvecAuteur=False)}}">
+                <form class="menusAlignesVertic" method="POST" action="{{url_for("creer", typeCreation="oeuvre", idUC=idUC, oeuvreAnonyme=True)}}">
                     <button class="btn btn-outline-light mb-3" name="oeuvreCreer" type="submit" role="button">L'oeuvre ne possède pas d'auteur</button>
                 </form>
             </div>
@@ -138,7 +138,6 @@
             <form class="menusAlignesVertic" method="POST" action="{{url_for("creer", typeCreation="oeuvre", idUC=idUC, oeuvreAvecAuteur=True, auteurAbsent=True)}}">
                 <button type="submit" name="auteurAbsent" class="btn btn-outline-success mb-3">L'auteur n'est pas dans la liste</button>
             </form>
-
         {% endif %}
 
         {% if auteurAbsent and not personnes %}
@@ -156,7 +155,22 @@
             </form>
         {% endif %}
 
-        {% if resultats %}
+        {% if oeuvreAnonyme and not resultatsOeuvres %}
+            <!-- Formulaire de saisie pour chercher un nouvel auteur -->
+            <form class="row g-3" method="POST" action="{{url_for("creer", typeCreation="oeuvre", idUC=idUC, oeuvreAnonyme=True)}}">
+                <div class="col-12">
+                    <label class="col-sm-2 col-form-label">Saisissez un titre d'oeuvre</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" name="titre" placeholder="Mots-clés">
+                    </div>
+                </div>
+                <div>
+                    <button type="submit" class="btn btn-outline-success mb-3">C'est parti !</button>
+                </div>
+            </form>
+        {% endif %}
+
+        {% if resultats and not oeuvreAnonyme %}
             <!-- Tableau des résultats donnés par une requête sur les auteurs -->
             <table class="table table-striped table-hover">
                 <thead>
@@ -186,7 +200,7 @@
                 {% endfor %}
                 </tbody>
             </table>
-        {% elif resultatsOeuvres %}
+        {% elif resultatsOeuvres and not oeuvreAnonyme %}
             <!-- Tableau des résultats donnés par une requête sur les oeuvres d'un auteur particulier -->
             <table class="table table-striped table-hover">
                 <thead>
@@ -221,5 +235,43 @@
                 </tbody>
             </table>
         {% endif %}
+
+        {% if resultatsOeuvres and oeuvreAnonyme %}
+            <!-- Tableau des résultats donnés par une requête sur les oeuvres sans auteur -->
+            <table class="table table-striped table-hover">
+                <thead>
+                <tr>
+                    <th id="col1" scope="col">Titre</th>
+                    <th id="col2" scope="col">Lien</th>
+                    <th id="col3" scope="col">Ajouter</th>
+                </tr>
+                <tbody id="listeResultats">
+                {% for resultat in resultatsOeuvres %}
+                    <tr>
+                        <td>{{ resultat.titre.value }}</td>
+                        <td><a href="{{ resultat.uriAbout.value }}">lien vers Data-BNF</a></td>
+                        <td>
+                            <form class="" method="POST"
+                                  action="{{url_for("creer", typeCreation="oeuvre",
+                                  idUC=idUC,
+                                  oeuvreAnonyme=True,
+                                  oeuvreChoisie=True)}}">
+                                <div class="">
+                                    <div class="">
+                                        <input type="hidden" name="oeuvreChoisieTitre" value="{{ resultat.titre.value }}">
+                                        <input type="hidden" name="oeuvreChoisieURIabout" value="{{ resultat.uriAbout.value }}">
+                                    </div>
+                                </div>
+                                <div>
+                                    <button type="submit" class="btn btn-outline-success">Sélectionner</button>
+                                </div>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
     {% endif %}
+
 {% endblock %}

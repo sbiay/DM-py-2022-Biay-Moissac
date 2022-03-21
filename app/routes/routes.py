@@ -658,7 +658,7 @@ def recherche(typeRecherche=["simple", "avancee"]):
 
 @app.route("/creer/<typeCreation>", methods=["GET", "POST"])
 def creer(typeCreation=["codex", "oeuvre"],
-          idUC=None, oeuvreAvecAuteur=None, auteurAbsent=None, oeuvreChoisie=None, idAuteur=None):
+          idUC=None, oeuvreAvecAuteur=None, oeuvreAnonyme=None, auteurAbsent=None, oeuvreChoisie=None, idAuteur=None):
     if typeCreation == "codex":
         # On récupère les données nécessaires au chargement des menus :
         # On récupère la liste des lieux de conservations existants
@@ -776,9 +776,12 @@ def creer(typeCreation=["codex", "oeuvre"],
                                        saisieDatepasapres=request.form.get("date_pas_apres", ""),
                                        ), flash("La création du codex a rencontré un problème.", "error")
     if typeCreation == "oeuvre":
-        # On récupère le booléen définissant si l'oeuvre à créer possède un auteur ou est anonyme
+        # On récupère les booléens définissant si l'oeuvre à créer possède un auteur ou est anonyme
         oeuvreAvecAuteur = request.args.get("oeuvreAvecAuteur", None)
+        oeuvreAnonyme = request.args.get("oeuvreAnonyme", None)
         idUC = request.args.get("idUC", None)
+        print(f"Avec auteur est {oeuvreAvecAuteur}")
+        print(f"Anonyme est {oeuvreAnonyme}")
         # Si l'oeuvre à créer possède un auteur
         if oeuvreAvecAuteur:
             # On doit proposer la liste des auteurs
@@ -863,7 +866,7 @@ def creer(typeCreation=["codex", "oeuvre"],
                             auteurAbsent=True,
                             personnes=None
                         )
-
+                
                 # Si un auteur a été choisi dans la liste des résultats
                 elif request.form.get("auteurChoisiNom", "").strip():
                     # On récupère l'URI de l'auteur et son nom
@@ -916,7 +919,7 @@ def creer(typeCreation=["codex", "oeuvre"],
                         auteurAbsent=True,
                         personnes=None
                     )
-
+            
             # Si on a sélectionné un auteur dans la liste des auteurs existants
             elif request.form.get("auteurChoisi", None):
                 idAuteurChoisi = request.form["auteurChoisi"]
@@ -945,7 +948,7 @@ def creer(typeCreation=["codex", "oeuvre"],
                             auteurAbsent=True,
                             personnes=None
                         )
-    
+                    
                     else:
                         resultats = []
                         for resultat in resultat["results"]["bindings"]:
@@ -959,7 +962,7 @@ def creer(typeCreation=["codex", "oeuvre"],
                         )
                 except json.decoder.JSONDecodeError:
                     flash("La requête à rencontré un problème, veuillez réessayer plus tard.", "error")
-
+            
             if request.args.get("oeuvreChoisie", None):
                 oeuvreChoisie = True
                 # On récupère les données du formulaire de sélection de l'oeuvre
@@ -967,10 +970,9 @@ def creer(typeCreation=["codex", "oeuvre"],
                 idAuteur = request.form["idAuteur"]
                 URIdataBNF = request.form["oeuvreChoisieURIabout"]
                 ark = URIdataBNF[19:-6]
-                print(idUC)
                 # On récupère l'id du codex concerné pour la redirection
-                idcodex = Unites_codico.query.get(idUC).code_id
-
+                idcodex = Unites_codico.query.get(int(idUC)).code_id
+                
                 # On vérifie que l'oeuvre ne soit pas déjà dans la base
                 tousArksOeuvres = tousArkDict("oeuvres")["arkOeuvres"]
                 # Si c'est le cas, on est renvoyé à la liste de sélection des auteurs
@@ -986,7 +988,7 @@ def creer(typeCreation=["codex", "oeuvre"],
                         auteur=idAuteur)
                     if reussi:
                         # Puis on doit l'associer à l'unité codicologique courante
-                        reussi, nouvelleAssociation = Contient.creer(nouvelleOeuvre.id, idUC)
+                        reussi, nouvelleAssociation = Contient.creer(nouvelleOeuvre.id, int(idUC))
                         if reussi:
                             flash("L'oeuvre a été correctement créée et ajoutée à l'unité codicologique", "success")
                             return redirect(url_for("notice_codex", num=idcodex))
@@ -999,21 +1001,143 @@ def creer(typeCreation=["codex", "oeuvre"],
                               "error")
                         return redirect(url_for("notice_codex", num=idcodex))
             
+            
+            
+            
+            # Accès au menu d'une création avec auteur
             else:
                 return render_template(
-                "pages/creer.html",
-                titre="oeuvre",
-                idUC=idUC,
-                personnes=tousAuteurs
-            )
+                    "pages/creer.html",
+                    titre="oeuvre",
+                    idUC=idUC,
+                    personnes=tousAuteurs
+                )
+        elif oeuvreAnonyme:
+            # S'il y a une saisie
+            if request.form.get("titre", "").strip():
+                # On récupère la saisie et on en élimine les caracètes dangereux
+                motscles = saisieRecherche(request.form["titre"])
+                # Les mots-clés sont une list en index 0 du retour de la fonction saisieRecherche()
+                motscles = motscles[0]
+                # On écrit un filtre sparql pour chaque mot-clé,
+                # à la fois pour la recherche de la forme d'autorité du titre
+                # et pour la recherche des formes alternatives
+                listeFiltres = [f'filter contains(lcase(?titre), "{mot}").' for mot in motscles]
+                listeFiltresAutres = [f'filter contains(lcase(?titreAutre), "{mot}").' for mot in motscles]
+                # On écrit ces filtres dans une str :
+                chaineFiltres = ""
+                for index, filtre in enumerate(listeFiltres):
+                    # On n'ajoutera pas de saut de ligne pour le dernier filtre de la liste
+                    if index == len(listeFiltres) - 1:
+                        chaineFiltres += "\n" + filtre
+                    else:
+                        chaineFiltres += filtre
+                chaineFiltresAutres = ""
+                for index, filtre in enumerate(listeFiltresAutres):
+                    # On n'ajoutera pas de saut de ligne pour le dernier filtre de la liste
+                    if index == len(listeFiltres) - 1:
+                        chaineFiltresAutres += "\n" + filtre
+                    else:
+                        chaineFiltresAutres += filtre
+                # On écrit une requête sparql pour l'adresser à DataBNF
+                requete = '''
+                            PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+                            PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+                            SELECT DISTINCT ?uri ?titre ?uriAbout
+                            WHERE {
+                              ?uri skos:prefLabel ?titre.
+                              ?uri skos:altLabel ?titreAutre.
+                              ?uri <http://xmlns.com/foaf/0.1/focus> ?uriAbout.
+                              ?uriAbout <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>
+                             <http://rdvocab.info/uri/schema/FRBRentitiesRDA/Work>.
+                              ''' + chaineFiltres + '''
+                              OPTIONAL {?uri skos:altLabel ?titreAutre.
+                              ''' + chaineFiltresAutres + '''
+                              }
+                              } LIMIT 100'''
+                requHTTP = requests.get(
+                    "https://data.bnf.fr/sparql?format=json&query=" + urllib.parse.quote(requete))
+                if requHTTP.status_code == 200:
+                    try:
+                        resultat = requHTTP.json()
+                        if not resultat["results"]["bindings"]:
+                            flash("La requête n'a donné aucun résultat.", "info")
+                            return render_template(
+                                "pages/creer.html",
+                                titre="oeuvre",
+                                idUC=idUC,
+                                oeuvreAnonyme=True
+                            )
+                        else:
+                            resultats = []
+                            for resultat in resultat["results"]["bindings"]:
+                                resultats.append(resultat)
+                            return render_template(
+                                "pages/creer.html",
+                                titre="oeuvre",
+                                idUC=idUC,
+                                oeuvreAnonyme=True,
+                                resultatsOeuvres=resultats
+                            )
+                    except json.decoder.JSONDecodeError:
+                        flash("La requête à rencontré un problème, veuillez réessayer plus tard.", "error")
+                        
+                        return render_template(
+                            "pages/creer.html",
+                            titre="oeuvre",
+                            idUC=idUC,
+                            oeuvreAnonyme=True
+                        )
 
-        # Si l'oeuvre à créer est anonyme
-        else:
-            True
-        
+            if request.args.get("oeuvreChoisie", None):
+                # On récupère les données du formulaire de sélection de l'oeuvre
+                titre = request.form["oeuvreChoisieTitre"]
+                URIdataBNF = request.form["oeuvreChoisieURIabout"]
+                ark = URIdataBNF[19:-6]
+                idUC = request.args.get("idUC", None)
+                # On récupère l'id du codex concerné pour la redirection
+                idcodex = Unites_codico.query.get(int(idUC)).code_id
+
+                # On vérifie que l'oeuvre ne soit pas déjà dans la base
+                tousArksOeuvres = tousArkDict("oeuvres")["arkOeuvres"]
+                # Si c'est le cas, on est renvoyé à la liste de sélection des auteurs
+                if tousArksOeuvres.get(ark):
+                    flash("L'oeuvre est déjà présente dans la base.", "info")
+                    return redirect(url_for("notice_codex", num=idcodex))
+
+                # Si l'oeuvre n'est pas présente dans la base, on doit la créer
+                else:
+                    reussi, nouvelleOeuvre = Oeuvres.creer(
+                        titre=titre,
+                        data_bnf=ark,
+                        auteur=idAuteur)
+                    if reussi:
+                        # Puis on doit l'associer à l'unité codicologique courante
+                        reussi, nouvelleAssociation = Contient.creer(nouvelleOeuvre.id, int(idUC))
+                        if reussi:
+                            flash("L'oeuvre a été correctement créée et ajoutée à l'unité codicologique", "success")
+                            return redirect(url_for("notice_codex", num=idcodex))
+                        else:
+                            flash("L'association de l'oeuvre à l'l'unité codicologique a rencontré un problème.",
+                                  "error")
+                            return redirect(url_for("notice_codex", num=idcodex))
+                    else:
+                        flash("La création de l'oeuvre a rencontré un problème.",
+                              "error")
+                        return redirect(url_for("notice_codex", num=idcodex))
+                    
             return render_template(
+                    "pages/creer.html",
+                    titre="oeuvre",
+                    idUC=idUC,
+                    oeuvreAnonyme=True
+                )
+        
+        # Accès au menu générale de la création avec ou sans auteur
+        return render_template(
             "pages/creer.html",
             titre="oeuvre",
-            idUC=idUC
+            idUC=idUC,
+            oeuvreAnonyme=False
         )
         
