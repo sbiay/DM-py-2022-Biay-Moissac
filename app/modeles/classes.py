@@ -167,6 +167,28 @@ class Oeuvres(db.Model):
     lien_attr = db.relationship("Personnes", back_populates="oeuvres_attr", foreign_keys=attr)
     contenu_defini_par = db.relationship("Contient", back_populates="a_pour_oeuvre")
 
+    @staticmethod
+    def creer(titre, data_bnf, auteur=None):
+        """
+        Création d'un codex dans la base de données.
+        """
+        # On crée les données de l'oeuvre
+        nouvelleOeuvre = Oeuvres(
+            titre=titre,
+            data_bnf=data_bnf,
+            auteur=auteur,
+        )
+        # On tente d'écrire la nouvelle oeuvre dans la base
+        try:
+            db.session.add(nouvelleOeuvre)
+            # On envoie le paquet
+            db.session.commit()
+        
+            # On renvoie l'utilisateur
+            return True, nouvelleOeuvre
+        except Exception as erreur:
+            return False, [str(erreur)]
+
 
 class Personnes(db.Model):
     id = db.Column(db.Integer, primary_key=True)

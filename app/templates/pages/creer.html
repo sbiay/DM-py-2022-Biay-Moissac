@@ -99,7 +99,7 @@
                 </select>
             </div>
             <div>
-                <button type="submit" class="btn btn-primary">Créer</button>
+                <button type="submit" class="btn btn-outline-success mb-3">Créer</button>
             </div>
         </form>
 
@@ -151,7 +151,7 @@
                     </div>
                 </div>
                 <div>
-                    <button type="submit" class="btn btn-primary">C'est parti !</button>
+                    <button type="submit" class="btn btn-outline-success mb-3">C'est parti !</button>
                 </div>
             </form>
         {% endif %}
@@ -200,11 +200,15 @@
                         <td>{{ resultat.titre.value }}</td>
                         <td>
                             <form class="" method="POST"
-                                  action="{{url_for("creer", typeCreation="oeuvre", idUC=idUC, oeuvreAvecAuteur=True, auteurAbsent=True)}}">
+                                  action="{{url_for("creer", typeCreation="oeuvre",
+                                  idUC=idUC,
+                                  oeuvreAvecAuteur=True,
+                                  oeuvreChoisie=True)}}">
                                 <div class="">
                                     <div class="">
-                                        <input type="hidden" name="auteurChoisiNom" value="{{ resultat.titre.value }}">
-                                        <input type="hidden" name="auteurChoisiUriAbout" value="{{ resultat.uriOeuvre.value }}">
+                                        <input type="hidden" name="oeuvreChoisieTitre" value="{{ resultat.titre.value }}">
+                                        <input type="hidden" name="oeuvreChoisieURIabout" value="{{ resultat.uriOeuvre.value }}">
+                                        <input type="hidden" name="idAuteur" value="{{ idAuteurChoisi }}">
                                     </div>
                                 </div>
                                 <div>
