@@ -779,7 +779,6 @@ def creer(typeCreation=["codex", "oeuvre"],
         # On récupère le booléen définissant si l'oeuvre à créer possède un auteur ou est anonyme
         oeuvreAvecAuteur = request.args.get("oeuvreAvecAuteur", None)
         idUC = request.args.get("idUC", None)
-        idUC = int(idUC)
         # Si l'oeuvre à créer possède un auteur
         if oeuvreAvecAuteur:
             # On doit proposer la liste des auteurs
@@ -968,7 +967,7 @@ def creer(typeCreation=["codex", "oeuvre"],
                 idAuteur = request.form["idAuteur"]
                 URIdataBNF = request.form["oeuvreChoisieURIabout"]
                 ark = URIdataBNF[19:-6]
-                
+                print(idUC)
                 # On récupère l'id du codex concerné pour la redirection
                 idcodex = Unites_codico.query.get(idUC).code_id
 
