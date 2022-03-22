@@ -1,19 +1,11 @@
-import json, requests, time
-from flask import flash, Flask, redirect, render_template, request, url_for, jsonify
+import json
+from flask import request, url_for, jsonify
 from urllib.parse import urlencode
-from flask_login import login_user, current_user, logout_user
-from sqlalchemy import delete, update, or_, and_
-from bs4 import BeautifulSoup
 
-from ..appliMoissac import app, login, db
+from ..appliMoissac import app
 from ..constantes import ROWS_PER_PAGE
-from ..modeles.classes import Codices, Lieux, Unites_codico, Oeuvres, Personnes, Provenances, Contient
-from ..modeles.utilisateurs import User
-from ..modeles.traitements import auteursListDict, codexJson, codicesListDict, conservationDict, personneLabel, \
-    codexLabel, tousAuteursJson, tousArkDict, toutesOeuvresJson, saisieRecherche, saisieTexte, \
-    oeuvreDict, oeuvresListDict
-from ..modeles.requetes import rechercheArk, rechercheCote
-from ..comutTest import test
+from ..modeles.classes import Codices
+from ..modeles.traitements import codexJson
 
 @app.route("/api/codex/<int:num>")
 def codex(num):
