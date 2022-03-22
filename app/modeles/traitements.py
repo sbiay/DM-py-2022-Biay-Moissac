@@ -93,14 +93,26 @@ def personneLabel(idPersonne, forme=["court", "long"]):
     """
     nomPersonne = Personnes.query.get(idPersonne).nom
     
-    # On retient pour la page le nom sans les parenthèses, sauf si elles contiennent un titre (pape,
+    # TODO compléter ci-dessous
+    # On retient pour la page QUELLE PAGE ? le nom sans les parenthèses, sauf si elles contiennent un titre (pape,
     # saint, etc)
-    
-    # Gestion des cas particuliers
-    if idPersonne == 16:
-        # Macer Floridus (auteur prétendu)
+    # TODO Test
+
+    # On ne traite pas les noms qui n'ont pas de parenthèse
+    if not "(" in nomPersonne:
         return nomPersonne
-    elif idPersonne == 15:
+    else:
+        # On ne traite pas les noms qui ne comportent pas de date numérique entre parenthèses
+        # (ex. "Macer Floridus (auteur prétendu)").
+        sansChiffre = True
+        for chiffre in "0123456789":
+            if chiffre in nomPersonne:
+                sansChiffre = False
+        if sansChiffre:
+            return nomPersonne
+
+    # Gestion des cas particuliers
+    if idPersonne == 15:
         # Odon de Meung (10..-10..)
         if forme == "long":
             return "Odon de Meung (XIe siècle)"
