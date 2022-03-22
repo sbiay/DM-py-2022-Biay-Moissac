@@ -780,8 +780,6 @@ def creer(typeCreation=["codex", "oeuvre"],
         oeuvreAvecAuteur = request.args.get("oeuvreAvecAuteur", None)
         oeuvreAnonyme = request.args.get("oeuvreAnonyme", None)
         idUC = request.args.get("idUC", None)
-        print(f"Avec auteur est {oeuvreAvecAuteur}")
-        print(f"Anonyme est {oeuvreAnonyme}")
         # Si l'oeuvre à créer possède un auteur
         if oeuvreAvecAuteur:
             # On doit proposer la liste des auteurs
@@ -985,7 +983,7 @@ def creer(typeCreation=["codex", "oeuvre"],
                     reussi, nouvelleOeuvre = Oeuvres.creer(
                         titre=titre,
                         data_bnf=ark,
-                        auteur=idAuteur)
+                        lien_auteur=int(idAuteur))
                     if reussi:
                         # Puis on doit l'associer à l'unité codicologique courante
                         reussi, nouvelleAssociation = Contient.creer(nouvelleOeuvre.id, int(idUC))

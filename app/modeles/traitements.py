@@ -630,10 +630,17 @@ def tousAuteursJson():
         }
         # On récupère toutes les oeuvres attribuées à un auteur
         oeuvres = []
+        
+        # TODO test
+        if objetPersonne.id == 19:
+            print(f"Jules César est bien là")
+            print(f"Les oeuvres dont il est l'auteur sont {objetPersonne.oeuvres_aut}")
         if objetPersonne.oeuvres_attr:
             for oeuvre in objetPersonne.oeuvres_attr:
                 oeuvres.append(oeuvre)
         if objetPersonne.oeuvres_aut:
+            if objetPersonne.id == 19:
+                print(f"Jules César est l'auteur de {objetPersonne.oeuvres_aut}")
             for oeuvre in objetPersonne.oeuvres_aut:
                 oeuvres.append(oeuvre)
         # On trie les oeuvres alphabétiquement selon l'attribut "titre"

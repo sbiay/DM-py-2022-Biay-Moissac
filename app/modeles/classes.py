@@ -168,7 +168,7 @@ class Oeuvres(db.Model):
     contenu_defini_par = db.relationship("Contient", back_populates="a_pour_oeuvre")
 
     @staticmethod
-    def creer(titre, data_bnf, auteur=None):
+    def creer(titre, data_bnf, lien_auteur=None):
         """
         Création d'un codex dans la base de données.
         """
@@ -176,7 +176,7 @@ class Oeuvres(db.Model):
         nouvelleOeuvre = Oeuvres(
             titre=titre,
             data_bnf=data_bnf,
-            auteur=auteur,
+            lien_auteur=Personnes.query.get(int(lien_auteur)),
         )
         # On tente d'écrire la nouvelle oeuvre dans la base
         try:
