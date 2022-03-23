@@ -1,0 +1,30 @@
+{% extends "conteneur.html" %}
+
+{% block headTitle %}
+    <title>{{ titre }}|Librairie de Moissac</title>
+{% endblock %}
+
+{% block corps %}
+    <h1>{{ titre }}</h1>
+    <br>
+    {% if dictOeuvre["auteur"] or dictOeuvre["attr"] %}
+        {% if dictOeuvre["auteur"] %}
+            <h2>{{ dictOeuvre["auteur"] }}</h2>
+            <p><a href="{{ url_for('noticePersonne', id=dictOeuvre["auteur_id"]) }}">Lien vers la notice de l'auteur</a>.</p>
+        {% endif %}
+        {% if dictOeuvre["attr"] %}
+            <p>Attribué à : <a href="{{ url_for('noticePersonne', id=dictOeuvre["attr_id"]) }}">{{ dictOeuvre["attr"] }}</a></p>
+        {% endif %}
+    {% endif %}
+    <!-- Pour les codices qui la contiennent-->
+    <h2>Contenue dans</h2>
+    <ul>
+        {% for codex in dictOeuvre["contenue_dans"] %}
+            <li><a href="{{ url_for('notice_codex', num=codex["codex_id"])}}">{{codex["label"]}}</a></li>
+        {% endfor %}
+    </ul>
+    {% if dictOeuvre["data.bnf"] %}
+        <h2>Liens</h2>
+        <p><a href="https://data.bnf.fr/{{ dictOeuvre['data.bnf'] }}">Lien vers la notice Data-BNF</a>.</p>
+    {% endif %}
+{% endblock %}

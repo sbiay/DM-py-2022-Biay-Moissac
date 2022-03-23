@@ -1,0 +1,41 @@
+{% extends "conteneur.html" %}
+
+{% block headTitle %}
+    <title>{{titre}}|Librairie de Moissac</title>
+{% endblock %}
+
+{% block corps %}
+    {% if titre %}
+        <header>
+            <h1>{{titre}}</h1>
+        </header>
+        <div>
+            {% if dictPersonne["personne_ark"] %}
+                <p><a href="https://data.bnf.fr/{{ dictPersonne['personne_ark'] }}">Lien vers la notice Data-BNF</a>.</p>
+            {% endif %}
+            <h2>Oeuvres</h2>
+            {% for oeuvre in dictPersonne["oeuvres"] %}
+                <!-- Pour les titres des oeuvres -->
+                <head>
+                    <a href="{{ url_for("noticeOeuvre", id=oeuvre["oeuvre_id"]|string) }}">
+                        <i>{{ oeuvre["titre"] }}</i>
+                    </a>
+                </head>
+                {% if oeuvre["relation"] == "a pour attribution" %}
+                    <span> (attribué à)</span>
+                {% endif %}
+                <!-- Pour les codices qui les contiennent-->
+                <ul>
+                    {% for codex in oeuvre["contenue_dans"] %}
+                        <li><a href="{{ url_for('notice_codex', num=codex["codex_id"])}}">{{codex["label"]}}</a></li>
+                    {% endfor %}
+                </ul>
+            {% endfor %}
+        </div>
+
+
+    {% else %}
+        <p>{{message_erreur}}</p>
+    {% endif %}
+
+{% endblock %}

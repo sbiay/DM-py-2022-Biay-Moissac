@@ -26,3 +26,4 @@ if not test:
     from app.modeles.utilisateurs import User
     # Import des routes
     from app.routes import routes
+    from app.routes import api

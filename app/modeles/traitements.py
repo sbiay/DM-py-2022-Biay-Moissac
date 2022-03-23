@@ -1,10 +1,10 @@
 import json
 from operator import attrgetter
-from .classes import Codices, Lieux, Oeuvres, Personnes, Provenances, Unites_codico
-from ..constantes import ROWS_PER_PAGE
+from .classes import Codices, Lieux, Oeuvres, Personnes, Provenances, Unites_codico, Contient
 
 
 # Les scripts suivants mettent en forme des chaînes de caractères pour l'affichage d'un enregistrement particulier
+# on le traitement d'une requête
 def localisationUClabel(uc_id):
     """
     Cette fonction prend comme argument l'identifiant d'une unité codicologique (un objet de la classe Unites_codico) et,
@@ -44,7 +44,7 @@ def codexLabel(code_id):
     :type code_id: int
     :returns: dictionnaire dont :
        - la clé "codex_id" prend pour valeur le paramètre code_id (int)
-       - la clé label prend pour valeur une string composée de son lieu de conservation et de sa cote.
+       - la clé "label" prend pour valeur une string composée de son lieu de conservation et de sa cote.
     :rtype: dict
     """
     cote = Codices.query.get(code_id).cote
@@ -93,14 +93,26 @@ def personneLabel(idPersonne, forme=["court", "long"]):
     """
     nomPersonne = Personnes.query.get(idPersonne).nom
     
-    # On retient pour la page le nom sans les parenthèses, sauf si elles contiennent un titre (pape,
+    # TODO compléter ci-dessous
+    # On retient pour la page QUELLE PAGE ? le nom sans les parenthèses, sauf si elles contiennent un titre (pape,
     # saint, etc)
-    
-    # Gestion des cas particuliers
-    if idPersonne == 16:
-        # Macer Floridus (auteur prétendu)
+    # TODO Test
+
+    # On ne traite pas les noms qui n'ont pas de parenthèse
+    if not "(" in nomPersonne:
         return nomPersonne
-    elif idPersonne == 15:
+    else:
+        # On ne traite pas les noms qui ne comportent pas de date numérique entre parenthèses
+        # (ex. "Macer Floridus (auteur prétendu)").
+        sansChiffre = True
+        for chiffre in "0123456789":
+            if chiffre in nomPersonne:
+                sansChiffre = False
+        if sansChiffre:
+            return nomPersonne
+
+    # Gestion des cas particuliers
+    if idPersonne == 15:
         # Odon de Meung (10..-10..)
         if forme == "long":
             return "Odon de Meung (XIe siècle)"
@@ -118,7 +130,9 @@ def personneLabel(idPersonne, forme=["court", "long"]):
     
     elif forme == "long":
         # Si l'on veut obtenir un label de nom avec les dates de la personne
-        if nomPersonne.split("(")[1][0] not in "0123456789":
+        if '(' not in nomPersonne:
+            return nomPersonne
+        elif nomPersonne.split("(")[1][0] not in "0123456789":
             # Si la forme d'autorité DataBNF place en tête de parenthèse non une date (chiffre) mais un rôle (lettre)
             parenthese = nomPersonne.split('(')[1][:-1]
             role = parenthese.split(", ")[0]
@@ -139,47 +153,70 @@ def personneLabel(idPersonne, forme=["court", "long"]):
             dateMort = dateLabel(dateMort)
             nom = f"{nomPersonne.split('(')[0][:-1]} ({dateNaissance}-{dateMort})"
             return nom
+        
     else:
         print('''Le paramètre forme n'accepte que les valeurs "long" et "court"''')
         return None
 
 
+def saisieRecherche(motscles, exclusive=None):
+    """
+    Cette fonction prend comme argument la saisie d'un utilisateur,
+    détermine si la recherche contient l'opérateur ET,
+    élimine les caractères dangereux,
+    et retourne la liste de ces mots-clés ainsi qu'un booléen.
+    :param motscles: saisie d'un utilisateur
+    :type motscles: str
+    :param exclusive: définit le comportement de la recherche par défaut
+    :type exclusive: bool
+    :returns: une liste composée de la liste de ces mots-clés ainsi qu'un booléen
+    :return type: liste
+    """
+    if not motscles:
+        return None, False
+    
+    # Si la conjonction ET est présente dans la requête, on définit la recherche comme exclusive
+    if " ET " in motscles:
+        exclusive = True
+    elif " OU " in motscles:
+        exclusive = False
+    # On supprime l'opérateur
+    motscles = motscles.replace(" ET ", " ").replace(" OU ", " ")
+    # On élimine les caractères inutiles ou potentiellement dangereux
+    caracteresInterdits = """,.!<>\;"&#^`?%{}[]|()"""
+    for caractere in caracteresInterdits:
+        motscles = motscles.replace(caractere, "")
+    # On remplace les caractères joignant deux mots par une espace
+    caracteresJointifs = "'-"
+    for caractere in caracteresJointifs:
+        motscles = motscles.replace(caractere, " ")
+    # On passe également les mots en bas de casse
+    motscles = motscles.lower()
+    # On convertit les mots-clés en liste
+    motscles = motscles.split(" ")
+    
+    
+    return [motscles, exclusive]
+
+
+def saisieTexte(texte):
+    """
+    Cette fonction prend comme argument la saisie d'un utilisateur dans un champ "texte"
+    élimine les caractères dangereux,et retourne le texte nettoyé.
+    :param texte: saisie d'un utilisateur
+    :type texte: str
+    :returns: texte nettoyé
+    :return type: str
+    """
+    caracteresInterdits = """<>\&"#^`%{}[]|"""
+    for caractere in caracteresInterdits:
+        texte = texte.replace(caractere, "")
+    
+    return texte
+
 # Les scripts suivants mettent sous la forme de dictionnaires ou d'objet Json
 # les données d'un enregistrement ou d'un objet particulier
-def pageIndex(id, quel_index=["oeuvres", "auteurs"]):
-    """
-    Cette fonction prend comme argument l'identifiant d'une oeuvre ou d'un auteur de la base de données
-    et le numéro de la page d'index où l'objet est affiché dans l'index.
-    :param id: identifiant d'un objet de la classe Oeuvres ou Personnes
-    :type id: int
-    :returns: numéro de la page d'index où l'objet est affiché dans l'index
-    :return type: int
-    """
-    if quel_index == "oeuvres":
-        classOeuvres = Oeuvres.query.order_by(Oeuvres.titre).paginate(per_page=ROWS_PER_PAGE)
-        for page in classOeuvres.iter_pages():
-            classOeuvres = Oeuvres.query.order_by(Oeuvres.titre).paginate(page=page, per_page=ROWS_PER_PAGE)
-            for data in vars(classOeuvres).items():
-                # On sélectionne la propriété items
-                if data[0] == "items":
-                    for items in data[1]:
-                        # On cherche la correspondance entre le paramètre id et les id
-                        if id == items.id:
-                            return page
-    elif quel_index == "auteurs":
-        classPersonnes = Personnes.query.order_by(Personnes.nom).paginate(per_page=ROWS_PER_PAGE)
-        for page in classPersonnes.iter_pages():
-            classPersonnes = Personnes.query.order_by(Personnes.nom).paginate(page=page, per_page=ROWS_PER_PAGE)
-            for data in vars(classPersonnes).items():
-                # On sélectionne la propriété items
-                if data[0] == "items":
-                    for items in data[1]:
-                        # On cherche la correspondance entre le paramètre id et les id
-                        if id == items.id:
-                            return page
-                        
-                        
-def oeuvreDict(objetOeuvre):
+def oeuvreDict(id):
     """
     Cette fonction prend comme argument un objet de la classe Oeuvres
     et retourne un dictionnaire de forme suivante :
@@ -191,7 +228,6 @@ def oeuvreDict(objetOeuvre):
      "auteur_id": 1,
      "auteur": "Jean Cassien (saint)",
      "auteur_ark": 12044269,
-     "auteur_pageIndex": 1,
      "attr": null
     }
     :param objetOeuvre: un objet de la classe Oeuvres
@@ -200,6 +236,7 @@ def oeuvreDict(objetOeuvre):
     :return type: dict
     """
     # Les métadonnées seront décrites dans le dictionnaire "dico"
+    objetOeuvre = Oeuvres.query.get(id)
     dico = {
         "oeuvre_id": objetOeuvre.id,
         "titre": objetOeuvre.titre,
@@ -212,7 +249,6 @@ def oeuvreDict(objetOeuvre):
         # On utilise la fonction labelPersonne() pour renseigner la forme courte du nom (sans dates)
         dico["auteur"] = personneLabel(objetOeuvre.lien_auteur.id, "court")
         dico["auteur_ark"] = objetOeuvre.lien_auteur.data_bnf
-        dico["auteur_pageIndex"] = pageIndex(objetOeuvre.lien_auteur.id, "auteurs")
     # Sinon, un seul champ est renseigné
     else:
         dico["auteur"] = None
@@ -221,7 +257,6 @@ def oeuvreDict(objetOeuvre):
         dico["attr_id"] = objetOeuvre.lien_attr.id
         dico["attr"] = personneLabel(objetOeuvre.lien_attr.id, "court")
         dico["attr_ark"] = objetOeuvre.lien_attr.data_bnf
-        dico["attr_pageIndex"] = pageIndex(objetOeuvre.lien_attr.id, "auteurs")
     else:
         dico["attr"] = None
     return dico
@@ -327,12 +362,15 @@ def codexJson(codex_id):
         dicoUC["localisation"] = localisationUClabel(objetUC.id)
         dicoUC["description"] = objetUC.descript
         dicoUC["date"] = f"entre {objetUC.date_pas_avant} et {objetUC.date_pas_apres}"
+        dicoUC["date_pas_avant"] = objetUC.date_pas_avant
+        dicoUC["date_pas_apres"] = objetUC.date_pas_apres
         dicoUC["oeuvres"] = []
         
         # Pour chaque oeuvre contenue dans l'objet UC courant, on ajoutera un dictionnaire décrivant ses métadonnées
         # en faisant appel à la fonction dicoOeuvre
-        for objetOeuvre in objetUC.contenu:
-            dicoUCcourante = oeuvreDict(objetOeuvre)
+        objetsContient = objetUC.contenu_defini_par
+        for item in objetsContient:
+            dicoUCcourante = oeuvreDict(item.a_pour_oeuvre.id)
             dicoUC["oeuvres"].append(dicoUCcourante)
         
         # On ajoute le dictionnaire décrivant le contenu de l'unité codicologique courante au dictionnaire description
@@ -340,7 +378,7 @@ def codexJson(codex_id):
     
     # Pour les provenances et l'origine du manuscrit, on opère des jointures manuelles sur la classe Provenances
     for provenance in Provenances.query.filter(Provenances.codex == codex_id):
-        # Pour l'origine du codices, on pose comme condition que l'attirbut booléen "origine" soit True
+        # Pour l'origine du codices, on pose comme condition que l'attribut booléen "origine" soit True
         if provenance.origine:
             id = Lieux.query.get(provenance.lieu).id
             label = Lieux.query.get(provenance.lieu).label
@@ -354,9 +392,10 @@ def codexJson(codex_id):
             }
             # L'attribut remarque, s'il existe, apporte un complément au label (approximation, incertitude) :
             # on les joints dans une chaîne unique.
-            if provenance.remarque:
+            if provenance.remarque and label:
                 dicoOrigine["label"] = f"{label} ({provenance.remarque})"
-            
+            elif provenance.remarque and not label:
+                dicoOrigine["label"] = f" ({provenance.remarque})"
             description["origine"].append(dicoOrigine)
         
         # Pour les autres provenances du codex
@@ -373,7 +412,7 @@ def codexJson(codex_id):
             if provenance.remarque:
                 dicoProvenance["label"] = f"{label} ({provenance.remarque})"
             description["provenances"].append(dicoProvenance)
-    
+
     # Test : export
     with open("resultats-tests/codex.json", mode="w") as jsonf:
         json.dump(description, jsonf)
@@ -383,7 +422,7 @@ def codexJson(codex_id):
 
 
 # Les scripts suivants rassemblent l'ensemble des données de la base en vue de leur exploitation
-def tousArkDict():
+def tousArkDict(idSortie=["codices", "oeuvres", "personnes"]):
     """
     Cette fonction charge dans un dictionnaire tous les identifiants arks contenus dans la base
     :return type: dict
@@ -405,34 +444,56 @@ def tousArkDict():
         "arkOeuvres": {},
         "arkPersonnes": {}
     }
-    
-    # On charge d'abord tous les codices
-    codices = Codices.query.all()
-    # On boucle sur chaque id pour récupérer, grâce à la fonction codexJson() les données de chaque codex
-    for codex in codices:
-        donneesCodex = json.loads(codexJson(codex.id))
-        for item in donneesCodex["contenu"]:
-            for oeuvre in item["oeuvres"]:
-                # Si l'oeuvre possède un ark
-                if oeuvre["data.bnf"]:
-                    # Si cet identifiant n'a pas encore été créé dans tousArk, on ajoute l'id du codex dans une liste
-                    if not tousArk["arkOeuvres"].get(oeuvre["data.bnf"]):
-                        tousArk["arkOeuvres"][oeuvre["data.bnf"]] = [codex.id]
-                    else:
-                        if codex.id not in tousArk["arkOeuvres"][oeuvre["data.bnf"]]:
-                            tousArk["arkOeuvres"][oeuvre["data.bnf"]].append(codex.id)
-                if oeuvre.get("auteur_ark"):
-                    if not tousArk["arkPersonnes"].get(oeuvre["auteur_ark"]):
-                        tousArk["arkPersonnes"][oeuvre["auteur_ark"]] = [codex.id]
-                    else:
-                        if codex.id not in tousArk["arkPersonnes"][oeuvre["auteur_ark"]]:
-                            tousArk["arkPersonnes"][oeuvre["auteur_ark"]].append(codex.id)
-                if oeuvre.get("attr_ark"):
-                    if not tousArk["arkPersonnes"].get(oeuvre["attr_ark"]):
-                        tousArk["arkPersonnes"][oeuvre["attr_ark"]] = [codex.id]
-                    else:
-                        if codex.id not in tousArk["arkPersonnes"][oeuvre["attr_ark"]]:
-                            tousArk["arkPersonnes"][oeuvre["attr_ark"]].append(codex.id)
+    if idSortie == "oeuvres":
+        toutesOeuvres = json.loads(toutesOeuvresJson())
+        for oeuvre in toutesOeuvres:
+            if oeuvre["data.bnf"]:
+                # Si cet identifiant n'a pas encore été créé dans tousArk, on ajoute l'id de l'oeuvre dans une liste
+                if not tousArk["arkOeuvres"].get(oeuvre["data.bnf"]):
+                    tousArk["arkOeuvres"][oeuvre["data.bnf"]] = [oeuvre["oeuvre_id"]]
+                else:
+                    if oeuvre["oeuvre_id"] not in tousArk["arkOeuvres"][oeuvre["data.bnf"]]:
+                        tousArk["arkOeuvres"][oeuvre["data.bnf"]].append(oeuvre["oeuvre_id"])
+    elif idSortie == "personnes":
+        toutesPersonnes = json.loads(tousAuteursJson())
+        for personne in toutesPersonnes:
+            if personne["personne_ark"]:
+                if not tousArk["arkPersonnes"].get(personne["personne_ark"]):
+                    tousArk["arkPersonnes"][personne["personne_ark"]] = [personne["personne_id"]]
+                else:
+                    if personne["personne_id"] not in tousArk["arkPersonnes"][personne["personne_ark"]]:
+                        tousArk["arkPersonnes"][personne["personne_ark"]].append(personne["personne_id"])
+    # Si l'on cherche les ark des par codices
+    else:
+        # On charge d'abord tous les codices
+        codices = Codices.query.all()
+        # On boucle sur chaque id pour récupérer, grâce à la fonction codexJson() les données de chaque codex
+        for codex in codices:
+            donneesCodex = json.loads(codexJson(codex.id))
+            for item in donneesCodex["contenu"]:
+                for oeuvre in item["oeuvres"]:
+                    # On définit le type d'identifiant à inscrire dans les valeurs de sortie
+                    # Si l'oeuvre possède un ark
+                    if oeuvre["data.bnf"]:
+                        # Si cet identifiant n'a pas encore été créé dans tousArk, on ajoute l'id du codex dans une liste
+                        if not tousArk["arkOeuvres"].get(oeuvre["data.bnf"]):
+                            tousArk["arkOeuvres"][oeuvre["data.bnf"]] = [codex.id]
+                        else:
+                            if codex.id not in tousArk["arkOeuvres"][oeuvre["data.bnf"]]:
+                                tousArk["arkOeuvres"][oeuvre["data.bnf"]].append(codex.id)
+                    if oeuvre.get("auteur_ark"):
+                        if not tousArk["arkPersonnes"].get(oeuvre["auteur_ark"]):
+                            tousArk["arkPersonnes"][oeuvre["auteur_ark"]] = [codex.id]
+                        else:
+                            if codex.id not in tousArk["arkPersonnes"][oeuvre["auteur_ark"]]:
+                                tousArk["arkPersonnes"][oeuvre["auteur_ark"]].append(codex.id)
+                    if oeuvre.get("attr_ark"):
+                        if not tousArk["arkPersonnes"].get(oeuvre["attr_ark"]):
+                            tousArk["arkPersonnes"][oeuvre["attr_ark"]] = [codex.id]
+                        else:
+                            if codex.id not in tousArk["arkPersonnes"][oeuvre["attr_ark"]]:
+                                tousArk["arkPersonnes"][oeuvre["attr_ark"]].append(codex.id)
+        
     return tousArk
 
 
@@ -491,16 +552,16 @@ def toutesOeuvresJson():
     """
     # On initie une liste vide, puis on assigne l'ensemble des objets de la classe Oeuvres à classOeuvres
     oeuvres = []
-    classOeuvres = Oeuvres.query.order_by(Oeuvres.titre).all()
+    toutesOeuvres = Oeuvres.query.order_by(Oeuvres.titre).all()
     
     # On boucle sur chaque objet
-    for objetOeuvre in classOeuvres:
+    for objetOeuvre in toutesOeuvres:
         # On décrit les métadonnées d'une oeuvre grâce à la fonction dicoOeuvre()
-        oeuvre = oeuvreDict(objetOeuvre)
-        
+        oeuvre = oeuvreDict(objetOeuvre.id)
         # Pour renseigner les codices contenant l'oeuvre
         oeuvre["contenue_dans"] = []
-        for objetUC in Oeuvres.query.get(objetOeuvre.id).unites_codico:
+        for objetContient in Oeuvres.query.get(objetOeuvre.id).contenu_defini_par:
+            objetUC = objetContient.a_pour_uc
             objetCodex = objetUC.codex
             dicoCodex = {
                 "codex_id": objetCodex.id,
@@ -512,7 +573,6 @@ def toutesOeuvresJson():
             }
             oeuvre["contenue_dans"].append(dicoCodex)
         oeuvres.append(oeuvre)
-    
     # test
     with open("resultats-tests/oeuvres.json", mode="w") as jsonf:
         json.dump(oeuvres, jsonf)
@@ -570,10 +630,17 @@ def tousAuteursJson():
         }
         # On récupère toutes les oeuvres attribuées à un auteur
         oeuvres = []
+        
+        # TODO test
+        if objetPersonne.id == 19:
+            print(f"Jules César est bien là")
+            print(f"Les oeuvres dont il est l'auteur sont {objetPersonne.oeuvres_aut}")
         if objetPersonne.oeuvres_attr:
             for oeuvre in objetPersonne.oeuvres_attr:
                 oeuvres.append(oeuvre)
         if objetPersonne.oeuvres_aut:
+            if objetPersonne.id == 19:
+                print(f"Jules César est l'auteur de {objetPersonne.oeuvres_aut}")
             for oeuvre in objetPersonne.oeuvres_aut:
                 oeuvres.append(oeuvre)
         # On trie les oeuvres alphabétiquement selon l'attribut "titre"
@@ -584,14 +651,13 @@ def tousAuteursJson():
         # sur le modèle de la fonction toutes_oeuvres()
         for oeuvre in oeuvres:
             # On applique la fonction dicoOeuvre() à nos objets
-            donneesOeuvre_recup = oeuvreDict(oeuvre)
+            donneesOeuvre_recup = oeuvreDict(oeuvre.id)
             # Les données relatives aux auteurs et aux attributions du dictionnaire "donneesOeuvre_recup"
             # n'étant pas à retenir, car déjà renseignées comme clés primaires du dictionnaire dicoPersonnes,
             # on crée un nouveau dictionnaire, "donneesOeuvre_nouv", pour y transférer seulement les clés pertinentes
             donneesOeuvre_nouv = {
                 "oeuvre_id": donneesOeuvre_recup["oeuvre_id"],
                 "titre": donneesOeuvre_recup["titre"],
-                "oeuvre_pageIndex": pageIndex(donneesOeuvre_recup["oeuvre_id"], "oeuvres"),
             }
             # On créé une nouvelle donnée si l'oeuvre possède un auteur
             if donneesOeuvre_recup["auteur"]:
@@ -664,3 +730,65 @@ def codicesListDict():
                 listDictCodices.append(dicoCodex)
     
     return listDictCodices
+
+
+def auteursListDict():
+    """
+    Cette fonction charge l'ensemble des auteurs de la base
+    les trie alphabétiquement par nom
+    et retourne, dans cet ordre, une liste de dictionnaires contenant son id, son nom et un score initié à 0.
+    :return type: list
+
+    Chaque item de la liste sera un dictionnaire selon le modèle suivant :
+    {'auteur_id': 1,
+     'nom': 'Jean Cassien (saint, v. 360-v. 432)',
+     'score': 0}
+    """
+    # On initie la liste
+    listDictAuteurs = []
+    
+    # On charge les personnes de la base
+    personnes = Personnes.query.order_by(Personnes.nom).all()
+    
+    # On boucle sur les personnes
+    for personne in personnes:
+        # Pour chaque personne, on écrit un dictionnaire
+        dicoPersonne = {
+            "personne_id": personne.id,
+            "nom": personneLabel(personne.id, "long"),
+            "score": 0
+        }
+        listDictAuteurs.append(dicoPersonne)
+    
+    return listDictAuteurs
+
+
+def oeuvresListDict():
+    """
+    Cette fonction charge l'ensemble des oeuvres de la base
+    les trie alphabétiquement par titre
+    et retourne, dans cet ordre, une liste de dictionnaires contenant son id, son titre et un score initié à 0.
+    :return type: list
+
+    Chaque item de la liste sera un dictionnaire selon le modèle suivant :
+    {'oeuvre_id': 1,
+     'titre': 'De fide et symbolo',
+     'score': 0}
+    """
+    # On initie la liste
+    listDictOeuvres = []
+    
+    # On charge les oeuvres de la base
+    oeuvres = Oeuvres.query.order_by(Oeuvres.titre).all()
+    
+    # On boucle sur les oeuvres
+    for oeuvre in oeuvres:
+        # Pour chaque oeuvre, on écrit un dictionnaire
+        dicoOeuvre = {
+            "oeuvre_id": oeuvre.id,
+            "titre": oeuvre.titre,
+            "score": 0
+        }
+        listDictOeuvres.append(dicoOeuvre)
+    
+    return listDictOeuvres
