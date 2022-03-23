@@ -46,7 +46,7 @@ Une fois la distribution Anaconda installée :
 ## Sous Linux (Ubuntu/Debian)
 - Pour installer Python 3, ouvrez un terminal et saisissez la commande :
     ```shell
-    $ sudo apt-get install python3 libfreetype6-dev python3-pip python3-virtualenv
+    $ sudo apt-get install python3 libfreetype6-dev python3-pip python3.8-venv
     ```
 - Déplacez-vous dans le dossier de l'application dézippé.
 - Créez un environnement virtuel à l'aide de la commande :
