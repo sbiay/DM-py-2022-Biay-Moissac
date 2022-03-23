@@ -1,17 +1,17 @@
 La librairie de Moissac
 ===
 
-![image](app/static/img/btv1b105254751_f336-detail.jpg)
+![image alt >](app/static/img/btv1b105254751_f336-detail.jpg)
 
-*La librairie de Moissac* est une application Python-Flask qui permet la consultation et l'enrichissement d'une base de données des manuscrits conservés dans la *librairie* (c'est-à-dire la bibliothèque) de l'abbaye Saint-Pierre de Moissac tout au long du Moyen Âge. 
+*La librairie de Moissac* est une application Python-Flask qui permet la consultation et l'enrichissement d'une base de données des manuscrits attestés dans la *librairie* (c'est-à-dire la bibliothèque) de l'abbaye Saint-Pierre de Moissac tout au long du Moyen Âge. 
 
 # Présentation générale
 ## L'histoire
-Puissante abbaye bénédictine fondée dès le VIIe siècle, l'abbaye de Moissac devint au XIe siècle un centre de production de manuscrits très actif ainsi que le donataire de nombreux autres *codices*, provenant en particulier de l'abbaye de Cluny. Ses collections firent la délectation des collectionneurs de livres anciens à partir du XVIe siècle, tout particulièrement Jean-Baptiste Colbert. Versée dans les collections de la Bibliothèque du Roi en 1732, la collection Colbert conduisit *in fine* de nombreux manuscrits faits ou possédés par l'abbaye de Moissac au sein des collections de la Bibliothèque nationale de France.
+Puissante abbaye bénédictine fondée au VIIe siècle, l'abbaye de Moissac devint au XIe siècle un centre de production de manuscrits très actif ainsi que le donataire de nombreux autres *codices*, provenant en particulier de l'abbaye de Cluny. Ses livres firent la délectation des collectionneurs à partir du XVIe siècle, tout particulièrement de Jean-Baptiste Colbert. Versée dans les collections de la Bibliothèque du Roi en 1732, la collection Colbert conduisit *in fine* de nombreux manuscrits faits ou possédés par l'abbaye de Moissac au sein des collections de la Bibliothèque nationale de France.
 
 ## Les sources des données
-Cette application propose les notices d'une petite partie de ces *codices*. Pour chacun d'entre-eux nous avons récolté les informations ayant trait à leur histoire et à leur contenu dans deux sources :
-- Les notices de ces *codices* publiées sur les sites des institutions qui les conservent, en particuliers le site de la Bibliothèque nationale de France [Archives et manuscrits](https://archivesetmanuscrits.bnf.fr) ;
+Cette application propose les notices d'une petite partie de ces *codices*. Pour chacun d'entre-eux, nous avons récolté les informations ayant trait à leur histoire et à leur contenu dans deux sources :
+- Les notices de ces *codices* publiées sur les sites des institutions qui les conservent, en particulier le site de la Bibliothèque nationale de France [Archives et manuscrits](https://archivesetmanuscrits.bnf.fr) ;
 - Le catalogue établi par Jean Dufour pour sa thèse d'École des chartes en 1963 :
     - La position de cette thèse est accessible sur le site [Thenc@ : Thèses ENC accessibles en ligne](https://bibnum.chartes.psl.eu/s/thenca/item/56764#?c=&m=&s=&cv=&xywh=-2%2C-1%2C4%2C1) ;
     - L'ouvrage a été remanié et publié par la suite : *La bibliothèque et le scriptorium de Moissac*, Genève, Droz, 1972.
