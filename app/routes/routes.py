@@ -15,7 +15,6 @@ from ..modeles.traitements import auteursListDict, codexJson, codicesListDict, c
     codexLabel, tousAuteursJson, tousArkDict, toutesOeuvresJson, saisieRecherche, saisieTexte, \
     oeuvreDict, oeuvresListDict
 from ..modeles.requetes import rechercheArk, rechercheCote
-from ..comutTest import test
 
 
 @app.route("/")
@@ -616,9 +615,6 @@ def recherche(typeRecherche=["simple", "avancee"]):
                                 pertinent = True
                     if pertinent:
                         scoreCodex += 1
-            print(f"Le codex {donneesCodex['codex_id']} a pour score {scoreCodex}")
-            print(f"La somme des auteurs et oeuvres pertinents est de \
-                {len(oeuvresPositives) + len(auteursPositifs)}")
             if len(oeuvresPositives) \
                 + len(auteursPositifs) \
                 <= scoreCodex and scoreCodex != 0:
@@ -659,6 +655,13 @@ def recherche(typeRecherche=["simple", "avancee"]):
 @app.route("/creer/<typeCreation>", methods=["GET", "POST"])
 def creer(typeCreation=["codex", "oeuvre"],
           idUC=None, oeuvreAvecAuteur=None, oeuvreAnonyme=None, auteurAbsent=None, oeuvreChoisie=None, idAuteur=None):
+    """
+    Selon le paramètre "typeCreation", cette route permet la création d'un codex ou d'une oeuvre dans la base.
+    La création d'une oeuvre est strictement conditionnée à son rattachement à une unité codicologique déterminée :
+    elle ne peut se faire que par le formulaire de mise à jour d'un codex, au niveau d'une unité codicologique
+    particulière.
+    """
+    
     if typeCreation == "codex":
         # On récupère les données nécessaires au chargement des menus :
         # On récupère la liste des lieux de conservations existants
@@ -684,6 +687,7 @@ def creer(typeCreation=["codex", "oeuvre"],
                 origines=lieuxOrigine
             )
         
+        # L'accès au formulaire de création d'un codex se fait par la méthode POST
         elif request.method == "POST":
             # On contrôle la saisie des données
             erreurs = []
@@ -721,7 +725,7 @@ def creer(typeCreation=["codex", "oeuvre"],
                                        saisieDatepasapres=request.form.get("date_pas_apres", ""),
                                        )
             
-            # S'il n'y a pas d'erreur, on récupère les valeurs
+            # S'il n'y a pas d'erreur, on récupère les valeurs en les nettoyant grâce à la fonction saisieTexte()
             cote = saisieTexte(request.form["cote"])
             id_technique = saisieTexte(request.form["id_technique"])
             descript_materielle = saisieTexte(request.form["descript_materielle"])
@@ -729,8 +733,6 @@ def creer(typeCreation=["codex", "oeuvre"],
             date_pas_avant = int(request.form.get("date_pas_avant", ""))
             date_pas_apres = int(request.form.get("date_pas_apres", ""))
             conservation_id = request.form["conservation_id"]
-            origine = request.form["origine"]
-            provient = request.form["provient"]
             unites_codico = []
             
             # Créer une première unité codicologique par défaut
@@ -748,7 +750,8 @@ def creer(typeCreation=["codex", "oeuvre"],
             else:
                 print(
                     f"L'unité codicologique par défaut du codex {idFuturCodex}"
-                    f" en cours de création a rencontré un problème.")
+                    f" en cours de création a rencontré un problème."
+                )
             
             # On crée le codex dans la base
             if Codices.creer(cote,
@@ -756,8 +759,6 @@ def creer(typeCreation=["codex", "oeuvre"],
                              descript_materielle,
                              histoire,
                              conservation_id,
-                             origine,
-                             provient,
                              unites_codico
                              )[0]:
                 return redirect(url_for("notice_codex", num=idFuturCodex)), flash("Le codex a bien été créé", "success")

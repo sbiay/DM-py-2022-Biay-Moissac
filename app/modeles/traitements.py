@@ -63,7 +63,7 @@ def codexLabel(code_id):
 
 def dateLabel(chaine):
     """Cette fonction prend une chaîne de caractère contenant une date et traite les informations
-    de type approximatif et les retourne en un certain format :
+    de type approximatif et les retourne mises en forme :
     :param chaine: chaine de caractère à traiter
     :type chaine: str
     :returns: chaine exprimant une éventuelle approximation de date de la façon suivante : v. 1550, ou av./apr. 1550.
@@ -80,10 +80,12 @@ def dateLabel(chaine):
 
 def personneLabel(idPersonne, forme=["court", "long"]):
     """
-    Cette fonction prend comme argument l'identifiant d'une personne dans la db
-    (correspondant à sa typographie selon Data-BNF)
+    Cette fonction prend comme argument l'identifiant d'une personne dans la base de données
     ainsi qu'un paramètre "forme" définissant la forme courte ou longue (sans dates ou avec dates)
-    sous laquelle le nom de la personne est retourné par la fonction
+    sous laquelle le nom de la personne est retourné par la fonction :
+        - Pour la notice d'un codex, l'index des oeuvres ou les pages de notices d'oeuvres le nom sans les dates, 
+        avec le titre éventuel de la personne entre parenthèses (pape, saint, etc).
+        - Pour l'index des auteurs ou la notice d'un auteur, on retient le nom avec les dates entre parenthèses si elles existent.
     :param idPersonne: clé primaire d'un objet de la classe Personne
     :type idPersonne: int
     :param forme: prend les valeurs "court" ou "long"
@@ -93,10 +95,8 @@ def personneLabel(idPersonne, forme=["court", "long"]):
     """
     nomPersonne = Personnes.query.get(idPersonne).nom
     
-    # TODO compléter ci-dessous
-    # On retient pour la page QUELLE PAGE ? le nom sans les parenthèses, sauf si elles contiennent un titre (pape,
-    # saint, etc)
-    # TODO Test
+    # 
+
 
     # On ne traite pas les noms qui n'ont pas de parenthèse
     if not "(" in nomPersonne:
@@ -413,10 +413,6 @@ def codexJson(codex_id):
                 dicoProvenance["label"] = f"{label} ({provenance.remarque})"
             description["provenances"].append(dicoProvenance)
 
-    # Test : export
-    with open("resultats-tests/codex.json", mode="w") as jsonf:
-        json.dump(description, jsonf)
-    
     # On retourne le dictionnaire description sous la forme d'un fichier Json
     return json.dumps(description)
 
@@ -573,9 +569,6 @@ def toutesOeuvresJson():
             }
             oeuvre["contenue_dans"].append(dicoCodex)
         oeuvres.append(oeuvre)
-    # test
-    with open("resultats-tests/oeuvres.json", mode="w") as jsonf:
-        json.dump(oeuvres, jsonf)
     
     # On retourne la liste des oeuvres sous la forme d'un objet Json
     return json.dumps(oeuvres)
@@ -631,10 +624,6 @@ def tousAuteursJson():
         # On récupère toutes les oeuvres attribuées à un auteur
         oeuvres = []
         
-        # TODO test
-        if objetPersonne.id == 19:
-            print(f"Jules César est bien là")
-            print(f"Les oeuvres dont il est l'auteur sont {objetPersonne.oeuvres_aut}")
         if objetPersonne.oeuvres_attr:
             for oeuvre in objetPersonne.oeuvres_attr:
                 oeuvres.append(oeuvre)
@@ -686,10 +675,7 @@ def tousAuteursJson():
         # On ajout le dictionnaire complet à la liste
         personnes.append(dicoPersonne)
     
-    # On écrit le dictionnaire "personnes" dans un fichier Json
-    with open("resultats-tests/auteurs.json", mode="w") as f:
-        json.dump(personnes, f)
-    
+    # On retourne le dictionnaire "personnes" en tant que fichier Json
     return json.dumps(personnes)
 
 

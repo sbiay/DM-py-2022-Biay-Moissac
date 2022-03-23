@@ -51,7 +51,8 @@ class Codices(db.Model):
     provient = db.relationship("Provenances", back_populates="codex_provenant")
     
     @staticmethod
-    def creer(cote, id_technique, descript_materielle, histoire, conservation_id, origine, provient, unites_codico):
+    def creer(cote, id_technique, descript_materielle, histoire, conservation_id, unites_codico, origine=None,
+              provient=None):
         """
         Création d'un codex dans la base de données.
         """
@@ -130,9 +131,10 @@ class Unites_codico(db.Model):
         """
         Création d'une unité codicologique dans la base de données.
         """
-        # TODO ajouter un test des valeurs entrantes
         
         # On crée les données de la nouvelle unité codicologique
+        # dont certaines ne peuvent pas en l'état de l'application être renseignées par un utilisateur
+        # (descript, loc…)
         nouvelleUC = Unites_codico(
             descript=descript,
             loc_init=loc_init,
