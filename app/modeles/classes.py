@@ -131,9 +131,10 @@ class Unites_codico(db.Model):
         """
         Création d'une unité codicologique dans la base de données.
         """
-        # TODO ajouter un test des valeurs entrantes
         
         # On crée les données de la nouvelle unité codicologique
+        # dont certaines ne peuvent pas en l'état de l'application être renseignées par un utilisateur
+        # (descript, loc…)
         nouvelleUC = Unites_codico(
             descript=descript,
             loc_init=loc_init,

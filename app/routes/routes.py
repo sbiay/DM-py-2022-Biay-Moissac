@@ -15,7 +15,6 @@ from ..modeles.traitements import auteursListDict, codexJson, codicesListDict, c
     codexLabel, tousAuteursJson, tousArkDict, toutesOeuvresJson, saisieRecherche, saisieTexte, \
     oeuvreDict, oeuvresListDict
 from ..modeles.requetes import rechercheArk, rechercheCote
-from ..comutTest import test
 
 
 @app.route("/")
@@ -684,6 +683,7 @@ def creer(typeCreation=["codex", "oeuvre"],
                 origines=lieuxOrigine
             )
         
+        # L'accès au formulaire de création d'un codex se fait par la méthode POST
         elif request.method == "POST":
             # On contrôle la saisie des données
             erreurs = []
@@ -721,7 +721,7 @@ def creer(typeCreation=["codex", "oeuvre"],
                                        saisieDatepasapres=request.form.get("date_pas_apres", ""),
                                        )
             
-            # S'il n'y a pas d'erreur, on récupère les valeurs
+            # S'il n'y a pas d'erreur, on récupère les valeurs en les nettoyant grâce à la fonction saisieTexte()
             cote = saisieTexte(request.form["cote"])
             id_technique = saisieTexte(request.form["id_technique"])
             descript_materielle = saisieTexte(request.form["descript_materielle"])
