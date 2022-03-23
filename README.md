@@ -1,6 +1,8 @@
 La librairie de Moissac
 ===
 
+![image](app/static/img/btv1b105254751_f336-detail.jpg)
+
 *La librairie de Moissac* est une application Python-Flask qui permet la consultation et l'enrichissement d'une base de données des manuscrits conservés dans la *librairie* (c'est-à-dire la bibliothèque) de l'abbaye Saint-Pierre de Moissac tout au long du Moyen Âge. 
 
 # Présentation générale
@@ -67,6 +69,20 @@ $ sudo apt-get install python3 libfreetype6-dev python3-pip python3-virtualenv
     ```
 - Vous devriez pouvoir ouvrir l'application dans un navigateur web grâce à [ce lien](http://127.0.0.1:5000/).
 
+# Sélection des données et choix de modélisation
+Tout en récoltant les descriptions à caractère historique et matérielle proposées par les notices du site [Archives et manuscrits](https://archivesetmanuscrits.bnf.fr) ainsi que certaines informations à caractère paléographique (plutôt issue de l'ouvrage de J. Dufour), nous avons modélisé dans notre base de données les informations suivantes :
+- La plus grande attention a été accordée aux **oeuvres** contenues dans les *codices* avec leur **auteur** ;
+- Nous avons également modélisé l'**origine** de ces *codices*, c'est-à-dire le lieu (ou les lieux hypothétiques) où ils ont été fabriqués (qui n'est pas toujours Moissac) ;
+- Ainsi que les lieux de **provenances** de ces manuscrits, c'est-à-dire les lieux autres que Moissac (dénominateur commun de notre collection) où ils ont été conservés au Moyen Âge ou à l'époque moderne (notamment les collections comme celle de Colbert).
+
+## Modèle conceptuel
+![modele-conceptuel](./app/db/mcd.svg)
+
+## Les unités codicologiques
+Nous avons opté pour un modèle conceptuel qui distingue les *codices* des **unités codicologiques** qui les composent. La plupart des *codices* sont d'un seul tenant : ils ne contiennent donc qu'une seule unité codicologique. 
+
+D'autres sont de nature composite, en particulier **Paris, BnF, Latin 2077**. Les oeuvres contenues ont donc été associées à chacune de ces unités plutôt qu'au *codex* en général, et ce afin d'en respecter la chronologie propre en particulier.
+
 # Fonctionnalités
 ## Recherche
 L'application propose deux modalités de recherche dans la base de données : simple et avancée.
@@ -127,19 +143,6 @@ Cette démarche a été développée avec de manière contraignante : seuls les 
 
 Ce privilège accordé aux données liées apporte de l'eau au moulin des fonctionnalités de recherche de l'application, exposée ci-dessus.
 
-# Sélection des données et choix de modélisation
-Tout en récoltant les descriptions à caractère historique et matérielle proposées par les notices du site [Archives et manuscrits](https://archivesetmanuscrits.bnf.fr) ainsi que certaines informations à caractère paléographique (plutôt issue de l'ouvrage de J. Dufour), nous avons modélisé dans notre base de données les informations suivantes :
-- La plus grande attention a été accordée aux **oeuvres** contenues dans les *codices* avec leur **auteur** ;
-- Nous avons également modélisé l'**origine** de ces *codices*, c'est-à-dire le lieu (ou les lieux hypothétiques) où ils ont été fabriqués (qui n'est pas toujours Moissac) ;
-- Ainsi que les lieux de **provenances** de ces manuscrits, c'est-à-dire les lieux autres que Moissac (dénominateur commun de notre collection) où ils ont été conservés au Moyen Âge ou à l'époque moderne (notamment les collections comme celle de Colbert).
-
-## Modèle conceptuel
-![modele-conceptuel](./app/db/mcd.svg)
-
-## Les unités codicologiques
-Nous avons opté pour un modèle conceptuel qui distingue les *codices* des **unités codicologiques** qui les composent. La plupart des *codices* sont d'un seul tenant : ils ne contiennent donc qu'une seule unité codicologique. 
-
-D'autres sont de nature composite, en particulier **Paris, BnF, Latin 2077**. Les oeuvres contenues ont donc été associées à chacune de ces unités plutôt qu'au *codex* en général, et ce afin d'en respecter la chronologie propre en particulier.
 
 # Développements possibles
 ## Création et mise à jour
