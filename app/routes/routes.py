@@ -615,9 +615,6 @@ def recherche(typeRecherche=["simple", "avancee"]):
                                 pertinent = True
                     if pertinent:
                         scoreCodex += 1
-            print(f"Le codex {donneesCodex['codex_id']} a pour score {scoreCodex}")
-            print(f"La somme des auteurs et oeuvres pertinents est de \
-                {len(oeuvresPositives) + len(auteursPositifs)}")
             if len(oeuvresPositives) \
                 + len(auteursPositifs) \
                 <= scoreCodex and scoreCodex != 0:
@@ -658,6 +655,13 @@ def recherche(typeRecherche=["simple", "avancee"]):
 @app.route("/creer/<typeCreation>", methods=["GET", "POST"])
 def creer(typeCreation=["codex", "oeuvre"],
           idUC=None, oeuvreAvecAuteur=None, oeuvreAnonyme=None, auteurAbsent=None, oeuvreChoisie=None, idAuteur=None):
+    """
+    Selon le paramètre "typeCreation", cette route permet la création d'un codex ou d'une oeuvre dans la base.
+    La création d'une oeuvre est strictement conditionnée à son rattachement à une unité codicologique déterminée :
+    elle ne peut se faire que par le formulaire de mise à jour d'un codex, au niveau d'une unité codicologique
+    particulière.
+    """
+    
     if typeCreation == "codex":
         # On récupère les données nécessaires au chargement des menus :
         # On récupère la liste des lieux de conservations existants
