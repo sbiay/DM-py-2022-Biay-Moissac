@@ -746,7 +746,8 @@ def creer(typeCreation=["codex", "oeuvre"],
             else:
                 print(
                     f"L'unité codicologique par défaut du codex {idFuturCodex}"
-                    f" en cours de création a rencontré un problème.")
+                    f" en cours de création a rencontré un problème."
+                )
             
             # On crée le codex dans la base
             if Codices.creer(cote,
