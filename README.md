@@ -155,6 +155,8 @@ En l'état de l'application, plusieurs fonctionnalités ne sont pas offertes à 
 ## Modélisation des données
 La structuration actuelle des *codices* en unités codicologiques ne permet pas d'associer deux parties d'un codex, séparées l'une de l'autre et pourtant conçues dans le même temps. Le problème se pose avec le codex 6 : Paris, BnF, Latin 1656A. Il comporte deux additions, au début et à la fin de l'ouvrage, qui devraient former une seule "unité codicologique" (ou addition significative) dont la localisation dans le codex serait discontinue. C'est un cas rare.
 
+L'entité **Personnes** a été envisagée non seulement pour recevoir les auteurs des entités de type **Oeuvres** mais aussi pour les possesseurs des manuscrits. Cette relation n'a pas été implémentée dans l'application pour le moment.
+
 # Contenu de la base de données et particularités de modélisation
 ## Exhaustivité des données
 La description du contenu textuel des *codices* est exhaustive pour les *codices* portant les identifiants de 1 à 5 ; elle est en revanche partielle pour le codex 6.
@@ -169,13 +171,13 @@ Concernant l'**origine** des *codices* et la **datation** des unités codicologi
 Les informations relatives au manuscrit London, Harley 3078 ont été traduites par nos soins à partir de celles présentées sur la notice institutionnelle (accessible [ici](https://www.bl.uk/catalogues/illuminatedmanuscripts/record.asp?MSID=4097&CollID=8&NStart=3078)).
 
 ## Définition des entités et des attributs de la base de données
-- Unités codicologiques :
+- **Unités codicologiques** :
     - `descript` : cet attribut est dévolu à une description facultative de l'unité codicologique ; deux cas de figure se présentent : 
         - Si le codex ne comprend qu'une seule unité codicologique, on ne renseignera que d'éventuelles considérations paléographiques (apparaîtra sous le titre "Paléographie" dans le *frontend* de la notice) ;
         - Si le codex comprend plusieurs unités codicologiques, aux considérations paléographiques on pourra adjoindre une description matérielle de l'unité codicologique (elle apparaîtra alors comme paragraphe d'introduction à la liste des oeuvres de l'unité codicologique).
-- Oeuvres :
+- **Oeuvres** :
     - `attr` : cet attribut, qui renseigne l'identifiant d'un auteur, signifie qu'il peut s'agir d'une attribution apocryphe ou bien d'une hypothèse analytique.
 
-- Provenances : 
+- **Provenances** : 
     cette table de relation dotée d'attributs complémentaires rassemble les informations relatives à la fois à l'origine (booléen) et aux provenances des manuscrits. Ces relations prennent pour cible des entités de la classe Codices et non des entités de type unités codicologiques.
     - `cas_particulier` : cet attribut permet, en tant que clé étrangère, de relier éventuellement un enregistrement à une UC particulière.
