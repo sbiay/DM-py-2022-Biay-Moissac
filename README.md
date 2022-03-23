@@ -16,7 +16,6 @@ Cette application propose les notices d'une petite partie de ces *codices*. Pour
     - La position de cette thèse est accessible sur le site [Thenc@ : Thèses ENC accessibles en ligne](https://bibnum.chartes.psl.eu/s/thenca/item/56764#?c=&m=&s=&cv=&xywh=-2%2C-1%2C4%2C1) ;
     - L'ouvrage a été remanié et publié par la suite : *La bibliothèque et le scriptorium de Moissac*, Genève, Droz, 1972.
 
-
 # Installation
 Téléchargez l'archive zip de l'application, disponible sur cette page via le bouton **Code**, puis dézippez-la dans le dossier de votre choix.
 
@@ -142,9 +141,38 @@ Cette démarche a été développée avec de manière contraignante : seuls les 
 
 Ce privilège accordé aux données liées apporte de l'eau au moulin des fonctionnalités de recherche de l'application, exposée ci-dessus.
 
-
 # Développements possibles
 ## Création et mise à jour
-- Il n'est pas possible de créer de nouvelles unités codicologiques ;
-- Il n'est pas possible de créer des auteurs et des oeuvres absents de Data-BNF ;
-- Proposer un filtre de recherche par date.
+En l'état de l'application, plusieurs fonctionnalités ne sont pas offertes à l'utilisateur et constitueraient des développements jugés prioritaires :
+- Créer de nouvelles unités codicologiques ;
+- Créer des auteurs ou des oeuvres absents de Data-BNF ;
+- Filtrer les recherches par date ;
+- Ajouter des liens de type **attribution** entre une oeuvre et une personne.
+
+## Modélisation des données
+La structuration actuelle des *codices* en unités codicologiques ne permet pas d'associer deux parties d'un codex, séparées l'une de l'autre et pourtant conçues dans le même temps. Le problème se pose avec le codex 6 : Paris, BnF, Latin 1656A. Il comporte deux additions, au début et à la fin de l'ouvrage, qui devraient former une seule "unité codicologique" (ou addition significative) dont la localisation dans le codex serait discontinue. C'est un cas rare.
+
+# Contenu de la base de données et particularités de modélisation
+## Exhaustivité des données
+La description du contenu textuel des *codices* est exhaustive pour les *codices* portant les identifiants de 1 à 5 ; elle est en revanche partielle pour le codex 6.
+
+## Source des descriptions
+Les descriptions textuelles (matérialité, histoire) sont issues des notices de la BNF telles que publiées sur le site Archives et manuscrits.
+
+Les citations issues de l'ouvrage de J. Dufour sont accompagnées de la mention **(JD, BSM)**.
+
+Concernant l'**origine** des *codices* et la **datation** des unités codicologiques, les informations fournies par J. Dufour ont été privilégiées.
+
+
+Les informations relatives au manuscrit London, Harley 3078 ont été traduites par nos soins à partir des informations présentées sur la notice institutionnelle (accessible [ici](https://www.bl.uk/catalogues/illuminatedmanuscripts/record.asp?MSID=4097&CollID=8&NStart=3078)).
+
+## Définition des entités et des attributs de la base de données
+- Unités codicologiques :
+    - `descript` : cet attribut est dévolu à une description facultative de l'unité codicologique ; deux cas de figure se présentent : 
+        - Si le codex ne comprend qu'une seule unité codicologique, on ne renseignera que d'éventuelles considérations paléographiques (apparaîtra sous le titre "Paléographie" dans le *frontend* de la notice) ;
+        - Si le codex comprend plusieurs unités codicologiques, aux considérations paléographiques on pourra adjoindre une description matérielle de l'unité codicologique (elle apparaîtra alors comme paragraphe d'introduction à la liste des oeuvres de l'unité codicologique).
+- Oeuvres :
+    - `attr` : cet attribut, qui renseigne l'identifiant d'un auteur, signifie qu'il peut s'agir d'une attribution apocryphe ou bien d'une hypothèse analytique.
+
+- Provenances : cette table de relation dotée d'attributs complémentaires rassemble les informations relatives à la fois à l'origine (booléen) et aux provenances des manuscrits. Ces relations prennent pour cible des entités de la classe Codices et non des entités de type unités codicologiques.
+    - `cas_particulier` : cet attribut permet, en tant que clé étrangère, de relier éventuellement un enregistrement à une UC particulière.
