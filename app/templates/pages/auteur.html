@@ -16,18 +16,20 @@
             <h2>Oeuvres</h2>
             {% for oeuvre in dictPersonne["oeuvres"] %}
                 <!-- Pour les titres des oeuvres -->
-                <a href="{{ url_for("noticeOeuvre", id=oeuvre["oeuvre_id"]|string) }}">
-                    <i>{{ oeuvre["titre"] }}</i>
-                </a>
+                <head>
+                    <a href="{{ url_for("noticeOeuvre", id=oeuvre["oeuvre_id"]|string) }}">
+                        <i>{{ oeuvre["titre"] }}</i>
+                    </a>
+                </head>
                 {% if oeuvre["relation"] == "a pour attribution" %}
                     <span> (attribué à)</span>
                 {% endif %}
                 <!-- Pour les codices qui les contiennent-->
-                {% for codex in oeuvre["contenue_dans"] %}
-                    <ul>
+                <ul>
+                    {% for codex in oeuvre["contenue_dans"] %}
                         <li><a href="{{ url_for('notice_codex', num=codex["codex_id"])}}">{{codex["label"]}}</a></li>
-                    </ul>
-                {% endfor %}
+                    {% endfor %}
+                </ul>
             {% endfor %}
         </div>
 

@@ -18,11 +18,11 @@
     {% endif %}
     <!-- Pour les codices qui la contiennent-->
     <h2>Contenue dans</h2>
-    {% for codex in dictOeuvre["contenue_dans"] %}
-        <ul>
+    <ul>
+        {% for codex in dictOeuvre["contenue_dans"] %}
             <li><a href="{{ url_for('notice_codex', num=codex["codex_id"])}}">{{codex["label"]}}</a></li>
-        </ul>
-    {% endfor %}
+        {% endfor %}
+    </ul>
     {% if dictOeuvre["data.bnf"] %}
         <h2>Liens</h2>
         <p><a href="https://data.bnf.fr/{{ dictOeuvre['data.bnf'] }}">Lien vers la notice Data-BNF</a>.</p>

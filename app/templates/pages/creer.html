@@ -9,7 +9,7 @@
         <h1>Création {{ "d'un " + titre }}</h1>
 
         <br>
-
+        <!--Saisie de la cote-->
         <form class="row g-3" method="POST" action="{{url_for("creer", typeCreation="codex")}}">
             <div class="col-md-6 mb-3">
                 <label for="register-cote" class="form-label">Cote</label>
@@ -17,18 +17,21 @@
                     <input type="text" class="form-control" id="register-cote" name="cote" placeholder="ex. Latin 2077" {% if saisieCote %}value="{{ saisieCote }}"{% endif %}>
                 </div>
             </div>
+            <!--Saisie de l'identifiant technique-->
             <div class="col-md-6 mb-3">
                 <label for="register-id-technique" class="form-label">Identifiant technique</label>
                 <div class="">
                     <input type="text" class="form-control" id="register-id-technique" name="id_technique" placeholder="ex. ark:/12148/cc599714" {% if saisieIdentifiant %}value="{{ saisieIdentifiant }}"{% endif %}>
                 </div>
             </div>
+            <!--Saisie d'une description matérielle-->
             <div class="col-12 mb-3">
                 <label for="register-descript-materielle" class="form-label">Description matérielle</label>
                 <div class="">
                     <input type="textarea" class="form-control" id="register-descript-materielle" name="descript_materielle" placeholder="Description matérielle de la reliure" {% if saisieDescription %}value="{{ saisieDescription }}"{% endif %}>
                 </div>
             </div>
+            <!--Saisie des informations sur l'histoire du manuscrit-->
             <div class="col-12 mb-3">
                 <label for="register-histoire" class="form-label">Histoire</label>
                 <div class="">
@@ -37,6 +40,7 @@
                            name="histoire" {% if saisieHistoire %}value="{{ saisieHistoire }}"{% endif %}>
                 </div>
             </div>
+            <!--Saisie d'une date de début-->
             <div class="col-md-6 mb-3">
                 <label class="form-label">Date de début</label>
                 <div class="">
@@ -45,6 +49,7 @@
                            name="date_pas_avant" {% if saisieDatepasavant %}value="{{ saisieDatepasavant }}"{% endif %}>
                 </div>
             </div>
+            <!--Saisie d'une date de fin-->
             <div class="col-md-6 mb-3">
                 <label class="form-label">Date de fin</label>
                 <div class="">
@@ -53,6 +58,7 @@
                            name="date_pas_apres" {% if saisieDatepasapres %}value="{{ saisieDatepasapres }}"{% endif %}>
                 </div>
             </div>
+            <!--Sélection d'un lieu de conservation-->
             <div class="col-md-6 mb-3">
                 <label for="register-conservation"
                        class="form-label {% if 'conservation_id' in erreurs %}is-invalid{% endif %}">
@@ -64,36 +70,6 @@
                         <option value="{{ lieu.id }}" {% if lieu.id == lieuParDefaut.id %}selected{% endif %}>
                             <!-- Contenu affiché dans le champ -->
                             {{ lieu.localite + ", " + lieu.label }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-md-6 mb-3">
-                <label for="register-origine" class="form-label">Origine</label>
-                <select name="origine" class="form-select" id="register-origine">
-                    <option value=""/>
-                    {% for lieu in origines %}
-                        <option value="{{ lieu.id }}">
-                            {% if lieu.label %}
-                                {{ lieu.localite + ", " + lieu.label }}
-                            {% else %}
-                                {{ lieu.localite }}
-                            {% endif %}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-md-6 mb-3">
-                <label for="register-provenance" class="form-label">Provenance</label>
-                <select name="provient" class="form-select" id="register-provenance">
-                    <option value=""/>
-                    {% for lieu in provenances %}
-                        <option value="{{ lieu.id }}">
-                            {% if lieu.label %}
-                                {{ lieu.localite + ", " + lieu.label }}
-                            {% else %}
-                                {{ lieu.localite }}
-                            {% endif %}
                         </option>
                     {% endfor %}
                 </select>
@@ -176,12 +152,14 @@
                 <thead>
                 <tr>
                     <th id="col1" scope="col">Nom</th>
+                    <th id="col2" scope="col">Lien</th>
                     <th id="col3" scope="col">Ajouter</th>
                 </tr>
                 <tbody id="listeResultats">
                 {% for resultat in resultats %}
                     <tr>
                         <td>{{ resultat.nomFr.value }}</td>
+                        <td><a href="{{ resultat.uriAbout.value }}">lien vers Data-BNF</a></td>
                         <td>
                             <form class="" method="POST"
                                   action="{{url_for("creer", typeCreation="oeuvre", idUC=idUC, oeuvreAvecAuteur=True, auteurAbsent=True)}}">
