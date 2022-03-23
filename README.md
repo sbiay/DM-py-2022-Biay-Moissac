@@ -133,6 +133,9 @@ Tout en récoltant les descriptions à caractère historique et matérielle prop
 - Nous avons également modélisé l'**origine** de ces *codices*, c'est-à-dire le lieu (ou les lieux hypothétiques) où ils ont été fabriqués (qui n'est pas toujours Moissac) ;
 - Ainsi que les lieux de **provenances** de ces manuscrits, c'est-à-dire les lieux autres que Moissac (dénominateur commun de notre collection) où ils ont été conservés au Moyen Âge ou à l'époque moderne (notamment les collections comme celle de Colbert).
 
+## Modèle conceptuel
+![modele-conceptuel](./app/db/mcd.svg)
+
 ## Les unités codicologiques
 Nous avons opté pour un modèle conceptuel qui distingue les *codices* des **unités codicologiques** qui les composent. La plupart des *codices* sont d'un seul tenant ; d'autres sont de nature composite, en particulier **Paris, BnF, Latin 2077**. Les oeuvres contenues ont donc été associées à chacune de ces unités plutôt qu'au codex en général, et ce afin d'en respecter en particulier la chronologie propre.
 
