@@ -137,7 +137,9 @@ Tout en récoltant les descriptions à caractère historique et matérielle prop
 ![modele-conceptuel](./app/db/mcd.svg)
 
 ## Les unités codicologiques
-Nous avons opté pour un modèle conceptuel qui distingue les *codices* des **unités codicologiques** qui les composent. La plupart des *codices* sont d'un seul tenant ; d'autres sont de nature composite, en particulier **Paris, BnF, Latin 2077**. Les oeuvres contenues ont donc été associées à chacune de ces unités plutôt qu'au codex en général, et ce afin d'en respecter en particulier la chronologie propre.
+Nous avons opté pour un modèle conceptuel qui distingue les *codices* des **unités codicologiques** qui les composent. La plupart des *codices* sont d'un seul tenant : ils ne contiennent donc qu'une seule unité codicologique. 
+
+D'autres sont de nature composite, en particulier **Paris, BnF, Latin 2077**. Les oeuvres contenues ont donc été associées à chacune de ces unités plutôt qu'au *codex* en général, et ce afin d'en respecter la chronologie propre en particulier.
 
 # Développements possibles
 ## Création et mise à jour
