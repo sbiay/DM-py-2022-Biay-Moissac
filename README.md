@@ -1,7 +1,7 @@
 La librairie de Moissac
 ===
 
-![image alt >](app/static/img/btv1b105254751_f72.jpg)
+![Paris-BNF-Lat-2077-f32v](app/static/img/btv1b105254751_f72.jpg)
 
 *La librairie de Moissac* est une application Python-Flask qui permet la consultation et l'enrichissement d'une base de données des manuscrits attestés dans la *librairie* (c'est-à-dire la bibliothèque) de l'abbaye Saint-Pierre de Moissac tout au long du Moyen Âge. 
 
@@ -24,15 +24,15 @@ Téléchargez l'archive zip de l'application, disponible sur cette page via le b
 L'installation de Python 3 est nécessaire pour utiliser cette application. Nous recommandons la distribution [Anaconda](https://www.anaconda.com/products/individual).
 
 Une fois la distribution Anaconda installée :
-- Lancer depuis le menu Démarrer l'**Anaconda Powershell Prompt** ;
-- Déplacez-vous dans le dossier de l'application dézippé.
+- Lancez depuis le menu Démarrer l'**Anaconda Powershell Prompt** ;
+- Déplacez-vous dans le dossier de l'application dézippée ;
 - Créez un environnement virtuel à l'aide de la commande :
     ```shell
     $ python3 -m venv env
     ```
 - Activez cet environnement virtuel à l'aide de la commande (opération à **réitérer** à chaque lancement de l'application) :
     ```shell
-    $ source venv/bin/activate
+    $ source env/bin/activate
     ```
 - Installer les modules requis grâce à la commande :
     ```shell
@@ -45,11 +45,10 @@ Une fois la distribution Anaconda installée :
 - Vous devriez pouvoir ouvrir l'application dans un navigateur web grâce à [ce lien](http://127.0.0.1:5000/).
 
 ## Sous Linux (Ubuntu/Debian)
-Pour installer Python 3, ouvrez un terminal et saisissez la commande :
-```shell
-$ sudo apt-get install python3 libfreetype6-dev python3-pip python3-virtualenv
-```
-
+- Pour installer Python 3, ouvrez un terminal et saisissez la commande :
+    ```shell
+    $ sudo apt-get install python3 libfreetype6-dev python3-pip python3-virtualenv
+    ```
 - Déplacez-vous dans le dossier de l'application dézippé.
 - Créez un environnement virtuel à l'aide de la commande :
     ```shell
@@ -57,7 +56,7 @@ $ sudo apt-get install python3 libfreetype6-dev python3-pip python3-virtualenv
     ```
 - Activez cet environnement virtuel à l'aide de la commande (opération à **réitérer** à chaque lancement de l'application) :
     ```shell
-    $ source venv/bin/activate
+    $ source env/bin/activate
     ```
 - Installer les modules requis grâce à la commande :
     ```shell
@@ -70,7 +69,7 @@ $ sudo apt-get install python3 libfreetype6-dev python3-pip python3-virtualenv
 - Vous devriez pouvoir ouvrir l'application dans un navigateur web grâce à [ce lien](http://127.0.0.1:5000/).
 
 # Sélection des données et choix de modélisation
-Tout en récoltant les descriptions à caractère historique et matérielle proposées par les notices du site [Archives et manuscrits](https://archivesetmanuscrits.bnf.fr) ainsi que certaines informations à caractère paléographique (plutôt issue de l'ouvrage de J. Dufour), nous avons modélisé dans notre base de données les informations suivantes :
+Tout en récoltant les descriptions à caractère historique et matériel proposées par les notices du site [Archives et manuscrits](https://archivesetmanuscrits.bnf.fr) ainsi que certaines informations à caractère paléographique (plutôt issue de l'ouvrage de J. Dufour), nous avons modélisé dans notre base de données les informations suivantes :
 - La plus grande attention a été accordée aux **oeuvres** contenues dans les *codices* avec leur **auteur** ;
 - Nous avons également modélisé l'**origine** de ces *codices*, c'est-à-dire le lieu (ou les lieux hypothétiques) où ils ont été fabriqués (qui n'est pas toujours Moissac) ;
 - Ainsi que les lieux de **provenances** de ces manuscrits, c'est-à-dire les lieux autres que Moissac (dénominateur commun de notre collection) où ils ont été conservés au Moyen Âge ou à l'époque moderne (notamment les collections comme celle de Colbert).
@@ -81,7 +80,7 @@ Tout en récoltant les descriptions à caractère historique et matérielle prop
 ## Les unités codicologiques
 Nous avons opté pour un modèle conceptuel qui distingue les *codices* des **unités codicologiques** qui les composent. La plupart des *codices* sont d'un seul tenant : ils ne contiennent donc qu'une seule unité codicologique. 
 
-D'autres sont de nature composite, en particulier **Paris, BnF, Latin 2077**. Les oeuvres contenues ont donc été associées à chacune de ces unités plutôt qu'au *codex* en général, et ce afin d'en respecter la chronologie propre en particulier.
+D'autres sont de nature composite, en particulier **Paris, BnF, Latin 2077**. Les oeuvres contenues ont donc été associées à chacune de ces unités plutôt qu'au *codex* en général, et ce afin d'en respecter la chronologie propre.
 
 # Fonctionnalités
 ## Recherche
@@ -147,4 +146,5 @@ Ce privilège accordé aux données liées apporte de l'eau au moulin des foncti
 # Développements possibles
 ## Création et mise à jour
 - Il n'est pas possible de créer de nouvelles unités codicologiques ;
-- Il n'est pas possible de créer des auteurs et des oeuvres absents de Data-BNF.
+- Il n'est pas possible de créer des auteurs et des oeuvres absents de Data-BNF ;
+- Proposer un filtre de recherche par date.
