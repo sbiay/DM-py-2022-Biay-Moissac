@@ -34,7 +34,10 @@ def localisationUClabel(uc_id):
             rvfin = "v"
         else:
             rvfin = ""
-        locUC = f"f. {str(UC.loc_init)}{rvdebut}-{str(UC.loc_fin)}{rvfin}"
+        if f"{str(UC.loc_init)}{rvdebut}" == f"{str(UC.loc_fin)}{rvfin}":
+            locUC = f"f. {str(UC.loc_init)}{rvdebut}"
+        else:
+            locUC = f"f. {str(UC.loc_init)}{rvdebut}-{str(UC.loc_fin)}{rvfin}"
     return locUC
 
 
