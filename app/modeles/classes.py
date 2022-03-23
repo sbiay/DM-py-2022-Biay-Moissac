@@ -51,7 +51,8 @@ class Codices(db.Model):
     provient = db.relationship("Provenances", back_populates="codex_provenant")
     
     @staticmethod
-    def creer(cote, id_technique, descript_materielle, histoire, conservation_id, origine, provient, unites_codico):
+    def creer(cote, id_technique, descript_materielle, histoire, conservation_id, unites_codico, origine=None,
+              provient=None):
         """
         Création d'un codex dans la base de données.
         """

@@ -729,8 +729,6 @@ def creer(typeCreation=["codex", "oeuvre"],
             date_pas_avant = int(request.form.get("date_pas_avant", ""))
             date_pas_apres = int(request.form.get("date_pas_apres", ""))
             conservation_id = request.form["conservation_id"]
-            origine = request.form["origine"]
-            provient = request.form["provient"]
             unites_codico = []
             
             # Créer une première unité codicologique par défaut
@@ -756,8 +754,6 @@ def creer(typeCreation=["codex", "oeuvre"],
                              descript_materielle,
                              histoire,
                              conservation_id,
-                             origine,
-                             provient,
                              unites_codico
                              )[0]:
                 return redirect(url_for("notice_codex", num=idFuturCodex)), flash("Le codex a bien été créé", "success")
