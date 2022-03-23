@@ -1,7 +1,7 @@
 La librairie de Moissac
 ===
 
-![image alt >](app/static/img/btv1b105254751_f336-detail.jpg)
+![image alt >](app/static/img/btv1b105254751_f72.jpg)
 
 *La librairie de Moissac* est une application Python-Flask qui permet la consultation et l'enrichissement d'une base de données des manuscrits attestés dans la *librairie* (c'est-à-dire la bibliothèque) de l'abbaye Saint-Pierre de Moissac tout au long du Moyen Âge. 
 
