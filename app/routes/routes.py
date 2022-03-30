@@ -272,6 +272,24 @@ def notice_codex(num, idUC=None):
             else:
                 flash("L'association de l'oeuvre a rencontré un problème", "error")
         
+        # Pour supprimer le codex
+        if request.form.get("codexSuppr", "").strip():
+            # On récupère l'identifiant du codex à supprimer
+            idAsupprimer = request.form["codexSuppr"]
+            # On filtre les provenances à supprimer
+            provenancesAsupprimer = Provenances.query.filter(Provenances.codex == idAsupprimer).all()
+            codexAsupprimer = Codices.query.get(num)
+            try:
+                for item in provenancesAsupprimer:
+                    db.session.delete(item)
+                    db.session.commit()
+                db.session.delete(codexAsupprimer)
+                db.session.commit()
+                flash("Le codex a été correctement supprimé.", "success")
+                return redirect(url_for("accueil"))
+            except Exception as erreur:
+                flash("La suppression a rencontré un problème.", "error")
+        
         # On recharge les données du codex
         codex = json.loads(codexJson(num))
         

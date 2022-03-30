@@ -162,7 +162,7 @@
                     <button class="btn btn-outline-success" type="submit" role="button">Revenir à la notice</button>
                 </form>
                 <form class="d-flex" method="POST" action="{{url_for("notice_codex", num=id)}}">
-                    <button class="btn btn-outline-danger" name="codexSuppr" type="submit" role="button">Supprimer le codex</button>
+                    <button class="btn btn-outline-danger" value="{{ id }}" name="codexSuppr" type="submit" role="button">Supprimer le codex</button>
                 </form>
             </div>
             <br>
