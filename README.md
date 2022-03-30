@@ -41,7 +41,7 @@ Une fois la distribution Anaconda installée :
     ```shell
     pip install -r requirements.txt
     ```
-- Ouvrez dans un éditeur de documents le fichier qui se trouve, dans votre dossier utilisateur (nom d'utilisateur à remplacer dans le chemin suivant) le fichier C:\Users\NOM-UTILISATEUR\anaconda3\envs\env\Lib\site-packages\flask_sqlalchemy\__init__.py ;
+- Ouvrez dans un éditeur de documents le fichier qui se trouve, dans votre dossier utilisateur (nom d'utilisateur à remplacer dans le chemin suivant) le fichier `anaconda3\envs\moissacenv\Lib\site-packages\flask_sqlalchemy\__init__.py` ;
 - Aux lignes 34-35, vous devez lire :
     ```py
     if sys.platform == 'win32':
