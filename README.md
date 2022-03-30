@@ -161,12 +161,12 @@ Cette démarche a été développée de manière contraignante : seuls les auteu
 Ce privilège accordé aux données liées apporte de l'eau au moulin des fonctionnalités de recherche de l'application, exposées ci-dessus (réservoirs de formes alternatives pour les noms et titres).
 
 ## API
-Trois routes d'API ont été créée :
+Trois routes d'API ont été créées :
 - `api/codices` permet d'obtenir tous les *codices* de la base ;
 - `api/codex/<int>` permet de d'obtenir la notice d'un *codex* particulier par son identifiant numérique dans la base (`<int>`) ;
-- `api/recherche-codex?q=MOTS-CLES` permet d'effectuer une recherche dans la base selon un ou plusieurs mots-clés passés dans l'URL. La recherche se comporte comme la **recherche simple** de l'interface utilisateur.
+- `api/recherche-codex?q=MOTSCLES` permet d'effectuer une recherche dans la base selon un ou plusieurs mots-clés passés dans l'URL. La recherche se comporte comme la **recherche simple** de l'interface utilisateur.
 
-Toutes les données sont renvoyées au format Json.
+Toutes les données sont renvoyées au format **Json**.
 
 # Développements possibles
 ## Création et mise à jour
