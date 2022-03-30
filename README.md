@@ -23,23 +23,39 @@ Téléchargez l'archive zip de l'application, disponible sur cette page via le b
 L'installation de Python 3 est nécessaire pour utiliser cette application. Nous recommandons la distribution [Anaconda](https://www.anaconda.com/products/individual).
 
 Une fois la distribution Anaconda installée :
-- Lancez depuis le menu Démarrer l'**Anaconda Powershell Prompt** ;
+- Lancez, depuis le menu Démarrer, l'**Anaconda Powershell Prompt** ;
 - Déplacez-vous dans le dossier de l'application dézippée ;
 - Créez un environnement virtuel à l'aide de la commande :
     ```shell
-    python3 -m venv env
+    conda create -n env
     ```
 - Activez cet environnement virtuel à l'aide de la commande (opération à **réitérer** à chaque lancement de l'application) :
     ```shell
-    source env/bin/activate
+    conda activate env
     ```
-- Installer les modules requis grâce à la commande :
+- Installez le module pip :
+    ```shell
+    conda install pip
+    ```
+- Installez les modules requis par l'application grâce à la commande :
     ```shell
     pip install -r requirements.txt
     ```
+- Ouvrez dans un éditeur de documents le fichier qui se trouve, dans votre dossier utilisateur (à remplacer dans le chemin suisant) le fichier C:\Users\NOM-UTILISATEUR\anaconda3\envs\env\Lib\site-packages\flask_sqlalchemy\__init__.py ;
+- Aux lignes 34-35, vous devez lire :
+    ```py
+    if sys.platform == 'win32':
+        _timer = time.clock
+    ```
+- Remplacez le module clock comme ceci :
+    ```py
+    if sys.platform == 'win32':
+        _timer = time.perf_counter
+    ```
+- Sauvegardez le fichier ;
 - Lancez l'application grâce à la commande :
     ```shell
-    python3 run.py
+    python run.py
     ```
 - Vous devriez pouvoir ouvrir l'application dans un navigateur web grâce à [ce lien](http://127.0.0.1:5000/).
 
