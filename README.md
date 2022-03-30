@@ -27,11 +27,11 @@ Une fois la distribution Anaconda installée :
 - Déplacez-vous dans le dossier de l'application dézippée ;
 - Créez un environnement virtuel à l'aide de la commande :
     ```shell
-    conda create -n env
+    conda create -n moissacenv
     ```
 - Activez cet environnement virtuel à l'aide de la commande (opération à **réitérer** à chaque lancement de l'application) :
     ```shell
-    conda activate env
+    conda activate moissacenv
     ```
 - Installez le module pip :
     ```shell
