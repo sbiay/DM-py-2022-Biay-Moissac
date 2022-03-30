@@ -53,6 +53,7 @@
                     <p>{{descript_materielle}}</p>
                 {% endif %}
                 {% if descUCs|length > 1 %}
+                    <!--Pour la description du contenu des codices à plusieurs unités codicologiques -->
                     <h2>Contenu</h2>
                     {% for UC in descUCs %}
                         <h3>{{UC["localisation"]}} ({{UC["date"]}})</h3>

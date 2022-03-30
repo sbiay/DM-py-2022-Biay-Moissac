@@ -34,7 +34,10 @@ def localisationUClabel(uc_id):
             rvfin = "v"
         else:
             rvfin = ""
-        locUC = f"f. {str(UC.loc_init)}{rvdebut}-{str(UC.loc_fin)}{rvfin}"
+        if f"{str(UC.loc_init)}{rvdebut}" == f"{str(UC.loc_fin)}{rvfin}":
+            locUC = f"f. {str(UC.loc_init)}{rvdebut}"
+        else:
+            locUC = f"f. {str(UC.loc_init)}{rvdebut}-{str(UC.loc_fin)}{rvfin}"
     return locUC
 
 
@@ -96,8 +99,7 @@ def personneLabel(idPersonne, forme=["court", "long"]):
     nomPersonne = Personnes.query.get(idPersonne).nom
     
     # 
-
-
+    
     # On ne traite pas les noms qui n'ont pas de parenthèse
     if not "(" in nomPersonne:
         return nomPersonne
@@ -110,7 +112,7 @@ def personneLabel(idPersonne, forme=["court", "long"]):
                 sansChiffre = False
         if sansChiffre:
             return nomPersonne
-
+    
     # Gestion des cas particuliers
     if idPersonne == 15:
         # Odon de Meung (10..-10..)
@@ -153,7 +155,7 @@ def personneLabel(idPersonne, forme=["court", "long"]):
             dateMort = dateLabel(dateMort)
             nom = f"{nomPersonne.split('(')[0][:-1]} ({dateNaissance}-{dateMort})"
             return nom
-        
+    
     else:
         print('''Le paramètre forme n'accepte que les valeurs "long" et "court"''')
         return None
@@ -195,7 +197,6 @@ def saisieRecherche(motscles, exclusive=None):
     # On convertit les mots-clés en liste
     motscles = motscles.split(" ")
     
-    
     return [motscles, exclusive]
 
 
@@ -213,6 +214,7 @@ def saisieTexte(texte):
         texte = texte.replace(caractere, "")
     
     return texte
+
 
 # Les scripts suivants mettent sous la forme de dictionnaires ou d'objet Json
 # les données d'un enregistrement ou d'un objet particulier
@@ -252,7 +254,7 @@ def oeuvreDict(id):
     # Sinon, un seul champ est renseigné
     else:
         dico["auteur"] = None
-    # Même chose pour les attributions (auteurs apocryphes)
+    # Même chose pour les attributions (auteurs apocryphes, ou hypothèses d'attributions)
     if objetOeuvre.lien_attr:
         dico["attr_id"] = objetOeuvre.lien_attr.id
         dico["attr"] = personneLabel(objetOeuvre.lien_attr.id, "court")
@@ -299,7 +301,7 @@ def codexJson(codex_id):
 
     Modèle de contenu du Json retourné : {
      "codex_id": 1,
-     "lieu_conservation": "Paris, Biblioth\u00e8que nationale de France",
+     "lieu_conservation": "Paris, Bibliothèque nationale de France",
      "label": "Paris, BnF, Latin 2989",
      "id_technique": "ark:/12148/cc60815j",
      "description_materielle": "Reliure du XVIIIe…",
@@ -308,7 +310,7 @@ def codexJson(codex_id):
         {
             "uc_id": 1,
             "localisation": null,
-            "description": "\u00c9criture minuscule caroline d\u2019une main principale.",
+            "description": "Ecriture minuscule caroline d'une main principale.",
             "date": "entre 975 et 1000",
             "oeuvres": [
                 {
@@ -317,7 +319,8 @@ def codexJson(codex_id):
                     "data.bnf": 13771861,
                     "partie_de": null,
                     "auteur": "Jean Cassien (saint)",
-                    "auteur_ark": 12044269, "attr": null
+                    "auteur_ark": 12044269,
+                    "attr": null
                 }
             ]
         }
@@ -378,7 +381,7 @@ def codexJson(codex_id):
     
     # Pour les provenances et l'origine du manuscrit, on opère des jointures manuelles sur la classe Provenances
     for provenance in Provenances.query.filter(Provenances.codex == codex_id):
-        # Pour l'origine du codices, on pose comme condition que l'attribut booléen "origine" soit True
+        # Pour l'origine du codex, on pose comme condition que l'attribut booléen "origine" soit True
         if provenance.origine:
             id = Lieux.query.get(provenance.lieu).id
             label = Lieux.query.get(provenance.lieu).label
@@ -412,87 +415,12 @@ def codexJson(codex_id):
             if provenance.remarque:
                 dicoProvenance["label"] = f"{label} ({provenance.remarque})"
             description["provenances"].append(dicoProvenance)
-
+    
     # On retourne le dictionnaire description sous la forme d'un fichier Json
     return json.dumps(description)
 
 
 # Les scripts suivants rassemblent l'ensemble des données de la base en vue de leur exploitation
-def tousArkDict(idSortie=["codices", "oeuvres", "personnes"]):
-    """
-    Cette fonction charge dans un dictionnaire tous les identifiants arks contenus dans la base
-    :return type: dict
-
-    Modèle du dictionnaire retourné {
-     'arkOeuvres': {
-        'ark:/12148/cb13771861w': [1],      # La valeur est une liste des identifiants des codices concernés
-        'ark:/12148/cb17908174f': [2, 4],
-        ...
-     'arkPersonnes': {
-        'ark:/12148/cb12044269r': [1],
-        'ark:/12148/cb11889551s': [2, 3]
-        ...
-        }
-    }
-    """
-    
-    tousArk = {
-        "arkOeuvres": {},
-        "arkPersonnes": {}
-    }
-    if idSortie == "oeuvres":
-        toutesOeuvres = json.loads(toutesOeuvresJson())
-        for oeuvre in toutesOeuvres:
-            if oeuvre["data.bnf"]:
-                # Si cet identifiant n'a pas encore été créé dans tousArk, on ajoute l'id de l'oeuvre dans une liste
-                if not tousArk["arkOeuvres"].get(oeuvre["data.bnf"]):
-                    tousArk["arkOeuvres"][oeuvre["data.bnf"]] = [oeuvre["oeuvre_id"]]
-                else:
-                    if oeuvre["oeuvre_id"] not in tousArk["arkOeuvres"][oeuvre["data.bnf"]]:
-                        tousArk["arkOeuvres"][oeuvre["data.bnf"]].append(oeuvre["oeuvre_id"])
-    elif idSortie == "personnes":
-        toutesPersonnes = json.loads(tousAuteursJson())
-        for personne in toutesPersonnes:
-            if personne["personne_ark"]:
-                if not tousArk["arkPersonnes"].get(personne["personne_ark"]):
-                    tousArk["arkPersonnes"][personne["personne_ark"]] = [personne["personne_id"]]
-                else:
-                    if personne["personne_id"] not in tousArk["arkPersonnes"][personne["personne_ark"]]:
-                        tousArk["arkPersonnes"][personne["personne_ark"]].append(personne["personne_id"])
-    # Si l'on cherche les ark des par codices
-    else:
-        # On charge d'abord tous les codices
-        codices = Codices.query.all()
-        # On boucle sur chaque id pour récupérer, grâce à la fonction codexJson() les données de chaque codex
-        for codex in codices:
-            donneesCodex = json.loads(codexJson(codex.id))
-            for item in donneesCodex["contenu"]:
-                for oeuvre in item["oeuvres"]:
-                    # On définit le type d'identifiant à inscrire dans les valeurs de sortie
-                    # Si l'oeuvre possède un ark
-                    if oeuvre["data.bnf"]:
-                        # Si cet identifiant n'a pas encore été créé dans tousArk, on ajoute l'id du codex dans une liste
-                        if not tousArk["arkOeuvres"].get(oeuvre["data.bnf"]):
-                            tousArk["arkOeuvres"][oeuvre["data.bnf"]] = [codex.id]
-                        else:
-                            if codex.id not in tousArk["arkOeuvres"][oeuvre["data.bnf"]]:
-                                tousArk["arkOeuvres"][oeuvre["data.bnf"]].append(codex.id)
-                    if oeuvre.get("auteur_ark"):
-                        if not tousArk["arkPersonnes"].get(oeuvre["auteur_ark"]):
-                            tousArk["arkPersonnes"][oeuvre["auteur_ark"]] = [codex.id]
-                        else:
-                            if codex.id not in tousArk["arkPersonnes"][oeuvre["auteur_ark"]]:
-                                tousArk["arkPersonnes"][oeuvre["auteur_ark"]].append(codex.id)
-                    if oeuvre.get("attr_ark"):
-                        if not tousArk["arkPersonnes"].get(oeuvre["attr_ark"]):
-                            tousArk["arkPersonnes"][oeuvre["attr_ark"]] = [codex.id]
-                        else:
-                            if codex.id not in tousArk["arkPersonnes"][oeuvre["attr_ark"]]:
-                                tousArk["arkPersonnes"][oeuvre["attr_ark"]].append(codex.id)
-        
-    return tousArk
-
-
 def toutesOeuvresJson():
     """
     Cette fonction retourne un objet Json de toutes les oeuvres de la base,
@@ -677,6 +605,81 @@ def tousAuteursJson():
     
     # On retourne le dictionnaire "personnes" en tant que fichier Json
     return json.dumps(personnes)
+
+
+def tousArkDict(idSortie=["codices", "oeuvres", "personnes"]):
+    """
+    Cette fonction charge dans un dictionnaire tous les identifiants arks contenus dans la base
+    :return type: dict
+
+    Modèle du dictionnaire retourné {
+     'arkOeuvres': {
+        'ark:/12148/cb13771861w': [1],      # La valeur est une liste des identifiants des codices concernés
+        'ark:/12148/cb17908174f': [2, 4],
+        ...
+     'arkPersonnes': {
+        'ark:/12148/cb12044269r': [1],
+        'ark:/12148/cb11889551s': [2, 3]
+        ...
+        }
+    }
+    """
+    
+    tousArk = {
+        "arkOeuvres": {},
+        "arkPersonnes": {}
+    }
+    if idSortie == "oeuvres":
+        toutesOeuvres = json.loads(toutesOeuvresJson())
+        for oeuvre in toutesOeuvres:
+            if oeuvre["data.bnf"]:
+                # Si cet identifiant n'a pas encore été créé dans tousArk, on ajoute l'id de l'oeuvre dans une liste
+                if not tousArk["arkOeuvres"].get(oeuvre["data.bnf"]):
+                    tousArk["arkOeuvres"][oeuvre["data.bnf"]] = [oeuvre["oeuvre_id"]]
+                else:
+                    if oeuvre["oeuvre_id"] not in tousArk["arkOeuvres"][oeuvre["data.bnf"]]:
+                        tousArk["arkOeuvres"][oeuvre["data.bnf"]].append(oeuvre["oeuvre_id"])
+    elif idSortie == "personnes":
+        toutesPersonnes = json.loads(tousAuteursJson())
+        for personne in toutesPersonnes:
+            if personne["personne_ark"]:
+                if not tousArk["arkPersonnes"].get(personne["personne_ark"]):
+                    tousArk["arkPersonnes"][personne["personne_ark"]] = [personne["personne_id"]]
+                else:
+                    if personne["personne_id"] not in tousArk["arkPersonnes"][personne["personne_ark"]]:
+                        tousArk["arkPersonnes"][personne["personne_ark"]].append(personne["personne_id"])
+    # Si l'on cherche les ark des par codices
+    else:
+        # On charge d'abord tous les codices
+        codices = Codices.query.all()
+        # On boucle sur chaque id pour récupérer, grâce à la fonction codexJson() les données de chaque codex
+        for codex in codices:
+            donneesCodex = json.loads(codexJson(codex.id))
+            for item in donneesCodex["contenu"]:
+                for oeuvre in item["oeuvres"]:
+                    # On définit le type d'identifiant à inscrire dans les valeurs de sortie
+                    # Si l'oeuvre possède un ark
+                    if oeuvre["data.bnf"]:
+                        # Si cet identifiant n'a pas encore été créé dans tousArk, on ajoute l'id du codex dans une liste
+                        if not tousArk["arkOeuvres"].get(oeuvre["data.bnf"]):
+                            tousArk["arkOeuvres"][oeuvre["data.bnf"]] = [codex.id]
+                        else:
+                            if codex.id not in tousArk["arkOeuvres"][oeuvre["data.bnf"]]:
+                                tousArk["arkOeuvres"][oeuvre["data.bnf"]].append(codex.id)
+                    if oeuvre.get("auteur_ark"):
+                        if not tousArk["arkPersonnes"].get(oeuvre["auteur_ark"]):
+                            tousArk["arkPersonnes"][oeuvre["auteur_ark"]] = [codex.id]
+                        else:
+                            if codex.id not in tousArk["arkPersonnes"][oeuvre["auteur_ark"]]:
+                                tousArk["arkPersonnes"][oeuvre["auteur_ark"]].append(codex.id)
+                    if oeuvre.get("attr_ark"):
+                        if not tousArk["arkPersonnes"].get(oeuvre["attr_ark"]):
+                            tousArk["arkPersonnes"][oeuvre["attr_ark"]] = [codex.id]
+                        else:
+                            if codex.id not in tousArk["arkPersonnes"][oeuvre["attr_ark"]]:
+                                tousArk["arkPersonnes"][oeuvre["attr_ark"]].append(codex.id)
+    
+    return tousArk
 
 
 def codicesListDict():
