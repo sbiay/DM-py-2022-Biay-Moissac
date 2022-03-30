@@ -278,9 +278,21 @@ def notice_codex(num, idUC=None):
             idAsupprimer = request.form["codexSuppr"]
             # On filtre les provenances à supprimer
             provenancesAsupprimer = Provenances.query.filter(Provenances.codex == idAsupprimer).all()
+            # On filtre les UC concernées par la suppression du codex
+            ucCodex = Unites_codico.query.filter(Unites_codico.code_id == int(idAsupprimer))
+            # On initie la liste des contenus de ces UC qu'il faut supprimer
+            contenusAsupprimer = []
+            for uc in ucCodex:
+                contenus = Contient.query.filter(Contient.unites_codico == uc.id).all()
+                for item in contenus:
+                    contenusAsupprimer.append(item)
+            # On récupère enfin le codex à supprimer
             codexAsupprimer = Codices.query.get(num)
             try:
                 for item in provenancesAsupprimer:
+                    db.session.delete(item)
+                    db.session.commit()
+                for item in contenusAsupprimer:
                     db.session.delete(item)
                     db.session.commit()
                 db.session.delete(codexAsupprimer)
@@ -289,7 +301,7 @@ def notice_codex(num, idUC=None):
                 return redirect(url_for("accueil"))
             except Exception as erreur:
                 flash("La suppression a rencontré un problème.", "error")
-        
+
         # On recharge les données du codex
         codex = json.loads(codexJson(num))
         
