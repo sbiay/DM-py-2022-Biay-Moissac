@@ -189,5 +189,8 @@ def recherche_codex():
             dict_resultats["links"]["prev"] = url_for("recherche_codex", _external=True) + "?" + urlencode(
                 arguments)
 
-    reponse = jsonify(dict_resultats)
-    return reponse
+        reponse = jsonify(dict_resultats)
+        return reponse
+    # En l'absence de mot-clé
+    else:
+        return erreur_404()
