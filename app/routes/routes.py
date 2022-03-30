@@ -328,12 +328,23 @@ def noticeOeuvre(id):
 @app.route("/recherche/<typeRecherche>")
 def recherche(typeRecherche=["simple", "avancee"]):
     """
-    Cette route traite les mots-clés envoyés via le formulaire de recherche simple de la barre de navigation.
-    Elle fonctionne selon un opérateur OU par défaut entre les différents mots-clés de la saisie.
-    L'opérateur ET peut être saisi par l'utilisateur ce qui rend la recherche exclusive et non inclusive.
-    Afin de bénéficier des multiples formes de titres d'oeuvre et de noms d'auteurs décrits sur data.bnf.fr,
-    cette recherche croise les identifiants ark d'auteurs et d'oeuvres contenus dans la base locale
-    avec les ark répondant aux mêmes mots-clés interrogés sur data.bnf.fr.
+    Cette route traite les mots-clés envoyés via le formulaire de recherche simple de la barre de navigation,
+    ou via le formulaire de saisie de la recherche avancée :
+        - La recherche simple fonctionne selon un opérateur OU par défaut entre les différents mots-clés de la saisie.
+        L'opérateur ET peut être saisi par l'utilisateur ce qui rend la recherche exclusive et non inclusive.
+        Afin de bénéficier des multiples formes de titres d'oeuvre et de noms d'auteurs décrits sur data.bnf.fr,
+        cette recherche croise les identifiants ark d'auteurs et d'oeuvres contenus dans la base locale
+        avec les ark répondant aux mêmes mots-clés interrogés sur data.bnf.fr.
+        - La recherche avancée : de même que la recherche simple, toutes les formes de noms d'auteurs ou de titres
+        d'oeuvres existant sur data.bnf.fr sont moissonnés par la recherche avancée
+        et croisés avec les données de la base locale. La recherche avancée est à la fois exclusive et inclusive :
+            - Elle ne renvoie que les *codices* pertinents par rapport à tous les mots-clés saisis ;
+            - Elle renvoie les oeuvres répondant à tous les mots-clés saisis dans le champ "oeuvre"
+            (indépendamment des mots-clés saisis dans le champ "auteur") ;
+            - Elle renvoie les auteurs répondant à tous les mots-clés saisis dans le champ "auteur"
+            (indépendamment des mots-clés saisis dans le champ "oeuvre") ;
+        Enfin, l'opérateur "OU" peut être saisi dans les champs "oeuvre" et "auteur",
+        ce qui rend la recherche inclusive pour ces types de données respectifs.
     """
     # Si la recherche est vide, les variables suivantes sont inchangées
     motscles = []
