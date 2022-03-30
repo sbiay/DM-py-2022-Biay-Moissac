@@ -41,8 +41,8 @@ Une fois la distribution Anaconda installée :
     ```shell
     pip install -r requirements.txt
     ```
-- Ouvrez dans un éditeur de documents le fichier qui se trouve, dans votre dossier utilisateur (nom d'utilisateur à remplacer dans le chemin suivant) le fichier `C:\Users\NOM-UTILISATEUR\anaconda3\envs\moissacenv\Lib\site-packages\flask_sqlalchemy\__init__.py` ;
-- Aux lignes 34-35, vous devez lire :
+- Ouvrez dans un éditeur de documents le fichier qui se trouve à l'emplacement suivant (nom d'utilisateur à remplacer dans le chemin de fichier) : `C:\Users\NOM-UTILISATEUR\anaconda3\envs\moissacenv\Lib\site-packages\flask_sqlalchemy\__init__.py` ;
+- Aux lignes 34-35, si vous lisez :
     ```py
     if sys.platform == 'win32':
         _timer = time.clock
